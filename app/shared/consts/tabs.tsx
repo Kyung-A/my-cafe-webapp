@@ -2,8 +2,8 @@ export const gnb = [
   {
     id: "search",
     name: "검색",
-    href: "/",
-    active: true,
+    href: "/search",
+    active: false,
   },
   {
     id: "mypage",

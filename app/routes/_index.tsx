@@ -1,3 +1,3 @@
 import { redirect } from "@remix-run/react";
 
-export const loader = async () => redirect("/cafeSearch");
+export const loader = async () => redirect("/search");

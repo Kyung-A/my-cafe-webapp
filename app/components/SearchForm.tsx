@@ -1,4 +1,4 @@
-export const Search = () => {
+export const SearchForm = () => {
   return (
     <div className="flex w-full items-center justify-between overflow-hidden rounded-sm bg-white">
       <input

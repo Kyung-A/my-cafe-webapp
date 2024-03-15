@@ -1,50 +1,52 @@
 import type { MetaFunction } from "@remix-run/node";
-import { Link, json, useFetcher, useLoaderData } from "@remix-run/react";
+import { Link } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 
-import { Search } from "~/components";
+import { SearchForm } from "~/components";
 import { useGeoLocation } from "~/hooks";
 import { MapLayout, Panel } from "~/layouts";
-import { getData } from "~/shared/api/cafe.server";
-import { gnb, lnb } from "~/shared/tabs";
+import { useMap } from "~/shared/contexts/Map";
+import { gnb, lnb } from "~/shared/consts/tabs";
 import { IGeocoder } from "~/shared/types";
 
 export const meta: MetaFunction = () => {
   return [{ title: "myCafe" }];
 };
 
-export async function loader({ request }) {
-  const url = new URL(request.url);
-  const param = url.searchParams.get("query");
-
-  let result;
-
-  // if (param) {
-  // result = await getData(param);
-  // }
-  return json({ data: "1111" });
-  // console.log(url.searchParams.get("query"));
-  // return json({ data: result });
-}
-
 export default function CafeSearchRoute() {
-  const data = useLoaderData<typeof loader>();
-  const fetcher = useFetcher();
+  const { mapData } = useMap();
   const { location } = useGeoLocation();
 
   const [address, setAddress] = useState<string>();
   const [copyLnb, setCopyLnb] = useState(lnb);
 
+  const fetchCafeData = useCallback(
+    (id: string) => {
+      const { kakao } = window;
+      if (!kakao || !mapData) return;
+
+      const ps = new kakao.maps.services.Places(mapData);
+      ps.categorySearch(
+        "CE7",
+        (data, status, paging) => {
+          console.log(data, status, paging);
+        },
+        { useMapBounds: true }
+      );
+    },
+    [mapData]
+  );
+
   const handlerActive = useCallback(
     (id: string) => {
-      fetcher.load(`/cafeSearch?query=${id}`);
       setCopyLnb(
         copyLnb.map((v) =>
           v.id === id ? { ...v, active: true } : { ...v, active: false }
         )
       );
+      fetchCafeData(id);
     },
-    [copyLnb]
+    [copyLnb, fetchCafeData]
   );
 
   useEffect(() => {
@@ -71,7 +73,7 @@ export default function CafeSearchRoute() {
   return (
     <MapLayout>
       <div className="bg-primary w-full px-4 py-6">
-        <Search />
+        <SearchForm />
         <ul className="mt-5 flex items-center justify-between">
           {gnb.map((v) => (
             <li key={v.id} className="w-1/2">

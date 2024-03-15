@@ -1,6 +1,6 @@
 import { Card } from "~/components";
 import { MapLayout, Panel } from "~/layouts";
-import { mypageGnb } from "~/shared/tabs";
+import { mypageGnb } from "~/shared/consts/tabs";
 
 const MyPage = () => {
   return (

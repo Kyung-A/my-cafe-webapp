@@ -1,15 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   createContext,
   useContext,
   useEffect,
   useRef,
   MutableRefObject,
+  useState,
 } from "react";
 import { useGeoLocation } from "~/hooks";
 
 interface IMap {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mapRef: MutableRefObject<any> | null;
+  mapEl: MutableRefObject<any> | null;
+  mapData: any;
 }
 
 interface IMapProvider {
@@ -17,16 +19,18 @@ interface IMapProvider {
 }
 
 const MapContext = createContext<IMap>({
-  mapRef: null,
+  mapEl: null,
+  mapData: {},
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
-  const mapRef = useRef(null);
+  const mapEl = useRef(null);
   const { location } = useGeoLocation();
+  const [mapData, setMapData] = useState();
 
   useEffect(() => {
     const { kakao } = window;
-    if (!mapRef.current || !kakao || !location) return;
+    if (!mapEl.current || !kakao || !location) return;
     const { latitude, longitude } = location;
 
     kakao.maps.load(() => {
@@ -35,14 +39,16 @@ const MapProvider = ({ children }: IMapProvider) => {
         level: 5,
       };
 
-      new kakao.maps.Map(mapRef.current, options);
+      const map = new kakao.maps.Map(mapEl.current, options);
+      setMapData(map);
     });
-  }, [mapRef, location]);
+  }, [mapEl, location]);
 
   return (
     <MapContext.Provider
       value={{
-        mapRef: mapRef,
+        mapEl: mapEl,
+        mapData: mapData,
       }}
     >
       {children}
