@@ -7,6 +7,7 @@ export default {
     colors: {
       ...colors,
       primary: '#F2CB05',
+      interaction: '#F29F05',
     },
   },
   variants: {},
