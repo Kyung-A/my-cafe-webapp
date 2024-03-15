@@ -9,6 +9,14 @@ import {
 } from "@remix-run/react";
 
 import stylesheet from "~/tailwind.css?url";
+import MapProvider from "./shared/contexts/Map";
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    kakao: any;
+  }
+}
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
@@ -21,14 +29,13 @@ export const links: LinksFunction = () => [
 
 export async function loader() {
   return json({
-    ENV: {
-      MAP_KEY: process.env.MAP_KEY,
-    },
+    mapKey: process.env.MAP_KEY,
   });
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const key = useLoaderData<typeof loader>();
+  const { mapKey } = useLoaderData<typeof loader>();
+
   return (
     <html lang="en">
       <head>
@@ -38,12 +45,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
+        {mapKey && (
+          <script
+            async
+            type="text/javascript"
+            src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&libraries=services&autoload=false`}
+          ></script>
+        )}
         {children}
         <ScrollRestoration />
-        <script
-          type="text/javascript"
-          src={`https://oapi.map.naver.com/openapi/v3/maps.js?ncpClientId=${key.ENV.MAP_KEY}`}
-        ></script>
         <Scripts />
       </body>
     </html>
@@ -51,5 +61,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <MapProvider>
+      <Outlet />
+    </MapProvider>
+  );
 }
