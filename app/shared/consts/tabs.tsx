@@ -3,7 +3,7 @@ export const gnb = [
     id: "search",
     name: "검색",
     href: "/search",
-    active: false,
+    active: true,
   },
   {
     id: "mypage",
@@ -37,11 +37,11 @@ export const lnb = [
     name: "카페 보기",
     active: false,
   },
-  {
-    id: "popular",
-    name: "인기 카페 보기",
-    active: false,
-  },
+  // {
+  //   id: "popular",
+  //   name: "인기 카페 보기",
+  //   active: false,
+  // },
   {
     id: "visited",
     name: "방문한 카페 보기",

@@ -1,5 +1,6 @@
 import { MetaFunction } from "@remix-run/node";
 import { Outlet } from "@remix-run/react";
+
 import { Panel } from "~/components";
 import { useMap } from "~/shared/contexts/Map";
 
