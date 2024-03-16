@@ -1,6 +1,6 @@
 export const SearchForm = () => {
   return (
-    <div className="flex w-full items-center justify-between overflow-hidden rounded-sm bg-white">
+    <div className="flex w-full items-center justify-between overflow-hidden rounded bg-white">
       <input
         type="search"
         placeholder="찾으시는 카페가 있으신가요?"
