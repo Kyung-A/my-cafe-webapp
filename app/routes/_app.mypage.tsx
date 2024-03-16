@@ -1,10 +1,9 @@
-import { Card } from "~/components";
-import { MapLayout, Panel } from "~/layouts";
+import { Card, Panel } from "~/components";
 import { mypageGnb } from "~/shared/consts/tabs";
 
-const MyPage = () => {
+export default function MyPage() {
   return (
-    <MapLayout>
+    <>
       <div className="bg-primary flex h-12 w-full flex-col justify-center px-4">
         <ul className="flex items-center justify-between">
           {mypageGnb.map((v) => (
@@ -91,8 +90,6 @@ const MyPage = () => {
           </div>
         </div>
       </Panel>
-    </MapLayout>
+    </>
   );
-};
-
-export default MyPage;
+}
