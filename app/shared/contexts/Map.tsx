@@ -8,10 +8,14 @@ import {
   useState,
 } from "react";
 import { useGeoLocation } from "~/hooks";
+import { lnb } from "../consts/tabs";
+import { IMenu } from "../types";
 
 interface IMap {
   mapEl: MutableRefObject<any> | null;
   mapData: any;
+  lnb: IMenu[];
+  setLnb: React.Dispatch<React.SetStateAction<IMenu[]>>;
 }
 
 interface IMapProvider {
@@ -21,12 +25,16 @@ interface IMapProvider {
 const MapContext = createContext<IMap>({
   mapEl: null,
   mapData: {},
+  lnb: [],
+  setLnb: () => [],
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
   const mapEl = useRef(null);
   const { location } = useGeoLocation();
+
   const [mapData, setMapData] = useState();
+  const [copyLnb, setCopyLnb] = useState<IMenu[]>(lnb);
 
   useEffect(() => {
     const { kakao } = window;
@@ -49,6 +57,8 @@ const MapProvider = ({ children }: IMapProvider) => {
       value={{
         mapEl: mapEl,
         mapData: mapData,
+        lnb: copyLnb,
+        setLnb: setCopyLnb,
       }}
     >
       {children}
