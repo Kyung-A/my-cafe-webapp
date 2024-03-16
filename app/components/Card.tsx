@@ -1,9 +1,15 @@
-export const Card = () => {
+import { ICafeResponse } from "~/shared/types";
+
+interface ICard {
+  data: ICafeResponse;
+}
+
+export function Card({ data }: ICard) {
   return (
     <div className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]">
       <div className="p-4">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">XX식당</h3>
+          <h3 className="text-lg font-semibold">{data.place_name}</h3>
           <div>
             <button className="mr-1">
               <svg
@@ -41,18 +47,18 @@ export const Card = () => {
         </div>
         <div className="mt-2 flex items-center gap-3">
           <div className="w-2/3">
-            <p className="text-sm">00:00 ~ 24:00</p>
-            <p className="text-sm">리뷰수 : 154</p>
-            <div className="mt-2 box-border w-full rounded bg-neutral-100 px-2 py-1">
+            <p className="break-keep text-sm">{data.address_name}</p>
+            <p className="text-sm">{data.phone}</p>
+            {/* <div className="mt-2 box-border w-full rounded bg-neutral-100 px-2 py-1">
               <p className="text-interaction font-semibold">메뉴</p>
               <p className="mt-1 line-clamp-1 text-sm">
                 소금빵 2000 | 크로아상 1000
               </p>
-            </div>
+            </div> */}
           </div>
-          <div className="w-1/3 self-stretch overflow-hidden rounded bg-neutral-100">
-            {/* 이미지 */}
-          </div>
+          {/* <div className="w-1/3 self-stretch overflow-hidden rounded bg-neutral-100">
+            이미지
+          </div> */}
         </div>
         <div className="mt-4 box-border rounded bg-neutral-100 px-2 py-1">
           <p className="text-interaction font-semibold">나의 후기</p>
@@ -63,4 +69,4 @@ export const Card = () => {
       </div>
     </div>
   );
-};
+}
