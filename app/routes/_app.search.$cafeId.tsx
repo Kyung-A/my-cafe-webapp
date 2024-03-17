@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { Link, useLoaderData, useLocation, useParams } from "@remix-run/react";
 
-import getCafeDetail from "~/.server/search";
+import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/components";
 
 interface IParams {
@@ -18,8 +19,9 @@ export async function loader({ params }: IParams) {
 
 export default function CafeDetailRoute() {
   const data = useLoaderData<typeof loader>();
+  const { cafeId } = useParams<string>();
+  const location = useLocation();
 
-  console.log(data);
   return (
     <Panel left="320px">
       <div className="bg-primary flex h-12 w-full flex-col justify-center px-4">
@@ -73,11 +75,13 @@ export default function CafeDetailRoute() {
                     ? "영업마감"
                     : "영업중"}
                 </p>
-                {data.basicInfo.openHour.periodList[0].timeList.map((v, i) => (
-                  <p key={i}>
-                    {v.timeSE} {v.dayOfWeek}
-                  </p>
-                ))}
+                {data.basicInfo.openHour.periodList[0].timeList.map(
+                  (v: any, i: number) => (
+                    <p key={i}>
+                      {v.timeSE} {v.dayOfWeek}
+                    </p>
+                  )
+                )}
               </div>
             </li>
             <li className="flex items-start gap-3">
@@ -105,26 +109,6 @@ export default function CafeDetailRoute() {
                 {data.basicInfo.address.addrdetail}
               </p>
             </li>
-            {/* <li className="flex items-start gap-3">
-              <div className="flex min-w-20 items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-5 w-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z"
-                  />
-                </svg>
-                <p className="font-semibold">전화번호</p>
-              </div>
-              <p>010-1234-5678</p>
-            </li> */}
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
                 <svg
@@ -146,7 +130,7 @@ export default function CafeDetailRoute() {
               <details className="w-full cursor-pointer outline-none">
                 <summary>메뉴 상세보기</summary>
                 <ul>
-                  {data.menuInfo.menuList.map((v, i) => (
+                  {data.menuInfo.menuList.map((v: any, i: number) => (
                     <li
                       key={i}
                       className="border-b-[1px] border-neutral-200 py-3 last:border-b-0"
@@ -166,13 +150,6 @@ export default function CafeDetailRoute() {
                       </div>
                     </li>
                   ))}
-                  {/* <li className="border-b-[1px] border-neutral-100 py-2">
-                    <div className="h-20 w-2/3 overflow-hidden rounded bg-neutral-100"></div>
-                    <div className="mt-2 space-y-1">
-                      <p className="font-semibold">카페라떼</p>
-                      <p className="text-sm">5,500원</p>
-                    </div>
-                  </li> */}
                 </ul>
               </details>
             </li>
@@ -180,43 +157,46 @@ export default function CafeDetailRoute() {
           <hr className="my-6 text-neutral-100" />
           <div className="w-full">
             <p className="text-lg font-semibold">☕ 나의 후기</p>
-            <div className="mt-10 flex w-full flex-col items-center justify-center">
-              <p>등록된 후기가 없습니다.</p>
-              <button className="bg-interaction mt-2 rounded-full px-3 py-1 text-sm font-semibold text-white">
-                후기 등록하기
-              </button>
-            </div>
-            {/* <div className="mt-2 rounded bg-neutral-100 px-3 py-2">
-              <p>
-                t is a long established fact that a reader will be distracted by
-                the readable content of a page when looking at its layout. The
-                point of using Lorem Ipsum is that it has a more-or-less normal
-                distribution of letters, as opposed to using Content here,
-                content here, making it look like readable English. Many desktop
-                publishing packages and web page editors now use Lorem Ipsum as
-                their default model text, and a search for lorem ipsum will
-                uncover many web sites still in their infancy. Various versions
-                have evolved over the years, sometimes by accident, sometimes on
-                purpose (injected humour and the like).
-              </p>
-              <button className="text-interaction mt-3 flex items-center gap-2 font-semibold">
-                후기 자세히 보러가기
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-6 w-6"
+            {location.state.review ? (
+              <div className="mt-2 rounded bg-neutral-100 px-3 py-4">
+                <p>{location.state.review}</p>
+                <Link
+                  to={`/search/review/${location.state.reviewId}`}
+                  className="text-interaction mt-3 flex items-center gap-2 text-sm font-semibold"
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-                  />
-                </svg>
-              </button>
-            </div> */}
+                  후기 자세히 보러가기
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="h-6 w-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+                    />
+                  </svg>
+                </Link>
+              </div>
+            ) : (
+              <div className="mt-10 flex w-full flex-col items-center justify-center">
+                <p>등록된 후기가 없습니다.</p>
+                <Link
+                  to="/search/review-create"
+                  state={{
+                    id: cafeId,
+                    name: data.basicInfo.placenamefull,
+                    booking: false,
+                  }}
+                  className="bg-interaction mt-2 rounded-full px-3 py-1 text-sm font-semibold text-white"
+                >
+                  후기 등록하기
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </div>

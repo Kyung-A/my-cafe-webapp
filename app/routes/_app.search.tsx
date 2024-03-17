@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Link, Outlet, useNavigate, useOutletContext } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  json,
+  useLoaderData,
+  useNavigate,
+  useOutletContext,
+} from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card, SearchForm } from "~/components";
 import { useGeoLocation } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
-import { gnb } from "~/shared/consts/tabs";
 import {
   ICafePagination,
   ICafeResponse,
@@ -14,9 +20,16 @@ import {
   IRegister,
 } from "~/shared/types";
 import useClickActive from "~/hooks/useClickActive";
+import { getReviewList } from "~/.server/review";
+
+export async function loader({ request }: { request: Request }) {
+  const result = await getReviewList(request);
+  return json({ review: result });
+}
 
 export default function CafeSearchRoute() {
   const navigate = useNavigate();
+  const userReview = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
 
   const { mapData, lnb, setLnb } = useMap();
@@ -55,29 +68,85 @@ export default function CafeSearchRoute() {
     }
   }, [markers]);
 
-  const fetchData = useCallback(() => {
-    const { kakao } = window;
-    if (!kakao || !mapData) return;
+  const fetchData = useCallback(
+    (type: string) => {
+      const { kakao } = window;
+      if (!kakao || !mapData) return;
 
-    const ps = new kakao.maps.services.Places(mapData);
-    ps.categorySearch(
-      "CE7",
-      (data: ICafeResponse[], status: string, paging: ICafePagination) => {
-        if (status !== kakao.maps.services.Status.OK) return;
+      const ps = new kakao.maps.services.Places(mapData);
+      ps.categorySearch(
+        "CE7",
+        (data: ICafeResponse[], status: string, paging: ICafePagination) => {
+          if (status !== kakao.maps.services.Status.OK) return;
 
-        const markerArr: { [key: string]: any }[] = [];
-        data.map((v) => {
-          const marker = addMarker(new kakao.maps.LatLng(v.y, v.x));
-          markerArr.push(marker);
-        });
+          const markerArr: { [key: string]: any }[] = [];
 
-        setPagination(paging);
-        setMarkers(markerArr);
-        setCafeData(data);
-      },
-      { useMapBounds: true }
-    );
-  }, [mapData, addMarker]);
+          const result = data.reduce((acc: ICafeResponse[], cur, index) => {
+            userReview.review?.some((reivew, reivewIndex) => {
+              if (cur.id === reivew.cafeId) {
+                if (type === "default") {
+                  acc[index] = {
+                    ...cur,
+                    reviewId: reivew.id,
+                    review: reivew.description,
+                    visited: reivew.visited,
+                    booking: reivew.visited,
+                  };
+                }
+                if (type === "visited" && reivew.visited) {
+                  acc[reivewIndex] = {
+                    ...cur,
+                    reviewId: reivew.id,
+                    review: reivew.description,
+                    visited: reivew.visited,
+                    booking: reivew.booking,
+                  };
+                }
+                if (type === "booking" && reivew.booking) {
+                  acc[reivewIndex] = {
+                    ...cur,
+                    reviewId: reivew.id,
+                    review: reivew.description,
+                    visited: reivew.visited,
+                    booking: reivew.booking,
+                  };
+                }
+              } else {
+                if (type === "default") {
+                  acc[index] = {
+                    ...cur,
+                    visited: false,
+                    booking: false,
+                  };
+                } else if (type === "notVisited") {
+                  acc = [
+                    ...acc,
+                    {
+                      ...cur,
+                      visited: false,
+                      booking: false,
+                    },
+                  ];
+                }
+              }
+            });
+
+            return acc;
+          }, []);
+          result.forEach((cafe) => {
+            const marker = addMarker(new kakao.maps.LatLng(cafe.y, cafe.x));
+            markerArr.push(marker);
+          });
+
+          setPagination(paging);
+          setMarkers(markerArr);
+          setCafeData(result);
+        },
+        { useMapBounds: true }
+      );
+    },
+    [mapData, addMarker, userReview]
+  );
 
   useEffect(() => {
     const { kakao } = window;
@@ -104,18 +173,6 @@ export default function CafeSearchRoute() {
     <div>
       <div className="bg-primary w-full px-4 py-4">
         <SearchForm />
-        <ul className="mt-5 flex items-center justify-between">
-          {gnb.map((v) => (
-            <li key={v.id} className="w-1/2">
-              <Link
-                to={v.href}
-                className={`block w-full rounded-full py-1 text-center ${v.active ? "bg-interaction font-semibold text-white" : ""}`}
-              >
-                {v.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
       </div>
       <div>
         {!isActiveLnb ? (
@@ -129,9 +186,10 @@ export default function CafeSearchRoute() {
                     onClick={() => {
                       if (v.id !== "default" && user === null) {
                         navigate("/signin");
+                      } else {
+                        handlerActive(v.id);
+                        fetchData(v.id);
                       }
-                      handlerActive(v.id);
-                      fetchData();
                     }}
                     className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
                   >
@@ -147,6 +205,7 @@ export default function CafeSearchRoute() {
               <div className="flex items-center justify-between">
                 <button
                   onClick={() => {
+                    navigate("/search");
                     setLnb(lnb.map((v) => ({ ...v, active: false })));
                     removeMarket();
                     setCafeData([]);
@@ -234,7 +293,11 @@ export default function CafeSearchRoute() {
             <div className="h-screen w-full overflow-y-auto px-4 pb-[300px]">
               <ul className="mt-2 flex flex-col gap-6">
                 {cafeData?.map((v) => (
-                  <Link to={v.id} key={v.id}>
+                  <Link
+                    to={v.id}
+                    key={v.id}
+                    state={{ review: v.review, reviewId: v.reviewId }}
+                  >
                     <Card data={v} />
                   </Link>
                 ))}
