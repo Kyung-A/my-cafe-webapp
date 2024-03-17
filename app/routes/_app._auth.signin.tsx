@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
-import { Form, useActionData } from "@remix-run/react";
+import { Form, Link, useActionData } from "@remix-run/react";
 import { createToken, signin } from "~/.server/storage";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -49,6 +49,29 @@ export default function SigninRoute() {
           {actionData?.errors.user}
         </p>
       )}
+      <div className="mt-8 w-full">
+        <p className="text-center font-semibold">회원이 아니신가요?</p>
+        <Link
+          to="/signup"
+          className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
+        >
+          <span>회원가입 하기</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={1.5}
+            stroke="currentColor"
+            className="h-5 w-5"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
+            />
+          </svg>
+        </Link>
+      </div>
       <button
         type="submit"
         className="bg-interaction mx-auto mt-8 block w-40 rounded-full py-2 font-semibold text-white"

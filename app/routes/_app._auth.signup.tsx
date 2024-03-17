@@ -74,7 +74,7 @@ export default function SignupRoute() {
           <input
             name="password"
             className="w-full rounded-full border border-neutral-400 px-2 py-2 outline-none placeholder:text-neutral-400"
-            type="password2"
+            type="password"
             required
             placeholder="비밀번호를 한번 더 입력해주세요."
           />
@@ -101,7 +101,7 @@ export default function SignupRoute() {
               viewBox="0 0 24 24"
               strokeWidth={1.5}
               stroke="currentColor"
-              className="h-4 w-4"
+              className="h-5 w-5"
             >
               <path
                 strokeLinecap="round"
