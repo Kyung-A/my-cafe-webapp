@@ -23,6 +23,10 @@ export interface ICafeResponse {
   road_address_name: string;
   x: string;
   y: string;
+  reviewId?: string;
+  review?: string;
+  visited?: boolean;
+  booking?: boolean;
 }
 
 export interface ICafePagination {
@@ -58,9 +62,28 @@ export interface IRegister {
   name: string;
   password?: string;
   password2?: string;
+  passwordHash?: string;
 }
 
 export interface ISignin {
   email: string;
   password: string;
+}
+
+export interface IFieldInput {
+  id: number;
+  text: string;
+}
+
+export interface IReview {
+  id: string;
+  cafeId: string;
+  description: string;
+  starRating: number;
+  visited: boolean;
+  booking: boolean;
+  good: string;
+  notGood: string;
+  tags: string;
+  recommend: string;
 }

@@ -13,24 +13,6 @@ export const gnb = [
   },
 ];
 
-export const mypageGnb = [
-  {
-    id: "booking",
-    name: "즐겨찾기",
-    active: true,
-  },
-  {
-    id: "visited",
-    name: "방문한 카페",
-    active: false,
-  },
-  {
-    id: "review",
-    name: "후기 쓴 카페",
-    active: false,
-  },
-];
-
 export const lnb = [
   {
     id: "default",

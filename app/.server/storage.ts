@@ -9,7 +9,7 @@ const sessionSecret = process.env.SESSION_SECRET;
 
 // 회원가입
 export async function register({ email, password, name }: IRegister) {
-  const passwordHash = await bcrypt.hash(password, 10);
+  const passwordHash = await bcrypt.hash(password as string, 10);
   await db.user.create({
     data: { email, passwordHash, name },
   });

@@ -8,10 +8,12 @@ export function Card({ data }: ICard) {
   return (
     <div className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]">
       <div className="p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex justify-between">
           <h3 className="text-lg font-semibold">{data.place_name}</h3>
-          <div>
-            <button className="mr-1">
+          <div className="shrink-0 pt-1">
+            <button
+              className={`mr-1 ${data.visited ? "text-interaction" : ""}`}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -27,7 +29,7 @@ export function Card({ data }: ICard) {
                 />
               </svg>
             </button>
-            <button>
+            <button className={`${data.booking ? "text-interaction" : ""}`}>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
@@ -60,12 +62,12 @@ export function Card({ data }: ICard) {
             이미지
           </div> */}
         </div>
-        <div className="mt-4 box-border rounded bg-neutral-100 px-2 py-1">
-          <p className="text-interaction font-semibold">나의 후기</p>
-          <p className="mt-1 line-clamp-3 text-sm">
-            디저트도 맛있고 인테리어도 예뻤어요
-          </p>
-        </div>
+        {data.review && (
+          <div className="mt-4 box-border rounded bg-neutral-100 px-2 py-1">
+            <p className="text-interaction font-semibold">나의 후기</p>
+            <p className="mt-1 line-clamp-3 text-sm">{data.review}</p>
+          </div>
+        )}
       </div>
     </div>
   );
