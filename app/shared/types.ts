@@ -53,8 +53,14 @@ export interface IMenu {
 }
 
 export interface IRegister {
+  id: string;
   email: string;
   name: string;
-  password: string;
+  password?: string;
   password2?: string;
+}
+
+export interface ISignin {
+  email: string;
+  password: string;
 }
