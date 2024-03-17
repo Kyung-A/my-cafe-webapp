@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Link, Outlet } from "@remix-run/react";
+import { Link, Outlet, useNavigate, useOutletContext } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { Card, SearchForm } from "~/components";
@@ -11,10 +11,14 @@ import {
   ICafeResponse,
   IGeocoder,
   IMarketPostion,
+  IRegister,
 } from "~/shared/types";
 import useClickActive from "~/hooks/useClickActive";
 
 export default function CafeSearchRoute() {
+  const navigate = useNavigate();
+  const { user } = useOutletContext<{ user: IRegister }>();
+
   const { mapData, lnb, setLnb } = useMap();
   const { location } = useGeoLocation();
   const { handlerActive } = useClickActive();
@@ -123,6 +127,9 @@ export default function CafeSearchRoute() {
                   <button
                     type="button"
                     onClick={() => {
+                      if (v.id !== "default" && user === null) {
+                        navigate("/signin");
+                      }
                       handlerActive(v.id);
                       fetchData();
                     }}
