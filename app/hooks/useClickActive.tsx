@@ -3,7 +3,7 @@ import { useMap } from "~/shared/contexts/Map";
 export function useClickActive() {
   const { GNB, setGNB } = useMap();
 
-  const handlerActive = (id: string) => {
+  const handleActive = (id: string) => {
     setGNB(
       GNB.map((v) =>
         v.id === id ? { ...v, active: true } : { ...v, active: false }
@@ -11,5 +11,5 @@ export function useClickActive() {
     );
   };
 
-  return { handlerActive };
+  return { handleActive };
 }
