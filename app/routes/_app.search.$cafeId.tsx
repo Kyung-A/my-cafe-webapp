@@ -185,9 +185,9 @@ export default function CafeDetailRoute() {
               <div className="mt-10 flex w-full flex-col items-center justify-center">
                 <p>등록된 후기가 없습니다.</p>
                 <Link
-                  to="/search/review-create"
+                  to="/search/reviewForm"
                   state={{
-                    id: cafeId,
+                    cafeId: cafeId,
                     name: data.basicInfo.placenamefull,
                     booking: false,
                   }}

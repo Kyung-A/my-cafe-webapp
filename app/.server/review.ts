@@ -1,11 +1,23 @@
 import { IReview } from "~/shared/types";
 import { db } from "./db";
-import { request } from "node_modules/axios/index.cjs";
 import { getToken } from "./storage";
 
-export async function postReview(data: IReview) {
+export async function createReview(data: IReview) {
   try {
-    await db.review.create({ data });
+    const result = await db.review.create({ data });
+    return result.id;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+export async function updateReview(data: IReview) {
+  try {
+    const result = await db.review.update({
+      where: { id: data.id },
+      data,
+    });
+    return result.id;
   } catch (err) {
     console.error(err);
   }
@@ -21,7 +33,11 @@ export async function getReviewList(request: Request) {
         where: { id: userId },
         include: { review: true },
       });
-      return result?.review;
+      if (result?.review.length === 0) {
+        return null;
+      } else {
+        return result?.review;
+      }
     } else {
       return null;
     }

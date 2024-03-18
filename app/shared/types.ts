@@ -78,6 +78,7 @@ export interface IFieldInput {
 export interface IReview {
   id: string;
   cafeId: string;
+  name: string;
   description: string;
   starRating: number;
   visited: boolean;

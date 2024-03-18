@@ -1,17 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionFunctionArgs, redirect } from "@remix-run/node";
-import { Form, useLocation } from "@remix-run/react";
+import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import { Form, useFetcher, useLocation } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 
-import { postReview } from "~/.server/review";
+import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
 
+export async function loader({ request }: { request: Request }) {
+  const url = new URL(request.url);
+  const reviewId = url.searchParams.get("reviewId");
+  if (reviewId) {
+    const result = await getReview(reviewId);
+    return json(result);
+  }
+  return null;
+}
+
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
   const user = await getUser(request);
-  const cafeId = String(formData.get("cafeId"));
+  const reviewId = String(formData.get("reviewId"));
 
   if (!user) {
     return redirect("/signin");
@@ -22,6 +32,8 @@ export async function action({ request }: ActionFunctionArgs) {
     const notGoodArr: FormDataEntryValue[] = [];
 
     [...formData.entries()].forEach(([key, value]) => {
+      if (key === "reviewId") return;
+
       if (key === "good") {
         goodArr.push(value);
         data[key] = goodArr.join(",");
@@ -40,30 +52,38 @@ export async function action({ request }: ActionFunctionArgs) {
     data["userId"] = user.id;
     data["visited"] = true;
 
-    await postReview(data as IReview);
-  }
+    if (reviewId) {
+      data["id"] = reviewId;
 
-  return redirect(`/search/${cafeId}`);
+      const id = await updateReview(data as IReview);
+      return redirect(`/search/review/${id}`);
+    } else {
+      const id = await createReview(data as IReview);
+      return redirect(`/search/review/${id}`);
+    }
+  }
 }
 
 export default function CafeReviewCreateRoute() {
+  const location = useLocation();
+  const fetcher = useFetcher<IReview>();
+
   const [goodInput, setGoodInput] = useState<IFieldInput[]>([
     { id: 0, text: "" },
   ]);
   const [notGoodInput, setNotGoodInput] = useState<IFieldInput[]>([
     { id: 0, text: "" },
   ]);
-  const location = useLocation();
 
   const addInput = useCallback(
     (name: string) => {
       if (name === "good") {
-        const num = goodInput.length !== 0 ? goodInput.at(-1).id : 0;
-        setGoodInput([...goodInput, { id: num + 1, text: "" }]);
+        const num = goodInput.length !== 0 ? goodInput.at(-1)?.id : 0;
+        setGoodInput([...goodInput, { id: num! + 1, text: "" }]);
       }
       if (name === "notGood") {
-        const num = notGoodInput.length !== 0 ? notGoodInput.at(-1).id : 0;
-        setNotGoodInput([...notGoodInput, { id: num + 1, text: "" }]);
+        const num = notGoodInput.length !== 0 ? notGoodInput.at(-1)?.id : 0;
+        setNotGoodInput([...notGoodInput, { id: num! + 1, text: "" }]);
       }
     },
     [goodInput, notGoodInput]
@@ -83,7 +103,22 @@ export default function CafeReviewCreateRoute() {
     [goodInput, notGoodInput]
   );
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    if (location.state.reviewId) {
+      fetcher.load(`/search/reviewForm?reviewId=${location.state.reviewId}`);
+    }
+  }, [location.state]);
+
+  useEffect(() => {
+    if (fetcher.data) {
+      const { good, notGood } = fetcher.data;
+
+      const goodArr = good.split(",").map((v, i) => ({ id: i, text: v }));
+      const notGoodArr = notGood.split(",").map((v, i) => ({ id: i, text: v }));
+      setGoodInput(goodArr);
+      setNotGoodInput(notGoodArr);
+    }
+  }, [fetcher.data]);
 
   return (
     <Panel left="320px">
@@ -92,14 +127,18 @@ export default function CafeReviewCreateRoute() {
           <h1 className="text-xl font-semibold">후기 등록</h1>
           <button
             type="submit"
-            className="bg-interaction rounded-full px-4 py-1 font-semibold"
+            className="bg-interaction rounded-full px-4 py-1 text-sm font-semibold"
           >
             저장
           </button>
         </div>
         <div className="h-screen w-full overflow-y-auto">
           <h2 className="mt-2 px-4 text-xl font-semibold">
-            {location.state?.name}
+            {fetcher.data ? (
+              <>{fetcher.data.name}</>
+            ) : (
+              <>{location.state?.name}</>
+            )}
           </h2>
           <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
             <div>
@@ -108,7 +147,19 @@ export default function CafeReviewCreateRoute() {
                 <>
                   <input
                     name="cafeId"
-                    value={location.state.id}
+                    value={location.state.cafeId}
+                    readOnly
+                    hidden
+                  />
+                  <input
+                    name="name"
+                    value={location.state.name}
+                    readOnly
+                    hidden
+                  />
+                  <input
+                    name="reviewId"
+                    value={location.state.reviewId}
                     readOnly
                     hidden
                   />
@@ -122,6 +173,7 @@ export default function CafeReviewCreateRoute() {
               )}
               <textarea
                 name="description"
+                defaultValue={fetcher.data?.description ?? ""}
                 required
                 placeholder="후기를 자유롭게 작성해주세요."
                 className="mt-2 h-24 w-full resize-none rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
@@ -138,6 +190,7 @@ export default function CafeReviewCreateRoute() {
                     <input
                       name="good"
                       type="text"
+                      defaultValue={v.text}
                       required
                       className="w-[90%] px-3 py-2 outline-none placeholder:text-neutral-300"
                       placeholder="장점을 입력해주세요."
@@ -184,6 +237,7 @@ export default function CafeReviewCreateRoute() {
                     <input
                       name="notGood"
                       type="text"
+                      defaultValue={v.text}
                       required
                       className="w-[90%] px-3 py-2 outline-none placeholder:text-neutral-300"
                       placeholder="단점을 입력해주세요."
@@ -224,6 +278,7 @@ export default function CafeReviewCreateRoute() {
               <input
                 name="recommend"
                 type="text"
+                defaultValue={fetcher.data?.recommend ?? ""}
                 required
                 className="mt-2 w-full rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
                 placeholder="추천메뉴를 입력해주세요."
@@ -233,6 +288,7 @@ export default function CafeReviewCreateRoute() {
               <p className="text-lg font-semibold">🏷️ 태그</p>
               <input
                 name="tags"
+                defaultValue={fetcher.data?.tags ?? ""}
                 type="text"
                 className="mt-2 w-full rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
                 placeholder="태그를 입력해주세요."
@@ -247,7 +303,7 @@ export default function CafeReviewCreateRoute() {
                   type="number"
                   max={5}
                   min={0}
-                  defaultValue={0}
+                  defaultValue={fetcher.data?.starRating ?? 0}
                   step={0.5}
                   className="w-20 rounded border border-neutral-300 px-3 py-1 outline-none placeholder:text-neutral-300"
                   placeholder="별점"

@@ -23,6 +23,7 @@ model User {
 model Review {
   id          String   @id @default(uuid())
   cafeId      String
+  name        String
   description String
   starRating  Int
   createdAt   DateTime @default(now())
