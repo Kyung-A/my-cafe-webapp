@@ -19,4 +19,9 @@ export const GNB = [
     name: "즐겨찾기",
     active: false,
   },
+  {
+    id: "search",
+    name: "검색",
+    active: false,
+  },
 ];

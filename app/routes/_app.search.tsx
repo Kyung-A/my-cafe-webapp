@@ -26,23 +26,46 @@ export default function CafeSearchRoute() {
   const { user } = useOutletContext<{ user: IRegister }>();
 
   const {
-    handlePagination,
     GNB,
+    cafeData,
+    handlePagination,
     setGNB,
     fetchCafeData,
-    cafeData,
+    searchKeyword,
     removeData,
     removeMarker,
     refetchCafeData,
   } = useMap();
   const { location } = useGeoLocation();
-  const { handlerActive } = useClickActive();
+  const { handleActive } = useClickActive();
 
+  const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
   const [observerRef, setObserverRef] = useState<null | HTMLDivElement>(null);
   const [address, setAddress] = useState<string>();
+  const [searchInput, setSearchInput] = useState<string>("");
 
   const isActiveLnb = useMemo(() => GNB.find((v) => v.active), [GNB]);
+
+  const handleEnter = useCallback(
+    (e: { key: string }, text: string) => {
+      if (e.key === "Enter") {
+        keyword.current = text;
+        handleActive("search");
+        searchKeyword(text, userReview);
+      }
+    },
+    [handleActive, searchKeyword, userReview]
+  );
+
+  const handleSearch = useCallback(
+    (text: string) => {
+      keyword.current = text;
+      handleActive("search");
+      searchKeyword(text, userReview);
+    },
+    [handleActive, searchKeyword, userReview]
+  );
 
   const onScroll = useCallback(
     (entries: any) => {
@@ -125,10 +148,11 @@ export default function CafeSearchRoute() {
         <div className="mb-2 flex items-center gap-2 text-white">
           <button
             onClick={() => {
-              navigate("/search");
               setGNB(GNB.map((v) => ({ ...v, active: false })));
               removeData();
               removeMarker();
+              setSearchInput("");
+              navigate("/search");
             }}
           >
             <svg
@@ -148,29 +172,38 @@ export default function CafeSearchRoute() {
           </button>
           <h1>myCafe</h1>
         </div>
-        <SearchForm />
+        <SearchForm
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+          handleEnter={handleEnter}
+          onSubmit={handleSearch}
+        />
       </div>
       <div>
         {!isActiveLnb ? (
           <div className="px-4 pb-40 pt-6">
             <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
             <ul className="mt-3 flex flex-col gap-2">
-              {GNB?.map((v) => (
+              {GNB.map((v) => (
                 <li key={v.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (v.id !== "default" && user === null) {
-                        navigate("/signin");
-                      } else {
-                        handlerActive(v.id);
-                        fetchCafeData(v.id, userReview);
-                      }
-                    }}
-                    className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
-                  >
-                    {v.name}
-                  </button>
+                  {v.id !== "search" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (v.id !== "default" && user === null) {
+                            navigate("/signin");
+                          } else {
+                            handleActive(v.id);
+                            fetchCafeData(v.id, userReview);
+                          }
+                        }}
+                        className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
+                      >
+                        {v.name}
+                      </button>
+                    </>
+                  )}
                 </li>
               ))}
             </ul>
@@ -181,27 +214,40 @@ export default function CafeSearchRoute() {
               <h2 className="text-md mt-1 font-semibold leading-6">
                 {address} 주변 <br />
               </h2>
-              <h3 className="text-interaction text-xl font-semibold ">
-                {isActiveLnb.name}
+              <h3 className="text-interaction text-xl font-semibold">
+                {/* {console.log(keyword)} */}
+                {isActiveLnb.id === "search"
+                  ? `${keyword.current} ${isActiveLnb.name}`
+                  : isActiveLnb.name}
               </h3>
             </div>
             <div className="h-screen w-full overflow-y-auto px-4 pb-[200px]">
-              <ul className="mt-2 flex min-h-[500px] flex-col gap-6">
-                {cafeData.current && (
-                  <>
-                    {cafeData.current.map((v: ICafeResponse) => (
-                      <Link
-                        to={v.id}
-                        key={v.id}
-                        state={{ review: v.review, reviewId: v.reviewId }}
-                      >
-                        <Card data={v} />
-                      </Link>
-                    ))}
-                  </>
-                )}
-              </ul>
-              <div ref={setObserverRef} className="h-1"></div>
+              {cafeData.current.length > 0 ? (
+                <>
+                  <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
+                    {cafeData.current && (
+                      <>
+                        {cafeData.current.map((v: ICafeResponse) => (
+                          <Link
+                            to={v.id}
+                            key={v.id}
+                            state={{ review: v.review, reviewId: v.reviewId }}
+                          >
+                            <Card data={v} />
+                          </Link>
+                        ))}
+                      </>
+                    )}
+                  </ul>
+                  <div ref={setObserverRef} className="h-1"></div>
+                </>
+              ) : (
+                <div className="h-full w-full pt-36">
+                  <p className="text-center">
+                    후기를 등록해서 <br /> 나만의 카페 목록을 만드세요!
+                  </p>
+                </div>
+              )}
             </div>
           </>
         )}

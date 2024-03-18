@@ -19,6 +19,7 @@ interface IMap {
   setGNB: React.Dispatch<React.SetStateAction<IMenu[]>>;
   cafeData: any;
   fetchCafeData: (type: string, data: any) => void;
+  searchKeyword: (text: string, data: any) => void;
   handlePagination: () => void;
   removeData: () => void;
   removeMarker: () => void;
@@ -36,6 +37,7 @@ const MapContext = createContext<IMap>({
   setGNB: () => [],
   cafeData: [],
   fetchCafeData: () => null,
+  searchKeyword: () => null,
   handlePagination: () => null,
   removeData: () => null,
   removeMarker: () => null,
@@ -96,6 +98,73 @@ const MapProvider = ({ children }: IMapProvider) => {
       setMarkers(markerArr);
     },
     [mapData]
+  );
+
+  // 키워드 검색
+  const searchKeyword = useCallback(
+    (text: string, reviewData: IReview[]) => {
+      const { kakao } = window;
+      if (!kakao || !mapData) return;
+
+      const ps = new kakao.maps.services.Places(mapData);
+
+      if (cafeData.current.length > 0 && markers.length > 0) {
+        removeMarker();
+        removeData();
+      }
+
+      ps.keywordSearch(
+        text,
+        (data: ICafeResponse[], status: string, paging: ICafePagination) => {
+          // console.log(data, status, paging);
+
+          const result = data.reduce((acc: ICafeResponse[], cur, index) => {
+            // 리뷰 X
+            if (!reviewData) {
+              acc[index] = {
+                ...cur,
+                visited: false,
+                booking: false,
+              };
+            } else {
+              // 리뷰 O
+              for (const review of reviewData) {
+                const { id, cafeId, description, visited, booking } = review;
+
+                if (cur.id === cafeId) {
+                  acc[index] = {
+                    ...cur,
+                    reviewId: id,
+                    review: description,
+                    visited: visited,
+                    booking: booking,
+                  };
+                  break;
+                } else {
+                  // 리뷰 있/없 총 데이터 반환
+                  acc[index] = {
+                    ...cur,
+                    visited: false,
+                    booking: false,
+                  };
+                }
+              }
+            }
+
+            return acc;
+          }, []);
+
+          cafeData.current = [...cafeData.current, ...result];
+          setPagination(paging);
+
+          if (markers.length === 0) {
+            addMarker(cafeData.current);
+          }
+        },
+        { useMapBounds: true, useMapCenter: true, radius: 1000 }
+      );
+    },
+    [mapData, markers]
   );
 
   // 후기 등록, 수정 시 목록 리패칭
@@ -173,7 +242,7 @@ const MapProvider = ({ children }: IMapProvider) => {
                       review;
                     if (cur.id === cafeId) {
                       if (visited) {
-                        acc.push({
+                        return acc.push({
                           ...cur,
                           reviewId: id,
                           review: description,
@@ -192,7 +261,7 @@ const MapProvider = ({ children }: IMapProvider) => {
                       review;
                     if (cur.id === cafeId) {
                       if (booking) {
-                        acc.push({
+                        return acc.push({
                           ...cur,
                           ...(id && { reviewId: id }),
                           ...(description && {
@@ -209,7 +278,9 @@ const MapProvider = ({ children }: IMapProvider) => {
 
               return acc;
             }, []);
-          } else {
+          }
+
+          if (type === "notVisited") {
             if (reviewData) {
               result = data.filter((v) => {
                 return !reviewData.some(
@@ -231,10 +302,10 @@ const MapProvider = ({ children }: IMapProvider) => {
             addMarker(cafeData.current);
           }
         },
-        { useMapBounds: true }
+        { useMapBounds: true, useMapCenter: true, radius: 1000 }
       );
     },
-    [addMarker, mapData, markers]
+    [mapData, markers]
   );
 
   // 지도 초기화
@@ -263,6 +334,7 @@ const MapProvider = ({ children }: IMapProvider) => {
         setGNB: setCopyGNB,
         cafeData: cafeData,
         fetchCafeData,
+        searchKeyword,
         handlePagination,
         removeData,
         removeMarker,
