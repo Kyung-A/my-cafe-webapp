@@ -1,11 +1,11 @@
 import { useMap } from "~/shared/contexts/Map";
 
-export default function useClickActive() {
-  const { lnb, setLnb } = useMap();
+export function useClickActive() {
+  const { GNB, setGNB } = useMap();
 
   const handlerActive = (id: string) => {
-    setLnb(
-      lnb.map((v) =>
+    setGNB(
+      GNB.map((v) =>
         v.id === id ? { ...v, active: true } : { ...v, active: false }
       )
     );
