@@ -1,6 +1,8 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
+
 import { createToken, signin } from "~/.server/storage";
+import arrowRight from "~/assets/arrowRight.svg";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -56,20 +58,7 @@ export default function SigninRoute() {
           className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
         >
           <span>회원가입 하기</span>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            className="h-5 w-5"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-            />
-          </svg>
+          <img src={arrowRight} className="w-5" alt="icon" />
         </Link>
       </div>
       <button

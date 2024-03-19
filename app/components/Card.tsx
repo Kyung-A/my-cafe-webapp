@@ -1,50 +1,65 @@
-import { ICafeResponse } from "~/shared/types";
+import { ICafeResponse, IRegister } from "~/shared/types";
+
+import visited from "~/assets/visited.svg";
+import unvisited from "~/assets/unvisited.svg";
+import unbookmark from "~/assets/unbookmark.svg";
+import bookmark from "~/assets/bookmark.svg";
 
 interface ICard {
   data: ICafeResponse;
+  user: IRegister | null;
+  handleBooking: (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+    cafeId: string
+  ) => void;
 }
 
-export function Card({ data }: ICard) {
+export function Card({ data, user, handleBooking }: ICard) {
+  console.log(user);
   return (
     <div className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]">
       <div className="p-4">
         <div className="flex justify-between">
           <h3 className="text-lg font-semibold">{data.place_name}</h3>
           <div className="shrink-0 pt-1">
-            <button
-              className={`mr-1 ${data.visited ? "text-interaction" : ""}`}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M8.25 9V5.25A2.25 2.25 0 0 1 10.5 3h6a2.25 2.25 0 0 1 2.25 2.25v13.5A2.25 2.25 0 0 1 16.5 21h-6a2.25 2.25 0 0 1-2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H2.25"
-                />
-              </svg>
-            </button>
-            <button className={`${data.booking ? "text-interaction" : ""}`}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="h-4 w-4"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z"
-                />
-              </svg>
-            </button>
+            {user && (
+              <>
+                <button className="mr-1 w-[18px]">
+                  {data.visited ? (
+                    <img
+                      src={visited}
+                      className="fill-interaction w-full"
+                      alt="방문함"
+                    />
+                  ) : (
+                    <img
+                      src={unvisited}
+                      className="w-full"
+                      alt="방문하지 못함"
+                    />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => handleBooking(e, data.id)}
+                  className="w-[18px]"
+                >
+                  {data.booking ? (
+                    <img
+                      src={bookmark}
+                      className="fill-interaction w-full"
+                      alt="즐겨찾기"
+                    />
+                  ) : (
+                    <img
+                      src={unbookmark}
+                      className="w-full"
+                      alt="즐겨찾기 안됨"
+                    />
+                  )}
+                </button>
+              </>
+            )}
           </div>
         </div>
         <div className="mt-2 flex items-center gap-3">

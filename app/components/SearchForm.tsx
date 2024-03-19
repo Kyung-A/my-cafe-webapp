@@ -1,3 +1,5 @@
+import search from "~/assets/search.svg";
+
 interface ISearch {
   searchInput: string;
   setSearchInput: React.Dispatch<React.SetStateAction<string>>;
@@ -25,20 +27,7 @@ export const SearchForm = ({
         onClick={() => onSubmit(searchInput)}
         className="p-2"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-          strokeWidth={1.5}
-          stroke="currentColor"
-          className="h-5 w-5 text-zinc-400"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
-          />
-        </svg>
+        <img src={search} className="w-5" alt="검색" />
       </button>
     </div>
   );

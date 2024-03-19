@@ -30,7 +30,6 @@ export default function ReviewDetailRoute() {
             cafeId: data?.cafeId,
             reviewId: reviewId,
             name: data?.name,
-            booking: false,
           }}
           className="bg-interaction shrink-0 rounded-full px-4 py-1 text-sm font-semibold "
         >

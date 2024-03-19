@@ -1,5 +1,7 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
+
+import arrowRight from "~/assets/arrowRight.svg";
 import { db } from "~/.server/db";
 import { register } from "~/.server/storage";
 
@@ -95,20 +97,7 @@ export default function SignupRoute() {
             className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
           >
             <span>로그인 하기</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-              />
-            </svg>
+            <img src={arrowRight} className="w-5" alt="icon" />
           </Link>
         </div>
       )}

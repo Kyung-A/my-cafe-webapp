@@ -7,6 +7,7 @@ import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
+import minus from "~/assets/minus.svg";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -200,20 +201,7 @@ export default function CafeReviewCreateRoute() {
                       type="button"
                       className="pr-2 text-neutral-400"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 12h14"
-                        />
-                      </svg>
+                      <img src={minus} className="w-6" alt="삭제" />
                     </button>
                   </div>
                 ))}
@@ -247,20 +235,7 @@ export default function CafeReviewCreateRoute() {
                       type="button"
                       className="pr-2 text-neutral-400"
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M5 12h14"
-                        />
-                      </svg>
+                      <img src={minus} className="w-6" alt="삭제" />
                     </button>
                   </div>
                 ))}

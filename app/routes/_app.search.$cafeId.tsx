@@ -2,8 +2,12 @@
 import { json } from "@remix-run/node";
 import { Link, useLoaderData, useLocation, useParams } from "@remix-run/react";
 
+import clock from "~/assets/clock.svg";
+import cafe from "~/assets/cafe.svg";
+import menu from "~/assets/menu.svg";
 import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/components";
+import arrowRight from "~/assets/arrowRight.svg";
 
 interface IParams {
   params: {
@@ -53,20 +57,7 @@ export default function CafeDetailRoute() {
           <ul className="mt-2 space-y-2">
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-5 w-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-                  />
-                </svg>
+                <img src={clock} className="w-5" alt="clock" />
                 <p className="font-semibold">영업시간</p>
               </div>
               <div>
@@ -86,21 +77,7 @@ export default function CafeDetailRoute() {
             </li>
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-5 w-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.5 21v-7.5a.75.75 0 0 1 .75-.75h3a.75.75 0 0 1 .75.75V21m-4.5 0H2.36m11.14 0H18m0 0h3.64m-1.39 0V9.349M3.75 21V9.349m0 0a3.001 3.001 0 0 0 3.75-.615A2.993 2.993 0 0 0 9.75 9.75c.896 0 1.7-.393 2.25-1.016a2.993 2.993 0 0 0 2.25 1.016c.896 0 1.7-.393 2.25-1.015a3.001 3.001 0 0 0 3.75.614m-16.5 0a3.004 3.004 0 0 1-.621-4.72l1.189-1.19A1.5 1.5 0 0 1 5.378 3h13.243a1.5 1.5 0 0 1 1.06.44l1.19 1.189a3 3 0 0 1-.621 4.72M6.75 18h3.75a.75.75 0 0 0 .75-.75V13.5a.75.75 0 0 0-.75-.75H6.75a.75.75 0 0 0-.75.75v3.75c0 .414.336.75.75.75Z"
-                  />
-                </svg>
-
+                <img src={cafe} className="w-5" alt="cafe" />
                 <p className="font-semibold">위치</p>
               </div>
               <p className="break-keep">
@@ -111,20 +88,7 @@ export default function CafeDetailRoute() {
             </li>
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-5 w-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M15.666 3.888A2.25 2.25 0 0 0 13.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 0 1-.75.75H9a.75.75 0 0 1-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 0 1-2.25 2.25H6.75A2.25 2.25 0 0 1 4.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 0 1 1.927-.184"
-                  />
-                </svg>
+                <img src={menu} className="w-5" alt="menu" />
                 <p className="font-semibold">메뉴</p>
               </div>
               <details className="w-full cursor-pointer outline-none">
@@ -165,20 +129,7 @@ export default function CafeDetailRoute() {
                   className="text-interaction mt-3 flex items-center gap-2 text-sm font-semibold"
                 >
                   후기 자세히 보러가기
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-6 w-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3"
-                    />
-                  </svg>
+                  <img src={arrowRight} className="w-[18px]" alt="icon" />
                 </Link>
               </div>
             ) : (
@@ -189,7 +140,6 @@ export default function CafeDetailRoute() {
                   state={{
                     cafeId: cafeId,
                     name: data.basicInfo.placenamefull,
-                    booking: false,
                   }}
                   className="bg-interaction mt-2 rounded-full px-3 py-1 text-sm font-semibold text-white"
                 >

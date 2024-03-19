@@ -14,6 +14,7 @@ import { useClickActive, useGeoLocation } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
 import { ICafeResponse, IGeocoder, IRegister, IReview } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
+import bar3 from "~/assets/bar3.svg";
 
 export async function loader({ request }: { request: Request }) {
   const result = await getReviewList(request);
@@ -73,6 +74,14 @@ export default function CafeSearchRoute() {
       handlePagination();
     },
     [handlePagination]
+  );
+
+  const handleBooking = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, cafeId: string) => {
+      e.preventDefault();
+      console.log(cafeId);
+    },
+    []
   );
 
   useEffect(() => {
@@ -155,20 +164,7 @@ export default function CafeSearchRoute() {
               navigate("/search");
             }}
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="h-5 w-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-              />
-            </svg>
+            <img src={bar3} alt="gnb" className="w-5" />
           </button>
           <h1>myCafe</h1>
         </div>
@@ -215,7 +211,6 @@ export default function CafeSearchRoute() {
                 {address} 주변 <br />
               </h2>
               <h3 className="text-interaction text-xl font-semibold">
-                {/* {console.log(keyword)} */}
                 {isActiveLnb.id === "search"
                   ? `${keyword.current} ${isActiveLnb.name}`
                   : isActiveLnb.name}
@@ -233,7 +228,11 @@ export default function CafeSearchRoute() {
                             key={v.id}
                             state={{ review: v.review, reviewId: v.reviewId }}
                           >
-                            <Card data={v} />
+                            <Card
+                              data={v}
+                              user={user}
+                              handleBooking={handleBooking}
+                            />
                           </Link>
                         ))}
                       </>
