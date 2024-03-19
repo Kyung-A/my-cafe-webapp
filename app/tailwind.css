@@ -24,3 +24,14 @@ html, body {
     background-color: rgba(173, 173, 173, 0.5);
     -webkit-box-shadow: 0 0 1px rgba(255,255,255,.5);
 }
+
+.focusBorder {
+    position: sticky;
+    inset: -1px;
+    border: 1px solid #F2CB05;
+    box-shadow: #ceac0442 0px 0px 0px 3px, #f2cb05ab 0px 1px 3px 0px;
+    border-radius: 4px;
+    z-index: 5;
+    pointer-events: none;
+    content: "";
+}

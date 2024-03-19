@@ -26,6 +26,6 @@ export const useGeoLocation = () => {
   }, []);
 
   return {
-    location,
+    curLocation: location,
   };
 };

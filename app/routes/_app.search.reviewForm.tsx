@@ -43,8 +43,6 @@ export async function action({ request }: ActionFunctionArgs) {
         data[key] = notGoodArr.join(",");
       } else if (key === "starRating") {
         data[key] = Number(value);
-      } else if (key === "booking") {
-        data[key] = Boolean(value);
       } else {
         data[key] = value;
       }
@@ -161,12 +159,6 @@ export default function CafeReviewCreateRoute() {
                   <input
                     name="reviewId"
                     value={location.state.reviewId}
-                    readOnly
-                    hidden
-                  />
-                  <input
-                    name="booking"
-                    value={location.state.booking}
                     readOnly
                     hidden
                   />

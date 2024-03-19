@@ -4,6 +4,7 @@ import {
   Outlet,
   json,
   useLoaderData,
+  useLocation,
   useNavigate,
   useOutletContext,
 } from "@remix-run/react";
@@ -25,6 +26,7 @@ export default function CafeSearchRoute() {
   const navigate = useNavigate();
   const userReview = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
+  const location = useLocation();
 
   const {
     GNB,
@@ -37,7 +39,7 @@ export default function CafeSearchRoute() {
     removeMarker,
     refetchCafeData,
   } = useMap();
-  const { location } = useGeoLocation();
+  const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
 
   const keyword = useRef<string | null>(null);
@@ -45,6 +47,9 @@ export default function CafeSearchRoute() {
   const [observerRef, setObserverRef] = useState<null | HTMLDivElement>(null);
   const [address, setAddress] = useState<string>();
   const [searchInput, setSearchInput] = useState<string>("");
+  const [coordinate, setCoordinate] = useState<{
+    [key: string]: string;
+  } | null>();
 
   const isActiveLnb = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
@@ -76,18 +81,10 @@ export default function CafeSearchRoute() {
     [handlePagination]
   );
 
-  const handleBooking = useCallback(
-    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, cafeId: string) => {
-      e.preventDefault();
-      console.log(cafeId);
-    },
-    []
-  );
-
   useEffect(() => {
     const { kakao } = window;
-    if (!kakao || !location) return;
-    const { latitude, longitude } = location;
+    if (!kakao || !curLocation) return;
+    const { latitude, longitude } = curLocation;
 
     kakao.maps.load(() => {
       const geocoder = new kakao.maps.services.Geocoder();
@@ -103,7 +100,7 @@ export default function CafeSearchRoute() {
         }
       );
     });
-  }, [location]);
+  }, [curLocation]);
 
   useEffect(() => {
     if (!observerRef) return;
@@ -130,7 +127,6 @@ export default function CafeSearchRoute() {
           if (cur.cafeId === old.cafeId) {
             if (cur.description !== old.description) changeReview = cur;
             if (cur.visited !== old.visited) changeReview = cur;
-            if (cur.booking !== old.booking) changeReview = cur;
           }
         });
         if (id && id.length > 0) {
@@ -150,6 +146,12 @@ export default function CafeSearchRoute() {
       oldReview.current = userReview;
     }
   }, [refetchCafeData, userReview]);
+
+  useEffect(() => {
+    if (!location.pathname.includes("directions")) {
+      setCoordinate(null);
+    }
+  }, [location.pathname]);
 
   return (
     <div>
@@ -222,19 +224,38 @@ export default function CafeSearchRoute() {
                   <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
                     {cafeData.current && (
                       <>
-                        {cafeData.current.map((v: ICafeResponse) => (
-                          <Link
-                            to={v.id}
-                            key={v.id}
-                            state={{ review: v.review, reviewId: v.reviewId }}
-                          >
-                            <Card
-                              data={v}
-                              user={user}
-                              handleBooking={handleBooking}
-                            />
-                          </Link>
-                        ))}
+                        {cafeData.current.map((v: ICafeResponse) => {
+                          const directions =
+                            location.pathname.includes("directions");
+
+                          return directions ? (
+                            <div
+                              onClick={() =>
+                                setCoordinate({
+                                  name: v.place_name,
+                                  x: v.x,
+                                  y: v.y,
+                                })
+                              }
+                              aria-hidden="true"
+                            >
+                              <Card data={v} user={user} />
+                            </div>
+                          ) : (
+                            <Link
+                              to={v.id}
+                              key={v.id}
+                              state={{
+                                x: v.x,
+                                y: v.y,
+                                review: v.review,
+                                reviewId: v.reviewId,
+                              }}
+                            >
+                              <Card data={v} user={user} />
+                            </Link>
+                          );
+                        })}
                       </>
                     )}
                   </ul>
@@ -251,7 +272,7 @@ export default function CafeSearchRoute() {
           </>
         )}
       </div>
-      <Outlet context={userReview} />
+      <Outlet context={{ userReview, coordinate }} />
     </div>
   );
 }

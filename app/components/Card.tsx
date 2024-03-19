@@ -2,20 +2,13 @@ import { ICafeResponse, IRegister } from "~/shared/types";
 
 import visited from "~/assets/visited.svg";
 import unvisited from "~/assets/unvisited.svg";
-import unbookmark from "~/assets/unbookmark.svg";
-import bookmark from "~/assets/bookmark.svg";
 
 interface ICard {
   data: ICafeResponse;
   user: IRegister | null;
-  handleBooking: (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-    cafeId: string
-  ) => void;
 }
 
-export function Card({ data, user, handleBooking }: ICard) {
-  console.log(user);
+export function Card({ data, user }: ICard) {
   return (
     <div className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]">
       <div className="p-4">
@@ -23,42 +16,17 @@ export function Card({ data, user, handleBooking }: ICard) {
           <h3 className="text-lg font-semibold">{data.place_name}</h3>
           <div className="shrink-0 pt-1">
             {user && (
-              <>
-                <button className="mr-1 w-[18px]">
-                  {data.visited ? (
-                    <img
-                      src={visited}
-                      className="fill-interaction w-full"
-                      alt="방문함"
-                    />
-                  ) : (
-                    <img
-                      src={unvisited}
-                      className="w-full"
-                      alt="방문하지 못함"
-                    />
-                  )}
-                </button>
-                <button
-                  type="button"
-                  onClick={(e) => handleBooking(e, data.id)}
-                  className="w-[18px]"
-                >
-                  {data.booking ? (
-                    <img
-                      src={bookmark}
-                      className="fill-interaction w-full"
-                      alt="즐겨찾기"
-                    />
-                  ) : (
-                    <img
-                      src={unbookmark}
-                      className="w-full"
-                      alt="즐겨찾기 안됨"
-                    />
-                  )}
-                </button>
-              </>
+              <button className="mr-1 w-[18px]">
+                {data.visited ? (
+                  <img
+                    src={visited}
+                    className="fill-interaction w-full"
+                    alt="방문함"
+                  />
+                ) : (
+                  <img src={unvisited} className="w-full" alt="방문하지 못함" />
+                )}
+              </button>
             )}
           </div>
         </div>

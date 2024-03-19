@@ -47,7 +47,7 @@ const MapContext = createContext<IMap>({
 const MapProvider = ({ children }: IMapProvider) => {
   const mapEl = useRef(null);
   const cafeData = useRef<ICafeResponse[]>([]);
-  const { location } = useGeoLocation();
+  const { curLocation } = useGeoLocation();
 
   const [mapData, setMapData] = useState();
   const [copyGNB, setCopyGNB] = useState<IMenu[]>(GNB);
@@ -116,7 +116,7 @@ const MapProvider = ({ children }: IMapProvider) => {
       ps.keywordSearch(
         text,
         (data: ICafeResponse[], status: string, paging: ICafePagination) => {
-          // console.log(data, status, paging);
+          if (status !== kakao.maps.services.Status.OK) return;
 
           const result = data.reduce((acc: ICafeResponse[], cur, index) => {
             // 리뷰 X
@@ -124,12 +124,11 @@ const MapProvider = ({ children }: IMapProvider) => {
               acc[index] = {
                 ...cur,
                 visited: false,
-                booking: false,
               };
             } else {
               // 리뷰 O
               for (const review of reviewData) {
-                const { id, cafeId, description, visited, booking } = review;
+                const { id, cafeId, description, visited } = review;
 
                 if (cur.id === cafeId) {
                   acc[index] = {
@@ -137,7 +136,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                     reviewId: id,
                     review: description,
                     visited: visited,
-                    booking: booking,
                   };
                   break;
                 } else {
@@ -145,7 +143,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                   acc[index] = {
                     ...cur,
                     visited: false,
-                    booking: false,
                   };
                 }
               }
@@ -156,15 +153,12 @@ const MapProvider = ({ children }: IMapProvider) => {
 
           cafeData.current = [...cafeData.current, ...result];
           setPagination(paging);
-
-          if (markers.length === 0) {
-            addMarker(cafeData.current);
-          }
+          addMarker(cafeData.current);
         },
-        { useMapBounds: true, useMapCenter: true, radius: 1000 }
+        { useMapBounds: true }
       );
     },
-    [mapData, markers]
+    [addMarker, mapData, markers, removeMarker]
   );
 
   // 후기 등록, 수정 시 목록 리패칭
@@ -175,7 +169,7 @@ const MapProvider = ({ children }: IMapProvider) => {
           ...v,
           review: newReview.description,
           visited: newReview.visited,
-          booking: newReview.booking,
+          // booking: newReview.booking,
         };
       }
     });
@@ -203,7 +197,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                 acc[index] = {
                   ...cur,
                   visited: false,
-                  booking: false,
                 };
               }
 
@@ -212,8 +205,7 @@ const MapProvider = ({ children }: IMapProvider) => {
                 // 주변검색
                 if (type === "default") {
                   for (const review of reviewData) {
-                    const { id, cafeId, description, visited, booking } =
-                      review;
+                    const { id, cafeId, description, visited } = review;
 
                     if (cur.id === cafeId) {
                       acc[index] = {
@@ -221,7 +213,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                         reviewId: id,
                         review: description,
                         visited: visited,
-                        booking: booking,
                       };
                       break;
                     } else {
@@ -229,7 +220,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                       acc[index] = {
                         ...cur,
                         visited: false,
-                        booking: false,
                       };
                     }
                   }
@@ -238,8 +228,7 @@ const MapProvider = ({ children }: IMapProvider) => {
                 // 방문 O
                 if (type === "visited") {
                   reviewData.forEach((review) => {
-                    const { id, cafeId, description, visited, booking } =
-                      review;
+                    const { id, cafeId, description, visited } = review;
                     if (cur.id === cafeId) {
                       if (visited) {
                         return acc.push({
@@ -247,28 +236,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                           reviewId: id,
                           review: description,
                           visited: visited,
-                          booking: booking,
-                        });
-                      }
-                    }
-                  });
-                }
-
-                // 즐겨찾기
-                if (type === "booking") {
-                  reviewData.forEach((review) => {
-                    const { id, cafeId, description, visited, booking } =
-                      review;
-                    if (cur.id === cafeId) {
-                      if (booking) {
-                        return acc.push({
-                          ...cur,
-                          ...(id && { reviewId: id }),
-                          ...(description && {
-                            review: description,
-                          }),
-                          visited: visited,
-                          booking: booking,
                         });
                       }
                     }
@@ -288,7 +255,6 @@ const MapProvider = ({ children }: IMapProvider) => {
                     review.cafeId === v.id && {
                       ...v,
                       visited: false,
-                      booking: review.booking,
                     }
                 );
               });
@@ -311,8 +277,8 @@ const MapProvider = ({ children }: IMapProvider) => {
   // 지도 초기화
   useEffect(() => {
     const { kakao } = window;
-    if (!mapEl.current || !kakao || !location) return;
-    const { latitude, longitude } = location;
+    if (!mapEl.current || !kakao || !curLocation) return;
+    const { latitude, longitude } = curLocation;
 
     kakao.maps.load(() => {
       const options = {
@@ -323,7 +289,7 @@ const MapProvider = ({ children }: IMapProvider) => {
       const map = new kakao.maps.Map(mapEl.current, options);
       setMapData(map);
     });
-  }, [mapEl, location]);
+  }, [mapEl, curLocation]);
 
   return (
     <MapContext.Provider

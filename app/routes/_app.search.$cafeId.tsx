@@ -42,7 +42,7 @@ export default function CafeDetailRoute() {
       </div>
       <div className="h-full w-full overflow-y-auto">
         <div className="px-4 pb-60 pt-6">
-          <div className="flex items-center gap-3 text-sm text-neutral-400">
+          <div className="mb-2 flex items-center gap-3 text-sm text-neutral-400">
             <p>리뷰수 {data.basicInfo.feedback.blogrvwcnt}</p>
             <p>|</p>
             <p>
@@ -54,6 +54,31 @@ export default function CafeDetailRoute() {
               / 5
             </p>
           </div>
+          <Link
+            to="/search/directions"
+            state={{
+              x: location.state.x,
+              y: location.state.y,
+              cafeId: cafeId,
+              name: data.basicInfo.placenamefull,
+              position: "start",
+            }}
+            className="border-interaction text-interaction inline-block rounded-full border px-4 py-[2px] text-sm font-semibold"
+          >
+            출발
+          </Link>
+          <Link
+            to="/search/directions"
+            state={{
+              x: location.state.x,
+              y: location.state.y,
+              name: data.basicInfo.placenamefull,
+              position: "end",
+            }}
+            className="bg-interaction border-interaction ml-1 inline-block rounded-full border px-4 py-[2px] text-sm font-semibold text-white"
+          >
+            도착
+          </Link>
           <ul className="mt-2 space-y-2">
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
@@ -62,11 +87,11 @@ export default function CafeDetailRoute() {
               </div>
               <div>
                 <p>
-                  {data.basicInfo.openHour.realtime.open === "N"
+                  {data.basicInfo?.openHour?.realtime.open === "N"
                     ? "영업마감"
                     : "영업중"}
                 </p>
-                {data.basicInfo.openHour.periodList[0].timeList.map(
+                {data.basicInfo?.openHour?.periodList[0].timeList.map(
                   (v: any, i: number) => (
                     <p key={i}>
                       {v.timeSE} {v.dayOfWeek}
@@ -94,7 +119,7 @@ export default function CafeDetailRoute() {
               <details className="w-full cursor-pointer outline-none">
                 <summary>메뉴 상세보기</summary>
                 <ul>
-                  {data.menuInfo.menuList.map((v: any, i: number) => (
+                  {data.menuInfo?.menuList.map((v: any, i: number) => (
                     <li
                       key={i}
                       className="border-b-[1px] border-neutral-200 py-3 last:border-b-0"

@@ -12,7 +12,7 @@ export const meta: MetaFunction = () => {
 export async function loader({ request }: { request: Request }) {
   const user = await getUser(request);
   if (!user) return null;
-  return json({ user });
+  return json(user);
 }
 
 export default function MainLayoutRoute() {
@@ -22,7 +22,7 @@ export default function MainLayoutRoute() {
   return (
     <div ref={mapEl} id="map" className="relative h-screen w-full">
       <Panel>
-        <Outlet context={{ user: user }} />
+        <Outlet context={{ user }} />
       </Panel>
     </div>
   );

@@ -26,7 +26,7 @@ export interface ICafeResponse {
   reviewId?: string;
   review?: string;
   visited?: boolean;
-  booking?: boolean;
+  bookmark?: boolean;
 }
 
 export interface ICafePagination {
@@ -57,7 +57,7 @@ export interface IMenu {
 }
 
 export interface IRegister {
-  id: string;
+  id?: string;
   email: string;
   name: string;
   password?: string;
@@ -78,13 +78,18 @@ export interface IFieldInput {
 export interface IReview {
   id: string;
   cafeId: string;
+  userId: string;
   name: string;
   description: string;
   starRating: number;
   visited: boolean;
-  booking: boolean;
   good: string;
   notGood: string;
   tags: string;
   recommend: string;
+}
+
+export interface IDirection {
+  origin: string;
+  destination: string;
 }
