@@ -5,7 +5,7 @@ interface ILocation {
   longitude: number;
 }
 
-export const useGeoLocation = () => {
+export function useGeoLocation() {
   const [location, setLocation] = useState<ILocation>();
 
   useEffect(() => {
@@ -28,4 +28,4 @@ export const useGeoLocation = () => {
   return {
     curLocation: location,
   };
-};
+}

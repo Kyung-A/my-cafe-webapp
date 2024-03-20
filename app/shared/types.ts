@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IGeocoder {
   address_name: string;
   code: "string";
@@ -26,7 +27,6 @@ export interface ICafeResponse {
   reviewId?: string;
   review?: string;
   visited?: boolean;
-  bookmark?: boolean;
 }
 
 export interface ICafePagination {
@@ -92,4 +92,42 @@ export interface IReview {
 export interface IDirection {
   origin: string;
   destination: string;
+}
+
+export interface IPolyline {
+  La: number;
+  Ma: number;
+}
+
+export interface IMarker {
+  setMap(arg0: any): any;
+  $a: number;
+  Ba: number;
+  Gb: string;
+  Ha: number;
+  Hb: boolean;
+  K: any | undefined;
+  Kj: number;
+  Na: boolean;
+  Rc: { x: number; y: number };
+  T: {
+    Qd: { x: number; y: number };
+    Wh: string;
+    Xj: { x: number; y: number };
+    de: string;
+    lf: { width: number; height: number };
+    mk: string;
+    n: string;
+  };
+  a: any;
+  ai: number;
+  ca: any;
+  ej: number;
+  f: { [key: string]: any };
+  fa: { [key: string]: any };
+  fj: number;
+  h: { [key: string]: any };
+  n: IPolyline;
+  o: { [key: string]: string };
+  yi: number;
 }

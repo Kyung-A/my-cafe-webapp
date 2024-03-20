@@ -11,7 +11,14 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { Card, SearchForm } from "~/components";
-import { useClickActive, useGeoLocation } from "~/hooks";
+import {
+  useClickActive,
+  useFetch,
+  useGeoLocation,
+  useKeyword,
+  usePagination,
+  useRemove,
+} from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
 import { ICafeResponse, IGeocoder, IRegister, IReview } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
@@ -24,23 +31,17 @@ export async function loader({ request }: { request: Request }) {
 
 export default function CafeSearchRoute() {
   const navigate = useNavigate();
+  const location = useLocation();
   const userReview = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
-  const location = useLocation();
 
-  const {
-    GNB,
-    cafeData,
-    handlePagination,
-    setGNB,
-    fetchCafeData,
-    searchKeyword,
-    removeData,
-    removeMarker,
-    refetchCafeData,
-  } = useMap();
+  const { removeData, removeMarker } = useRemove();
+  const { handlePagination } = usePagination();
+  const { fetchCafeData, refetchCafeData } = useFetch();
+  const { GNB, cafeData, setGNB } = useMap();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
+  const { searchKeyword } = useKeyword();
 
   const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
@@ -58,7 +59,7 @@ export default function CafeSearchRoute() {
       if (e.key === "Enter") {
         keyword.current = text;
         handleActive("search");
-        searchKeyword(text, userReview);
+        searchKeyword(text, userReview as IReview[]);
       }
     },
     [handleActive, searchKeyword, userReview]
@@ -68,7 +69,7 @@ export default function CafeSearchRoute() {
     (text: string) => {
       keyword.current = text;
       handleActive("search");
-      searchKeyword(text, userReview);
+      searchKeyword(text, userReview as IReview[]);
     },
     [handleActive, searchKeyword, userReview]
   );
@@ -107,7 +108,7 @@ export default function CafeSearchRoute() {
     const observer = new IntersectionObserver(onScroll, { threshold: 0.1 });
     observer.observe(observerRef);
 
-    if (cafeData.current.length === 45) observer.unobserve(observerRef);
+    if (cafeData.current?.length === 45) observer.unobserve(observerRef);
     return () => observer.disconnect();
   }, [onScroll, observerRef, cafeData]);
 
@@ -193,7 +194,7 @@ export default function CafeSearchRoute() {
                             navigate("/signin");
                           } else {
                             handleActive(v.id);
-                            fetchCafeData(v.id, userReview);
+                            fetchCafeData(v.id, userReview as IReview[]);
                           }
                         }}
                         className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
@@ -219,45 +220,42 @@ export default function CafeSearchRoute() {
               </h3>
             </div>
             <div className="h-screen w-full overflow-y-auto px-4 pb-[200px]">
-              {cafeData.current.length > 0 ? (
+              {cafeData.current && cafeData.current?.length > 0 ? (
                 <>
                   <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
-                    {cafeData.current && (
-                      <>
-                        {cafeData.current.map((v: ICafeResponse) => {
-                          const directions =
-                            location.pathname.includes("directions");
+                    {cafeData.current.map((v: ICafeResponse) => {
+                      const directions =
+                        location.pathname.includes("directions");
 
-                          return directions ? (
-                            <div
-                              onClick={() =>
-                                setCoordinate({
-                                  name: v.place_name,
-                                  x: v.x,
-                                  y: v.y,
-                                })
-                              }
-                              aria-hidden="true"
-                            >
-                              <Card data={v} user={user} />
-                            </div>
-                          ) : (
-                            <Link
-                              to={v.id}
-                              key={v.id}
-                              state={{
-                                x: v.x,
-                                y: v.y,
-                                review: v.review,
-                                reviewId: v.reviewId,
-                              }}
-                            >
-                              <Card data={v} user={user} />
-                            </Link>
-                          );
-                        })}
-                      </>
-                    )}
+                      return directions ? (
+                        <div
+                          key={v.id}
+                          onClick={() =>
+                            setCoordinate({
+                              name: v.place_name,
+                              x: v.x,
+                              y: v.y,
+                            })
+                          }
+                          aria-hidden="true"
+                        >
+                          <Card data={v} user={user} />
+                        </div>
+                      ) : (
+                        <Link
+                          to={v.id}
+                          key={v.id}
+                          state={{
+                            x: v.x,
+                            y: v.y,
+                            review: v.review,
+                            reviewId: v.reviewId,
+                          }}
+                        >
+                          <Card data={v} user={user} />
+                        </Link>
+                      );
+                    })}
                   </ul>
                   <div ref={setObserverRef} className="h-1"></div>
                 </>
