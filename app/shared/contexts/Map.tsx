@@ -24,6 +24,7 @@ interface IMap {
   setMarkers: Dispatch<SetStateAction<IMarker[]>>;
   pagination: ICafePagination | undefined;
   setPagination: Dispatch<SetStateAction<ICafePagination | undefined>>;
+  clusterer: { [key: string]: any } | undefined;
 }
 
 interface IMapProvider {
@@ -40,6 +41,7 @@ const MapContext = createContext<IMap>({
   setMarkers: () => [],
   pagination: undefined,
   setPagination: () => null,
+  clusterer: undefined,
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
@@ -51,6 +53,9 @@ const MapProvider = ({ children }: IMapProvider) => {
   const [copyGNB, setCopyGNB] = useState<IMenu[]>(GNB);
   const [markers, setMarkers] = useState<IMarker[]>([]);
   const [pagination, setPagination] = useState<ICafePagination>();
+  const [clusterer, setClusterer] = useState<
+    { [key: string]: any } | undefined
+  >();
 
   useEffect(() => {
     const { kakao } = window;
@@ -60,10 +65,19 @@ const MapProvider = ({ children }: IMapProvider) => {
     kakao.maps.load(() => {
       const options = {
         center: new kakao.maps.LatLng(latitude, longitude),
-        level: 6,
+        level: 5,
       };
 
       const map = new kakao.maps.Map(mapEl.current, options);
+
+      const clusterer = new kakao.maps.MarkerClusterer({
+        map: map,
+        averageCenter: true,
+        minLevel: 4,
+        disableClickZoom: true,
+      });
+
+      setClusterer(clusterer);
       setMapData(map);
     });
   }, [mapEl, curLocation]);
@@ -80,6 +94,7 @@ const MapProvider = ({ children }: IMapProvider) => {
         setMarkers,
         pagination,
         setPagination,
+        clusterer,
       }}
     >
       {children}

@@ -49,7 +49,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
           <script
             async
             type="text/javascript"
-            src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&libraries=services&autoload=false`}
+            src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${mapKey}&libraries=services,clusterer&autoload=false`}
           ></script>
         )}
         {children}

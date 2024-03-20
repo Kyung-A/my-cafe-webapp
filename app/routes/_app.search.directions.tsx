@@ -50,7 +50,7 @@ export default function DirectionsRoute() {
   const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
 
-  const { mapData, markers } = useMap();
+  const { mapData, markers, clusterer } = useMap();
   const { removeMarker } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();
@@ -75,6 +75,7 @@ export default function DirectionsRoute() {
   useLayoutEffect(() => {
     if (markers.length > 0) {
       removeMarker();
+      clusterer?.clear();
     }
   }, [markers]);
 

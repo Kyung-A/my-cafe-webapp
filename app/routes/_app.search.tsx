@@ -44,7 +44,7 @@ export default function CafeSearchRoute() {
   const { removeData, removeMarker } = useRemove();
   const { handlePagination } = usePagination();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const { GNB, cafeData, setGNB } = useMap();
+  const { GNB, cafeData, setGNB, clusterer } = useMap();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();
@@ -167,6 +167,7 @@ export default function CafeSearchRoute() {
               setGNB(GNB.map((v) => ({ ...v, active: false })));
               removeData();
               removeMarker();
+              clusterer?.clear();
               setSearchInput("");
               if (!location.pathname.includes("directions")) {
                 navigate("/search");

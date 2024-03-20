@@ -5,7 +5,7 @@ import { useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
 
 export function useKeyword() {
-  const { mapData, cafeData, markers, setPagination } = useMap();
+  const { mapData, cafeData, markers, setPagination, clusterer } = useMap();
   const { removeData, removeMarker } = useRemove();
   const { addMarker } = useFetch();
 
@@ -19,6 +19,7 @@ export function useKeyword() {
       if (cafeData.current && cafeData.current.length > 0) {
         removeMarker();
         removeData();
+        clusterer?.clear();
       }
 
       ps.keywordSearch(
