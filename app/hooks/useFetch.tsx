@@ -1,18 +1,21 @@
-import { useCallback } from "react";
+import { useLocation } from "@remix-run/react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useMap } from "~/shared/contexts/Map";
 import {
   ICafePagination,
   ICafeResponse,
+  ICoord,
   IMarker,
   IReview,
 } from "~/shared/types";
+import { markerOption } from "~/shared/utils/markerOption";
 
 export function useFetch() {
   const { mapData, cafeData, setPagination, markers, setMarkers } = useMap();
 
   const addMarker = useCallback(
-    (data: ICafeResponse[] | null) => {
+    (data: ICafeResponse[] | ICoord[] | null) => {
       const { kakao } = window;
       if (!kakao || !mapData) return;
 
@@ -20,10 +23,7 @@ export function useFetch() {
 
       data?.forEach((cafe) => {
         const position = new kakao.maps.LatLng(cafe.y, cafe.x);
-
-        const imageSrc = "https://t1.daumcdn.net/mapjsapi/images/2x/marker.png";
-        const imageSize = new kakao.maps.Size(28, 40);
-        const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+        const markerImage = markerOption(kakao);
         const marker = new kakao.maps.Marker({
           map: mapData,
           position: position,
@@ -122,12 +122,12 @@ export function useFetch() {
             }
           }
 
-          cafeData.current = [...cafeData.current, ...result];
+          cafeData.current = [
+            ...(cafeData.current as ICafeResponse[]),
+            ...result,
+          ];
           setPagination(paging);
-
-          if (markers.length === 0) {
-            addMarker(cafeData.current);
-          }
+          addMarker(cafeData.current);
         },
         { useMapBounds: true, useMapCenter: true, radius: 1000 }
       );
@@ -136,9 +136,9 @@ export function useFetch() {
   );
 
   const refetchCafeData = (newReview: IReview) => {
-    cafeData.current.forEach((v: ICafeResponse, i: number) => {
+    cafeData.current?.forEach((v: ICafeResponse, i: number) => {
       if (v.id === newReview.cafeId) {
-        cafeData.current[i] = {
+        cafeData.current![i] = {
           ...v,
           review: newReview.description,
           visited: newReview.visited,

@@ -59,7 +59,6 @@ export default function CafeDetailRoute() {
             state={{
               x: location.state.x,
               y: location.state.y,
-              cafeId: cafeId,
               name: data.basicInfo.placenamefull,
               position: "start",
             }}

@@ -1,14 +1,32 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunctionArgs } from "@remix-run/node";
-import { Form, json, useLocation, useOutletContext } from "@remix-run/react";
+import {
+  Form,
+  json,
+  useActionData,
+  useLocation,
+  useOutletContext,
+} from "@remix-run/react";
 import { useEffect, useState } from "react";
 
 import { getDirection } from "~/.server/search";
 import { Panel } from "~/components";
+import { useRemove } from "~/hooks";
+import { useMap } from "~/shared/contexts/Map";
+import { IPolyline } from "~/shared/types";
 
 interface IDirectionInput {
   value: string;
   name: string;
+}
+
+interface IRoads {
+  distance: number;
+  duration: number;
+  name: string;
+  traffic_speed: number;
+  traffic_state: number;
+  vertexes: number[];
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -22,49 +40,127 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function DirectionsRoute() {
   const location = useLocation();
+  const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
+  const { mapData } = useMap();
+  const { removeMarker } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();
   const [endInput, setEndInput] = useState<IDirectionInput>();
   const [focusInput, setFocusInput] = useState<string>();
+  const [startMarker, setStartMarker] = useState<any>();
+  const [endMarker, setEndMarker] = useState<any>();
 
   useEffect(() => {
-    if (location.state) {
+    removeMarker();
+  }, []);
+
+  useEffect(() => {
+    const { kakao } = window;
+
+    if (location.state && kakao) {
       const { x, y, name, position } = location.state;
+
+      const marker = new kakao.maps.Marker({
+        position: new kakao.maps.LatLng(y, x),
+      });
+
       if (position === "start") {
         setStartInput({
           value: `${x},${y}`,
           name: name,
         });
+        setStartMarker(marker);
       } else {
         setEndInput({
           value: `${x},${y}`,
           name: name,
         });
+        setEndMarker(marker);
       }
     }
-  }, [location]);
+  }, [location, mapData]);
 
   useEffect(() => {
+    const { kakao } = window;
+    if (!kakao) return;
+
+    if (startMarker) {
+      startMarker.setMap(mapData);
+    }
+    if (endMarker) {
+      endMarker.setMap(mapData);
+    }
+  }, [endMarker, startMarker, mapData]);
+
+  useEffect(() => {
+    const { kakao } = window;
+    if (!kakao) return;
+
     if (coordinate) {
       if (focusInput === "start") {
         setStartInput({
           value: `${coordinate.x},${coordinate.y}`,
           name: coordinate.name,
         });
+
+        if (startMarker) {
+          startMarker.setMap(null);
+        }
+
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(coordinate.y, coordinate.x),
+        });
+        setStartMarker(marker);
       } else {
         setEndInput({
           value: `${coordinate.x},${coordinate.y}`,
           name: coordinate.name,
         });
+
+        if (endMarker) {
+          endMarker.setMap(null);
+        }
+        const marker = new kakao.maps.Marker({
+          position: new kakao.maps.LatLng(coordinate.y, coordinate.x),
+        });
+
+        setEndMarker(marker);
       }
       setFocusInput("");
     }
-  }, [coordinate]);
+  }, [coordinate, mapData]);
+
+  useEffect(() => {
+    const { kakao } = window;
+    if (!kakao) return;
+
+    const linePath: IPolyline[] = [];
+    if (directions) {
+      directions.routes[0].sections[0].roads.forEach((road: IRoads) => {
+        road.vertexes.forEach((vertex: number, idx: number) => {
+          if (idx % 2 === 0) {
+            linePath.push(
+              new kakao.maps.LatLng(road.vertexes[idx + 1], road.vertexes[idx])
+            );
+          }
+        });
+        const polyline = new kakao.maps.Polyline({
+          map: mapData,
+          path: linePath,
+          strokeWeight: 5,
+          strokeColor: "rgb(54 22 137)",
+          strokeOpacity: 0.5,
+          strokeStyle: "solid",
+        });
+        polyline.setMap(mapData);
+      });
+    }
+  }, [directions, mapData]);
 
   return (
     <Panel left="320px">
-      <Form method="post" navigate={false}>
+      <Form method="post">
         <div className="bg-primary flex h-12 w-full flex-col justify-center px-4">
           <h1 className="text-xl font-semibold">길찾기</h1>
         </div>
@@ -74,7 +170,13 @@ export default function DirectionsRoute() {
             선택해주세요!
           </p>
           <div className="mt-2 w-full rounded border border-neutral-400">
-            <input name="origin" value={startInput?.value} hidden readOnly />
+            <input
+              name="origin"
+              value={startInput?.value}
+              onChange={() => null}
+              hidden
+              readOnly
+            />
             <button
               type="button"
               onClick={() => setFocusInput("start")}
@@ -86,7 +188,13 @@ export default function DirectionsRoute() {
                 <span className="text-neutral-400">출발지를 선택해주세요.</span>
               )}
             </button>
-            <input name="destination" value={endInput?.value} hidden readOnly />
+            <input
+              name="destination"
+              value={endInput?.value}
+              onChange={() => null}
+              hidden
+              readOnly
+            />
             <button
               type="button"
               onClick={() => setFocusInput("end")}

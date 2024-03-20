@@ -20,7 +20,13 @@ import {
   useRemove,
 } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
-import { ICafeResponse, IGeocoder, IRegister, IReview } from "~/shared/types";
+import {
+  ICafeResponse,
+  ICoord,
+  IGeocoder,
+  IRegister,
+  IReview,
+} from "~/shared/types";
 import { getReviewList } from "~/.server/review";
 import bar3 from "~/assets/bar3.svg";
 
@@ -48,9 +54,7 @@ export default function CafeSearchRoute() {
   const [observerRef, setObserverRef] = useState<null | HTMLDivElement>(null);
   const [address, setAddress] = useState<string>();
   const [searchInput, setSearchInput] = useState<string>("");
-  const [coordinate, setCoordinate] = useState<{
-    [key: string]: string;
-  } | null>();
+  const [coordinate, setCoordinate] = useState<ICoord | null>();
 
   const isActiveLnb = useMemo(() => GNB.find((v) => v.active), [GNB]);
 

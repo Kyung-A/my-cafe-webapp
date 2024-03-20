@@ -11,6 +11,13 @@ export interface IGeocoder {
   y: number;
 }
 
+export interface ICoord {
+  id?: string;
+  name?: string;
+  x: number | string;
+  y: number | string;
+}
+
 export interface ICafeResponse {
   address_name: string;
   category_group_code: string;
@@ -109,11 +116,11 @@ export interface IMarker {
   K: any | undefined;
   Kj: number;
   Na: boolean;
-  Rc: { x: number; y: number };
+  Rc: ICoord;
   T: {
-    Qd: { x: number; y: number };
+    Qd: ICoord;
     Wh: string;
-    Xj: { x: number; y: number };
+    Xj: ICoord;
     de: string;
     lf: { width: number; height: number };
     mk: string;
