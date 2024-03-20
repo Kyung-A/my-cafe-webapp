@@ -5,15 +5,20 @@ import {
   json,
   useActionData,
   useLocation,
+  useNavigate,
   useOutletContext,
+  useSubmit,
 } from "@remix-run/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 import { getDirection } from "~/.server/search";
 import { Panel } from "~/components";
 import { useRemove } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
 import { IPolyline } from "~/shared/types";
+import xMark from "~/assets/xMark.svg";
+import { converTime } from "~/shared/utils/converTime";
+import { converDistance } from "~/shared/utils/converDistance";
 
 interface IDirectionInput {
   value: string;
@@ -39,10 +44,13 @@ export async function action({ request }: ActionFunctionArgs) {
 }
 
 export default function DirectionsRoute() {
+  const submit = useSubmit();
   const location = useLocation();
+  const naviagte = useNavigate();
   const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
-  const { mapData } = useMap();
+
+  const { mapData, markers } = useMap();
   const { removeMarker } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();
@@ -50,10 +58,25 @@ export default function DirectionsRoute() {
   const [focusInput, setFocusInput] = useState<string>();
   const [startMarker, setStartMarker] = useState<any>();
   const [endMarker, setEndMarker] = useState<any>();
+  const [polylines, setPolylines] = useState<{ [key: string]: any }[]>([]);
 
-  useEffect(() => {
-    removeMarker();
-  }, []);
+  const handleRemovePolyline = useCallback(() => {
+    polylines.forEach((v) => v.setMap(null));
+  }, [polylines]);
+
+  const handleRemoveAll = () => {
+    if (startMarker || endMarker) {
+      endMarker?.setMap(null);
+      startMarker?.setMap(null);
+    }
+    handleRemovePolyline();
+  };
+
+  useLayoutEffect(() => {
+    if (markers.length > 0) {
+      removeMarker();
+    }
+  }, [markers]);
 
   useEffect(() => {
     const { kakao } = window;
@@ -79,11 +102,12 @@ export default function DirectionsRoute() {
         setEndMarker(marker);
       }
     }
-  }, [location, mapData]);
+  }, [location]);
 
   useEffect(() => {
     const { kakao } = window;
     if (!kakao) return;
+    handleRemovePolyline();
 
     if (startMarker) {
       startMarker.setMap(mapData);
@@ -129,7 +153,7 @@ export default function DirectionsRoute() {
       }
       setFocusInput("");
     }
-  }, [coordinate, mapData]);
+  }, [coordinate]);
 
   useEffect(() => {
     const { kakao } = window;
@@ -137,6 +161,8 @@ export default function DirectionsRoute() {
 
     const linePath: IPolyline[] = [];
     if (directions) {
+      const polylineArr: { [key: string]: any }[] = [];
+
       directions.routes[0].sections[0].roads.forEach((road: IRoads) => {
         road.vertexes.forEach((vertex: number, idx: number) => {
           if (idx % 2 === 0) {
@@ -153,18 +179,35 @@ export default function DirectionsRoute() {
           strokeOpacity: 0.5,
           strokeStyle: "solid",
         });
+        polylineArr.push(polyline);
         polyline.setMap(mapData);
       });
+      setPolylines(polylineArr);
     }
   }, [directions, mapData]);
 
   return (
     <Panel left="320px">
-      <Form method="post">
+      <button
+        onClick={() => {
+          handleRemoveAll();
+          naviagte("/search");
+        }}
+        className="bg-primary absolute left-80 top-0 flex h-12 w-12 flex-col items-center justify-center"
+      >
+        <img src={xMark} alt="닫기" className="w-8" />
+      </button>
+      <Form
+        method="post"
+        onSubmit={(event) => {
+          handleRemovePolyline();
+          submit(event.currentTarget);
+        }}
+      >
         <div className="bg-primary flex h-12 w-full flex-col justify-center px-4">
           <h1 className="text-xl font-semibold">길찾기</h1>
         </div>
-        <div className="w-full  px-4 py-6">
+        <div className="w-full px-4 py-6">
           <p className="break-keep text-sm text-neutral-500">
             도착지 / 출발지를 선택 후 검색 또는 메뉴를 통해 이동할 곳을
             선택해주세요!
@@ -173,7 +216,7 @@ export default function DirectionsRoute() {
             <input
               name="origin"
               value={startInput?.value}
-              onChange={() => null}
+              onChange={() => console.log()}
               hidden
               readOnly
             />
@@ -191,7 +234,7 @@ export default function DirectionsRoute() {
             <input
               name="destination"
               value={endInput?.value}
-              onChange={() => null}
+              onChange={() => console.log()}
               hidden
               readOnly
             />
@@ -213,6 +256,27 @@ export default function DirectionsRoute() {
           >
             길찾기
           </button>
+          {directions && (
+            <div className="mt-6 border-t border-neutral-200">
+              <h2 className="text-interaction mt-6 text-sm">최적경로</h2>
+              <h3 className="mt-1 text-xl font-semibold">
+                {converTime(directions.routes[0].summary.duration)}
+                <span className="ml-2 text-sm font-light text-neutral-400">
+                  {converDistance(directions.routes[0].summary.distance)}km
+                </span>
+              </h3>
+              <p className="mt-1 text-sm">
+                <span className="mr-2">택시비</span>
+                {directions.routes[0].summary.fare.taxi.toLocaleString("ko-KR")}
+                원
+              </p>
+              <p className="text-sm">
+                <span className="mr-2">통행요금</span>
+                {directions.routes[0].summary.fare.toll.toLocaleString("ko-KR")}
+                원
+              </p>
+            </div>
+          )}
         </div>
       </Form>
     </Panel>

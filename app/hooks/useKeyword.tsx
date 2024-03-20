@@ -16,11 +16,7 @@ export function useKeyword() {
 
       const ps = new kakao.maps.services.Places(mapData);
 
-      if (
-        cafeData.current &&
-        cafeData.current.length > 0 &&
-        markers.length > 0
-      ) {
+      if (cafeData.current && cafeData.current.length > 0) {
         removeMarker();
         removeData();
       }
@@ -73,7 +69,7 @@ export function useKeyword() {
         { useMapBounds: true }
       );
     },
-    [addMarker, mapData, markers, removeMarker]
+    [cafeData, mapData, markers.length]
   );
 
   return { searchKeyword };

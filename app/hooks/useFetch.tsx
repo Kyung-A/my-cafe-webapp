@@ -1,5 +1,4 @@
-import { useLocation } from "@remix-run/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 
 import { useMap } from "~/shared/contexts/Map";
 import {

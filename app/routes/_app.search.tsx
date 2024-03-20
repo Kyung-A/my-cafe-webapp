@@ -168,7 +168,9 @@ export default function CafeSearchRoute() {
               removeData();
               removeMarker();
               setSearchInput("");
-              navigate("/search");
+              if (!location.pathname.includes("directions")) {
+                navigate("/search");
+              }
             }}
           >
             <img src={bar3} alt="gnb" className="w-5" />
