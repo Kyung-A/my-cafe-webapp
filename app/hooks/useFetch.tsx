@@ -1,3 +1,4 @@
+import { useNavigate } from "@remix-run/react";
 import { useCallback } from "react";
 
 import { useMap } from "~/shared/contexts/Map";
@@ -11,7 +12,9 @@ import {
 import { markerOption } from "~/shared/utils/markerOption";
 
 export function useFetch() {
-  const { mapData, cafeData, setPagination, markers, setMarkers } = useMap();
+  const navigate = useNavigate();
+  const { mapData, cafeData, setPagination, markers, setMarkers, clusterer } =
+    useMap();
 
   const addMarker = useCallback(
     (data: ICafeResponse[] | ICoord[] | null) => {
@@ -26,11 +29,26 @@ export function useFetch() {
         const marker = new kakao.maps.Marker({
           map: mapData,
           position: position,
+          title: cafe.id,
           image: markerImage,
+          zIndex: 10,
         });
+
         markerArr.push(marker);
+
+        kakao.maps.event.addListener(marker, "click", function () {
+          navigate(`/search/${cafe.id}`, {
+            state: {
+              x: cafe.x,
+              y: cafe.y,
+              ...(cafe.review && { review: cafe.review }),
+              ...(cafe.reviewId && { reviewId: cafe.reviewId }),
+            },
+          });
+        });
       });
 
+      clusterer?.addMarkers(markerArr);
       setMarkers(markerArr);
     },
     [mapData]
@@ -120,7 +138,6 @@ export function useFetch() {
               });
             }
           }
-
           cafeData.current = [
             ...(cafeData.current as ICafeResponse[]),
             ...result,
