@@ -16,6 +16,8 @@ export interface ICoord {
   name?: string;
   x: number | string;
   y: number | string;
+  reviewId?: string;
+  review?: string;
 }
 
 export interface ICafeResponse {
@@ -138,3 +140,18 @@ export interface IMarker {
   o: { [key: string]: string };
   yi: number;
 }
+
+export interface IKaKao {
+  maps: {
+    Coords: new (arg0: any, arg1: number) => any;
+    LatLng: new (arg0: any, arg1: any) => any;
+    InfoWindow: new (arg0: { map: any; position: any; content: string }) => any;
+    event?: {
+      addListener: (arg0: any, arg1: string, arg2: () => void) => void;
+    };
+  };
+}
+
+export type IClusters = _.List<any>;
+
+export type IClusterer = { _clusters: _.List<any> | null | undefined };
