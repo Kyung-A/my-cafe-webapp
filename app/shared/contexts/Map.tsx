@@ -4,18 +4,17 @@ import {
   useContext,
   useEffect,
   useRef,
-  MutableRefObject,
   useState,
   Dispatch,
   SetStateAction,
-  ReactNode,
+  RefObject,
 } from "react";
 import { useGeoLocation } from "~/hooks";
 import { GNB } from "../consts/gnb";
 import { ICafePagination, ICafeResponse, IMarker, IMenu } from "../types";
 
 interface IMap {
-  mapEl: MutableRefObject<ReactNode> | null;
+  mapEl: RefObject<HTMLDivElement> | null;
   mapData: { [key: string]: any } | undefined;
   GNB: IMenu[];
   setGNB: Dispatch<SetStateAction<IMenu[]>>;
@@ -45,7 +44,7 @@ const MapContext = createContext<IMap>({
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
-  const mapEl = useRef<ReactNode | null>(null);
+  const mapEl = useRef<HTMLDivElement>(null);
   const cafeData = useRef<ICafeResponse[]>([]);
   const { curLocation } = useGeoLocation();
 
