@@ -15,5 +15,11 @@ export function useRemove() {
     cafeData.current = [];
   };
 
-  return { removeMarker, removeData };
+  const removewInfowindow = (arr: IMarker[]) => {
+    arr.forEach((v) => {
+      v.close();
+    });
+  };
+
+  return { removeMarker, removeData, removewInfowindow };
 }

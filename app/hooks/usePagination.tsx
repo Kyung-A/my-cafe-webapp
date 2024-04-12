@@ -4,9 +4,8 @@ import { useRemove } from ".";
 import { useMap } from "~/shared/contexts/Map";
 
 export function usePagination() {
-  const { clusterer } = useMap();
+  const { clusterer, pagination } = useMap();
   const { removeMarker } = useRemove();
-  const { pagination } = useMap();
 
   const handlePagination = useCallback(() => {
     if (pagination?.hasNextPage) {

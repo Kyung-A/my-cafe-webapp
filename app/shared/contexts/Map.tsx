@@ -10,7 +10,7 @@ import {
   RefObject,
 } from "react";
 
-import { useGeoLocation } from "~/hooks";
+import { useGeoLocation, useRemove } from "~/hooks";
 import { GNB } from "../consts/gnb";
 import {
   ICafePagination,
@@ -34,6 +34,7 @@ interface IMap {
   pagination: ICafePagination | undefined;
   setPagination: Dispatch<SetStateAction<ICafePagination | undefined>>;
   clusterer: { [key: string]: any } | undefined;
+  infoArr: IMarker[];
 }
 
 interface IMapProvider {
@@ -51,26 +52,28 @@ const MapContext = createContext<IMap>({
   pagination: undefined,
   setPagination: () => null,
   clusterer: undefined,
+  infoArr: [],
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
   const mapEl = useRef<HTMLDivElement>(null);
   const cafeData = useRef<ICafeResponse[]>([]);
   const { curLocation } = useGeoLocation();
+  const { removewInfowindow } = useRemove();
 
   const [mapData, setMapData] = useState<{ [key: string]: any } | undefined>();
   const [copyGNB, setCopyGNB] = useState<IMenu[]>(GNB);
   const [markers, setMarkers] = useState<IMarker[]>([]);
   const [pagination, setPagination] = useState<ICafePagination>();
   const [clusterer, setClusterer] = useState<IClusterer>();
+  const [infoArr, setInfoArr] = useState<IMarker[]>([]);
 
   const fetchMarkerInfowindow = (
     clusterer: IClusterer,
     clusters: IClusters,
-    kakao: IKaKao,
-    map: any,
-    infowindowArr: any[]
+    kakao: IKaKao
   ) => {
+    const infowindowArr: any[] = [];
     const result = _.differenceWith(clusterer._clusters, clusters, _.isEqual);
 
     result.forEach((v) => {
@@ -83,21 +86,18 @@ const MapProvider = ({ children }: IMapProvider) => {
         coords.toLatLng().La
       );
       const infowindow = new kakao.maps.InfoWindow({
-        map,
         position,
         content: '<div style="padding:5px;">Hello World!</div>',
       });
 
       infowindowArr.push(infowindow);
     });
+    return infowindowArr;
   };
 
-  const fetchClustersInfowindow = (
-    clusters: IClusters[],
-    kakao: IKaKao,
-    map: any,
-    infowindowArr: any[]
-  ) => {
+  const fetchClustersInfowindow = (clusters: IClusters[], kakao: IKaKao) => {
+    const infowindowArr: any[] = [];
+
     clusters.forEach((v: any) => {
       const coords = new kakao.maps.Coords(
         v._center.La.toFixed(1),
@@ -108,21 +108,13 @@ const MapProvider = ({ children }: IMapProvider) => {
         coords.toLatLng().La
       );
       const infowindow = new kakao.maps.InfoWindow({
-        map,
         position,
         content: '<div style="padding:5px;">Hello World!</div>',
       });
 
       infowindowArr.push(infowindow);
     });
-  };
-
-  const removewInfowindow = (kakao: IKaKao, map: any, infowindowArr: any[]) => {
-    kakao.maps.event?.addListener(map, "idle", function () {
-      infowindowArr.forEach((v: { close: () => void }) => {
-        v.close();
-      });
-    });
+    return infowindowArr;
   };
 
   useEffect(() => {
@@ -154,15 +146,22 @@ const MapProvider = ({ children }: IMapProvider) => {
         clusterer,
         "clustered",
         function (clusters: any) {
-          const infowindowArr: any[] = [];
+          const infowindow1 = fetchClustersInfowindow(clusters, kakao);
+          const infowindow2 = fetchMarkerInfowindow(clusterer, clusters, kakao);
 
-          fetchClustersInfowindow(clusters, kakao, map, infowindowArr);
-          fetchMarkerInfowindow(clusterer, clusters, kakao, map, infowindowArr);
-          removewInfowindow(kakao, map, infowindowArr);
+          setInfoArr([...infowindow1, ...infowindow2]);
+
+          kakao.maps.event?.addListener(map, "idle", function () {
+            removewInfowindow([...infowindow1, ...infowindow2]);
+          });
         }
       );
     });
   }, [mapEl, curLocation]);
+
+  useEffect(() => {
+    infoArr.forEach((v) => v.open(mapData));
+  }, [infoArr, mapData]);
 
   return (
     <MapContext.Provider
@@ -177,6 +176,7 @@ const MapProvider = ({ children }: IMapProvider) => {
         pagination,
         setPagination,
         clusterer,
+        infoArr,
       }}
     >
       {children}

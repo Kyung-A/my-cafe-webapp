@@ -139,13 +139,19 @@ export interface IMarker {
   n: IPolyline;
   o: { [key: string]: string };
   yi: number;
+  close: () => void;
+  open: (arg: { [key: string]: any } | undefined) => void;
 }
 
 export interface IKaKao {
   maps: {
     Coords: new (arg0: any, arg1: number) => any;
     LatLng: new (arg0: any, arg1: any) => any;
-    InfoWindow: new (arg0: { map: any; position: any; content: string }) => any;
+    InfoWindow: new (arg0: {
+      map?: any;
+      position: any;
+      content: string;
+    }) => any;
     event?: {
       addListener: (arg0: any, arg1: string, arg2: () => void) => void;
     };
