@@ -35,3 +35,51 @@ html, body {
     pointer-events: none;
     content: "";
 }
+
+.customOverlay {
+    @apply bg-white py-2 px-4 rounded-full border-primary border-2 max-w-52 relative
+}
+
+.customOverlay p {
+    @apply truncate font-bold text-sm
+}
+
+.customOverlay .number {
+    @apply absolute right-0 -top-2 bg-white w-6 h-5 text-xs rounded-full border-2 border-primary flex flex-col items-center justify-center
+}
+
+.customOverlay::before  {
+    position: absolute;
+    bottom: -15px;
+    left: 50%;
+    margin-left: -4px;
+    content: "";
+    box-shadow: rgb(61 61 61 / 50%) -2px -5px 4px 0px;
+    width: 12px;
+    height: 3px;
+    background-color: transparent;
+}
+
+.customOverlay::after  {
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    margin-left: -4px;
+    width: 8px;
+    height: 8px;
+    transform: rotate(55deg) skew(17deg);
+    content: "";
+    background-color: #fff;
+    border-right: 2px solid #F2CB05;
+    border-bottom: 2px solid #F2CB05;
+}
+
+.customOverlay-list {
+    box-shadow: 0px 0px 6px 0px #3232324f;
+    @apply bg-white rounded-sm max-w-52 relative bottom-9
+}
+
+.customOverlay-list p {
+    @apply truncate font-bold text-sm border-b px-4 py-2 last:border-b-0 border-trueGray-300
+    
+}

@@ -5,8 +5,16 @@ import { useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
 
 export function useKeyword() {
-  const { mapData, cafeData, markers, setPagination, clusterer } = useMap();
-  const { removeData, removeMarker } = useRemove();
+  const {
+    mapData,
+    cafeData,
+    markers,
+    setPagination,
+    clusterer,
+    overlayArr,
+    listOverlayArr,
+  } = useMap();
+  const { removeData, removeMarker, removewOverlay } = useRemove();
   const { addMarker } = useFetch();
 
   const searchKeyword = useCallback(
@@ -20,6 +28,8 @@ export function useKeyword() {
         removeMarker();
         removeData();
         clusterer?.clear();
+        listOverlayArr[0]?.setMap(null);
+        removewOverlay(overlayArr);
       }
 
       ps.keywordSearch(
@@ -70,7 +80,7 @@ export function useKeyword() {
         { useMapBounds: true }
       );
     },
-    [cafeData, mapData, markers.length]
+    [cafeData, mapData, markers.length, overlayArr, listOverlayArr]
   );
 
   return { searchKeyword };

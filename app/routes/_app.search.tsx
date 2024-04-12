@@ -41,10 +41,11 @@ export default function CafeSearchRoute() {
   const userReview = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
 
-  const { removeData, removeMarker, removewInfowindow } = useRemove();
+  const { removeData, removeMarker, removewOverlay } = useRemove();
   const { handlePagination } = usePagination();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const { GNB, cafeData, setGNB, clusterer, infoArr } = useMap();
+  const { GNB, cafeData, setGNB, clusterer, overlayArr, listOverlayArr } =
+    useMap();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();
@@ -82,9 +83,10 @@ export default function CafeSearchRoute() {
     (entries: any) => {
       if (!entries[0].isIntersecting) return;
       handlePagination();
-      removewInfowindow(infoArr);
+      removewOverlay(overlayArr);
+      listOverlayArr[0].setMap(null);
     },
-    [handlePagination, infoArr]
+    [handlePagination, overlayArr, listOverlayArr]
   );
 
   useEffect(() => {
@@ -168,7 +170,8 @@ export default function CafeSearchRoute() {
               setGNB(GNB.map((v) => ({ ...v, active: false })));
               removeData();
               removeMarker();
-              removewInfowindow(infoArr);
+              removewOverlay(overlayArr);
+              listOverlayArr[0]?.setMap(null);
               clusterer?.clear();
               setSearchInput("");
               if (!location.pathname.includes("directions")) {
