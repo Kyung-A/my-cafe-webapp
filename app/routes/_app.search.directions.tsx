@@ -50,8 +50,8 @@ export default function DirectionsRoute() {
   const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
 
-  const { mapData, markers, clusterer } = useMap();
-  const { removeMarker } = useRemove();
+  const { mapData, markers, clusterer, overlayArr, listOverlayArr } = useMap();
+  const { removeMarker, removewOverlay } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();
   const [endInput, setEndInput] = useState<IDirectionInput>();
@@ -75,9 +75,11 @@ export default function DirectionsRoute() {
   useLayoutEffect(() => {
     if (markers.length > 0) {
       removeMarker();
+      removewOverlay(overlayArr);
+      listOverlayArr[0]?.setMap(null);
       clusterer?.clear();
     }
-  }, [markers]);
+  }, [markers, overlayArr, listOverlayArr]);
 
   useEffect(() => {
     const { kakao } = window;
