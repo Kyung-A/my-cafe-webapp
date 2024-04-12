@@ -83,10 +83,15 @@ export default function CafeSearchRoute() {
     (entries: any) => {
       if (!entries[0].isIntersecting) return;
       handlePagination();
-      removewOverlay(overlayArr);
-      listOverlayArr[0].setMap(null);
+
+      if (cafeData.current?.length !== 45) {
+        removewOverlay(overlayArr);
+      }
+      if (listOverlayArr.length > 0) {
+        listOverlayArr[0]?.setMap(null);
+      }
     },
-    [handlePagination, overlayArr, listOverlayArr]
+    [handlePagination, overlayArr, listOverlayArr, cafeData]
   );
 
   useEffect(() => {
@@ -269,7 +274,13 @@ export default function CafeSearchRoute() {
                       );
                     })}
                   </ul>
-                  <div ref={setObserverRef} className="h-1"></div>
+                  {isActiveLnb.id !== "visited" && (
+                    <div ref={setObserverRef} className="h-1"></div>
+                  )}
+                  {isActiveLnb.id === "visited" &&
+                    cafeData.current?.length >= 15 && (
+                      <div ref={setObserverRef} className="h-1"></div>
+                    )}
                 </>
               ) : (
                 <div className="h-full w-full pt-36">
