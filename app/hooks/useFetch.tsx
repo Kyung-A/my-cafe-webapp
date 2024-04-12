@@ -9,12 +9,20 @@ import {
   IMarker,
   IReview,
 } from "~/shared/types";
-import { markerOption } from "~/shared/utils/markerOption";
+import markerImg from "~/assets/marker.png";
 
 export function useFetch() {
   const navigate = useNavigate();
   const { mapData, cafeData, setPagination, markers, setMarkers, clusterer } =
     useMap();
+
+  const textWidth = (text: number) => {
+    if (text > 12) return 200;
+    if (text > 10 && text <= 12) return 160;
+    if (text >= 7 && text <= 10) return 130;
+    if (text > 5 && text < 8) return 80;
+    if (text <= 5) return 60;
+  };
 
   const addMarker = useCallback(
     (data: ICafeResponse[] | ICoord[] | null) => {
@@ -25,13 +33,19 @@ export function useFetch() {
 
       data?.forEach((cafe) => {
         const position = new kakao.maps.LatLng(cafe.y, cafe.x);
-        const markerImage = markerOption(kakao);
+        const imageSrc = markerImg;
+        const imageSize = new kakao.maps.Size(
+          textWidth(cafe.place_name?.length as number),
+          50
+        );
+        const markerImage = new kakao.maps.MarkerImage(imageSrc, imageSize);
+
         const marker = new kakao.maps.Marker({
           map: mapData,
           position: position,
           title: cafe.id,
           image: markerImage,
-          zIndex: 10,
+          zIndex: 30,
         });
 
         markerArr.push(marker);
