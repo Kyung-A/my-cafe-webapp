@@ -19,6 +19,7 @@ import { IPolyline } from "~/shared/types";
 import xMark from "~/assets/xMark.svg";
 import { converTime } from "~/shared/utils/converTime";
 import { converDistance } from "~/shared/utils/converDistance";
+import { useOverlay } from "~/shared/contexts/Overlay";
 
 interface IDirectionInput {
   value: string;
@@ -50,7 +51,8 @@ export default function DirectionsRoute() {
   const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
 
-  const { mapData, markers, clusterer, overlayArr, listOverlayArr } = useMap();
+  const { mapData, markers, clusterer } = useMap();
+  const { overlayArr, listOverlayArr } = useOverlay();
   const { removeMarker, removewOverlay } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();

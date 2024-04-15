@@ -3,17 +3,11 @@ import { useCallback } from "react";
 import { useMap } from "~/shared/contexts/Map";
 import { useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
+import { useOverlay } from "~/shared/contexts/Overlay";
 
 export function useKeyword() {
-  const {
-    mapData,
-    cafeData,
-    markers,
-    setPagination,
-    clusterer,
-    overlayArr,
-    listOverlayArr,
-  } = useMap();
+  const { mapData, cafeData, markers, setPagination, clusterer } = useMap();
+  const { overlayArr, listOverlayArr } = useOverlay();
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { addMarker } = useFetch();
 

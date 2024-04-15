@@ -28,6 +28,7 @@ import {
 } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
 import bar3 from "~/assets/bar3.svg";
+import { useOverlay } from "~/shared/contexts/Overlay";
 
 export async function loader({ request }: { request: Request }) {
   const result = await getReviewList(request);
@@ -42,15 +43,8 @@ export default function CafeSearchRoute() {
 
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const {
-    GNB,
-    cafeData,
-    setGNB,
-    clusterer,
-    overlayArr,
-    listOverlayArr,
-    pagination,
-  } = useMap();
+  const { GNB, cafeData, setGNB, clusterer, pagination } = useMap();
+  const { overlayArr, listOverlayArr } = useOverlay();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();

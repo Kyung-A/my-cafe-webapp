@@ -10,6 +10,7 @@ import {
 
 import stylesheet from "~/tailwind.css?url";
 import MapProvider from "./shared/contexts/Map";
+import OverlayProvider from "./shared/contexts/Overlay";
 
 declare global {
   interface Window {
@@ -63,7 +64,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <MapProvider>
-      <Outlet />
+      <OverlayProvider>
+        <Outlet />
+      </OverlayProvider>
     </MapProvider>
   );
 }

@@ -146,4 +146,7 @@ export interface IMarker {
 
 export type IClusters = _.List<any>;
 
-export type IClusterer = { _clusters: _.List<any> | null | undefined };
+export type IClusterer = {
+  _clusters: _.List<any> | null | undefined;
+  clear: () => void;
+};
