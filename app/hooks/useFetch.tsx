@@ -157,7 +157,10 @@ export function useFetch() {
             ...result,
           ];
           setPagination(paging);
-          addMarker(cafeData.current);
+
+          if (!paging.hasNextPage) {
+            addMarker(cafeData.current);
+          }
         },
         { useMapBounds: true, useMapCenter: true, radius: 1000 }
       );

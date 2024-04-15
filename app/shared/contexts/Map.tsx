@@ -28,7 +28,7 @@ interface IMap {
   mapData: { [key: string]: any } | undefined;
   GNB: IMenu[];
   setGNB: Dispatch<SetStateAction<IMenu[]>>;
-  cafeData: { current: ICafeResponse[] | null };
+  cafeData: { current: ICafeResponse[] };
   markers: IMarker[];
   setMarkers: Dispatch<SetStateAction<IMarker[]>>;
   pagination: ICafePagination | undefined;
@@ -47,7 +47,7 @@ const MapContext = createContext<IMap>({
   mapData: undefined,
   GNB: [],
   setGNB: () => [],
-  cafeData: { current: null },
+  cafeData: { current: [] },
   markers: [],
   setMarkers: () => [],
   pagination: undefined,

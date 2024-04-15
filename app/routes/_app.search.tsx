@@ -16,7 +16,6 @@ import {
   useFetch,
   useGeoLocation,
   useKeyword,
-  usePagination,
   useRemove,
 } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
@@ -42,17 +41,22 @@ export default function CafeSearchRoute() {
   const { user } = useOutletContext<{ user: IRegister }>();
 
   const { removeData, removeMarker, removewOverlay } = useRemove();
-  const { handlePagination } = usePagination();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const { GNB, cafeData, setGNB, clusterer, overlayArr, listOverlayArr } =
-    useMap();
+  const {
+    GNB,
+    cafeData,
+    setGNB,
+    clusterer,
+    overlayArr,
+    listOverlayArr,
+    pagination,
+  } = useMap();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();
 
   const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
-  const [observerRef, setObserverRef] = useState<null | HTMLDivElement>(null);
   const [address, setAddress] = useState<string>();
   const [searchInput, setSearchInput] = useState<string>("");
   const [coordinate, setCoordinate] = useState<ICoord | null>();
@@ -79,21 +83,6 @@ export default function CafeSearchRoute() {
     [handleActive, searchKeyword, userReview]
   );
 
-  const onScroll = useCallback(
-    (entries: any) => {
-      if (!entries[0].isIntersecting) return;
-      handlePagination();
-
-      if (cafeData.current?.length !== 45) {
-        removewOverlay(overlayArr);
-      }
-      if (listOverlayArr.length > 0) {
-        listOverlayArr[0]?.setMap(null);
-      }
-    },
-    [handlePagination, overlayArr, listOverlayArr, cafeData]
-  );
-
   useEffect(() => {
     const { kakao } = window;
     if (!kakao || !curLocation) return;
@@ -114,15 +103,6 @@ export default function CafeSearchRoute() {
       );
     });
   }, [curLocation]);
-
-  useEffect(() => {
-    if (!observerRef) return;
-    const observer = new IntersectionObserver(onScroll, { threshold: 0.1 });
-    observer.observe(observerRef);
-
-    if (cafeData.current?.length === 45) observer.unobserve(observerRef);
-    return () => observer.disconnect();
-  }, [onScroll, observerRef, cafeData]);
 
   useEffect(() => {
     oldReview.current = userReview;
@@ -165,6 +145,12 @@ export default function CafeSearchRoute() {
       setCoordinate(null);
     }
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (pagination?.hasNextPage) {
+      pagination?.gotoPage(pagination.current + 1);
+    }
+  }, [pagination]);
 
   return (
     <div>
@@ -237,58 +223,48 @@ export default function CafeSearchRoute() {
               </h3>
             </div>
             <div className="h-screen w-full overflow-y-auto px-4 pb-[200px]">
-              {cafeData.current && cafeData.current?.length > 0 ? (
-                <>
-                  <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
-                    {cafeData.current.map((v: ICafeResponse) => {
-                      const directions =
-                        location.pathname.includes("directions");
+              {!pagination?.hasNextPage && cafeData.current.length > 0 && (
+                <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
+                  {cafeData.current.map((v: ICafeResponse) => {
+                    const directions = location.pathname.includes("directions");
 
-                      return directions ? (
-                        <div
-                          key={v.id}
-                          onClick={() =>
-                            setCoordinate({
-                              name: v.place_name,
-                              x: v.x,
-                              y: v.y,
-                            })
-                          }
-                          aria-hidden="true"
-                        >
-                          <Card data={v} user={user} />
-                        </div>
-                      ) : (
-                        <Link
-                          to={v.id}
-                          key={v.id}
-                          state={{
+                    return directions ? (
+                      <div
+                        key={v.id}
+                        onClick={() =>
+                          setCoordinate({
+                            name: v.place_name,
                             x: v.x,
                             y: v.y,
-                            review: v.review,
-                            reviewId: v.reviewId,
-                          }}
-                        >
-                          <Card data={v} user={user} />
-                        </Link>
-                      );
-                    })}
-                  </ul>
-                  {isActiveLnb.id !== "visited" && (
-                    <div ref={setObserverRef} className="h-1"></div>
-                  )}
-                  {isActiveLnb.id === "visited" &&
-                    cafeData.current?.length >= 15 && (
-                      <div ref={setObserverRef} className="h-1"></div>
-                    )}
-                </>
-              ) : (
-                <div className="h-full w-full pt-36">
-                  <p className="text-center">
-                    후기를 등록해서 <br /> 나만의 카페 목록을 만드세요!
-                  </p>
-                </div>
+                          })
+                        }
+                        aria-hidden="true"
+                      >
+                        <Card data={v} user={user} />
+                      </div>
+                    ) : (
+                      <Link
+                        to={v.id}
+                        key={v.id}
+                        state={{
+                          x: v.x,
+                          y: v.y,
+                          review: v.review,
+                          reviewId: v.reviewId,
+                        }}
+                      >
+                        <Card data={v} user={user} />
+                      </Link>
+                    );
+                  })}
+                </ul>
               )}
+              {(!pagination || !pagination?.hasNextPage) &&
+                cafeData.current.length === 0 && (
+                  <div className="h-full w-full pt-36">
+                    <p className="text-center">카페를 찾지 못 했습니다.</p>
+                  </div>
+                )}
             </div>
           </>
         )}
