@@ -1,9 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, useContext, useEffect, useState } from "react";
-import _ from "lodash";
 
-import { useRemove } from "~/hooks";
-import { IClusterer, IClusters, IMarker } from "../types";
+import { useCustomOverlay, useRemove } from "~/hooks";
+import { IMarker } from "../types";
 import { useMap } from "./Map";
 
 interface IOverlay {
@@ -23,86 +22,10 @@ const OverlayContext = createContext<IOverlay>({
 const OverlayProvider = ({ children }: IOverlayProvider) => {
   const { mapData, clusterer, cafeData } = useMap();
   const { removewOverlay } = useRemove();
+  const { fetchMarkerOverlay, fetchClusterOverlay } = useCustomOverlay();
 
   const [overlayArr, setOverlayArr] = useState<IMarker[]>([]);
   const [listOverlayArr, setListOverlayArr] = useState<IMarker[]>([]);
-
-  //   const textWidth = (text: number) => {
-  //     if (text > 12) return 200;
-  //     if (text > 10 && text <= 12) return 160;
-  //     if (text >= 7 && text <= 10) return 130;
-  //     if (text >= 5 && text < 8) return 80;
-  //     if (text < 5) return 50;
-  //   };
-
-  const fetchMarkerInfowindow = (
-    clusterer: IClusterer | undefined,
-    clusters: IClusters,
-    kakao: any
-  ) => {
-    const overlayList: any[] = [];
-    const result = _.differenceWith(clusterer?._clusters, clusters, _.isEqual);
-
-    result.forEach((v) => {
-      const coords = new kakao.maps.Coords(
-        v._center.La.toFixed(1),
-        Math.floor(v._center.Ma)
-      );
-      const position = new kakao.maps.LatLng(
-        coords.toLatLng().Ma,
-        coords.toLatLng().La
-      );
-
-      const cafeInfo = cafeData.current.find(
-        (cafe) => cafe.id === v._markers[0].Gb
-      );
-
-      const overlay = new kakao.maps.CustomOverlay({
-        clickable: true,
-        content: `<div class="customOverlay"><p>${cafeInfo?.place_name}</p></div>`,
-        position,
-        xAnchor: 0.5,
-        yAnchor: 1.2,
-        zIndex: -1,
-      });
-
-      overlayList.push(overlay);
-    });
-    return overlayList;
-  };
-
-  const fetchClustersInfowindow = (clusters: IClusters[], kakao: any) => {
-    const overlayList: any[] = [];
-
-    clusters.forEach((v: any) => {
-      const coords = new kakao.maps.Coords(
-        v._center.La.toFixed(1),
-        Math.floor(v._center.Ma)
-      );
-      const position = new kakao.maps.LatLng(
-        coords.toLatLng().Ma,
-        coords.toLatLng().La
-      );
-
-      const cafeInfoList = cafeData.current.filter((cafe) =>
-        v._markers.find((item: IMarker) => cafe.id === item.Gb && cafe)
-      );
-
-      const overlay = new kakao.maps.CustomOverlay({
-        clickable: true,
-        content: `<div class="customOverlay"><p>${cafeInfoList[0]?.place_name}</p><div class="number">+${cafeInfoList.length}</div></div>`,
-        position,
-        xAnchor: 0.5,
-        yAnchor: 0.7,
-        zIndex: -1,
-      });
-
-      //   const num = textWidth(cafeInfoList[0]?.place_name.length);
-      //   v.getClusterMarker().getContent().style.width = `${num}px`;
-      overlayList.push(overlay);
-    });
-    return overlayList;
-  };
 
   useEffect(() => {
     const { kakao } = window;
@@ -112,8 +35,8 @@ const OverlayProvider = ({ children }: IOverlayProvider) => {
       clusterer,
       "clustered",
       function (clusters: any) {
-        const overlay1 = fetchClustersInfowindow(clusters, kakao);
-        const overlay2 = fetchMarkerInfowindow(clusterer, clusters, kakao);
+        const overlay1 = fetchClusterOverlay(clusters, kakao);
+        const overlay2 = fetchMarkerOverlay(clusterer, clusters, kakao);
 
         setOverlayArr([...overlay1, ...overlay2]);
 
