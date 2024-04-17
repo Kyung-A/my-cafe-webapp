@@ -123,7 +123,9 @@ export default function CafeReviewCreateRoute() {
     <Panel left="320px">
       <Form method="post">
         <div className="bg-primary flex h-12 w-full items-center justify-between px-4">
-          <h1 className="text-xl font-semibold">후기 등록</h1>
+          <h1 className="text-xl font-semibold">
+            {location.state?.reviewId ? "후기 수정" : "후기 등록"}
+          </h1>
           <button
             type="submit"
             className="bg-interaction rounded-full px-4 py-1 text-sm font-semibold"
@@ -270,8 +272,8 @@ export default function CafeReviewCreateRoute() {
                   type="number"
                   max={5}
                   min={0}
-                  defaultValue={fetcher.data?.starRating ?? 0}
-                  step={0.5}
+                  defaultValue={fetcher.data?.starRating}
+                  step={1}
                   className="w-20 rounded border border-neutral-300 px-3 py-1 outline-none placeholder:text-neutral-300"
                   placeholder="별점"
                 />
