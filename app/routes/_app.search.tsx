@@ -27,8 +27,9 @@ import {
   IReview,
 } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
-import bar3 from "~/assets/bar3.svg";
 import { useOverlay } from "~/shared/contexts/Overlay";
+import bar3 from "~/assets/bar3.svg";
+import refresh from "~/assets/refresh.svg";
 
 export async function loader({ request }: { request: Request }) {
   const result = await getReviewList(request);
@@ -56,8 +57,9 @@ export default function CafeSearchRoute() {
   const [address, setAddress] = useState<string>();
   const [searchInput, setSearchInput] = useState<string>("");
   const [coordinate, setCoordinate] = useState<ICoord | null>();
+  const [isIdle, setIdle] = useState<boolean>(false);
 
-  const isActiveLnb = useMemo(() => GNB.find((v) => v.active), [GNB]);
+  const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
   const handleEnter = useCallback(
     (e: { key: string }, text: string) => {
@@ -111,14 +113,15 @@ export default function CafeSearchRoute() {
     kakao.maps.event?.addListener(mapData, "idle", function () {
       const { La, Ma } = mapData.getCenter();
       getGeocoder(kakao, La, Ma);
+      setIdle(true);
     });
   }, [mapData]);
 
   useEffect(() => {
-    if (!isActiveLnb) {
+    if (!isActiveMenu) {
       searchLocation.current = address;
     }
-  }, [address, isActiveLnb]);
+  }, [address, isActiveMenu]);
 
   useEffect(() => {
     oldReview.current = userReview;
@@ -169,127 +172,160 @@ export default function CafeSearchRoute() {
   }, [pagination]);
 
   return (
-    <div>
-      <div className="bg-primary w-full px-4 py-4">
-        <div className="mb-2 flex items-center gap-2 text-white">
-          <button
-            onClick={() => {
-              setGNB(GNB.map((v) => ({ ...v, active: false })));
-              removeData();
-              removeMarker();
-              removewOverlay(overlayArr);
-              listOverlayArr[0]?.setMap(null);
-              clusterer?.clear();
-              setSearchInput("");
-              if (!location.pathname.includes("directions")) {
-                navigate("/search");
-              }
-            }}
-          >
-            <img src={bar3} alt="gnb" className="w-5" />
-          </button>
-          <h1>myCafe</h1>
-        </div>
-        <SearchForm
-          searchInput={searchInput}
-          setSearchInput={setSearchInput}
-          handleEnter={handleEnter}
-          onSubmit={handleSearch}
-        />
-      </div>
+    <>
       <div>
-        {!isActiveLnb ? (
-          <div className="px-4 pb-40 pt-6">
-            <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
-            <ul className="mt-3 flex flex-col gap-2">
-              {GNB.map((v) => (
-                <li key={v.id}>
-                  {v.id !== "search" && (
+        <div className="bg-primary w-full px-4 py-4">
+          <div className="mb-2 flex items-center gap-2 text-white">
+            <button
+              onClick={() => {
+                setGNB(GNB.map((v) => ({ ...v, active: false })));
+                removeData();
+                removeMarker();
+                removewOverlay(overlayArr);
+                listOverlayArr[0]?.setMap(null);
+                clusterer?.clear();
+                setSearchInput("");
+                setIdle(false);
+                if (!location.pathname.includes("directions")) {
+                  navigate("/search");
+                }
+              }}
+            >
+              <img src={bar3} alt="gnb" className="w-5" />
+            </button>
+            <h1>myCafe</h1>
+          </div>
+          <SearchForm
+            searchInput={searchInput}
+            setSearchInput={setSearchInput}
+            handleEnter={handleEnter}
+            onSubmit={handleSearch}
+          />
+        </div>
+        <div>
+          {!isActiveMenu ? (
+            <div className="px-4 pb-40 pt-6">
+              <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
+              <ul className="mt-3 flex flex-col gap-2">
+                {GNB.map((v) => (
+                  <li key={v.id}>
+                    {v.id !== "search" && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (v.id !== "default" && user === null) {
+                              navigate("/signin");
+                            } else {
+                              handleActive(v.id);
+                              fetchCafeData(v.id, userReview as IReview[]);
+                            }
+                          }}
+                          className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
+                        >
+                          {v.name}
+                        </button>
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <>
+              <div className="px-4 pb-2 pt-6">
+                <h2 className="text-md mt-1 font-semibold leading-6">
+                  {isActiveMenu.id !== "search" && (
                     <>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          if (v.id !== "default" && user === null) {
-                            navigate("/signin");
-                          } else {
-                            handleActive(v.id);
-                            fetchCafeData(v.id, userReview as IReview[]);
-                          }
-                        }}
-                        className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
-                      >
-                        {v.name}
-                      </button>
+                      {searchLocation.current} 주변 <br />
                     </>
                   )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : (
-          <>
-            <div className="px-4 pb-2 pt-6">
-              <h2 className="text-md mt-1 font-semibold leading-6">
-                {isActiveLnb.id !== "search" && (
-                  <>
-                    {searchLocation.current} 주변 <br />
-                  </>
-                )}
-              </h2>
-              <h3 className="text-interaction text-xl font-semibold">
-                {isActiveLnb.id === "search"
-                  ? `${keyword.current} ${isActiveLnb.name}`
-                  : isActiveLnb.name}
-              </h3>
-            </div>
-            <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
-              {!pagination?.hasNextPage && cafeData.current.length > 0 && (
-                <ul className="mt-2 flex flex-col gap-6">
-                  {cafeData.current.map((v: ICafeResponse) => {
-                    const directions = location.pathname.includes("directions");
+                </h2>
+                <h3 className="text-interaction text-xl font-semibold">
+                  {isActiveMenu.id === "search"
+                    ? `${keyword.current} ${isActiveMenu.name}`
+                    : isActiveMenu.name}
+                </h3>
+              </div>
+              <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
+                {!pagination?.hasNextPage && cafeData.current.length > 0 && (
+                  <ul className="mt-2 flex flex-col gap-6">
+                    {cafeData.current.map((v: ICafeResponse) => {
+                      const directions =
+                        location.pathname.includes("directions");
 
-                    return directions ? (
-                      <div
-                        key={v.id}
-                        onClick={() =>
-                          setCoordinate({
-                            name: v.place_name,
+                      return directions ? (
+                        <div
+                          key={v.id}
+                          onClick={() =>
+                            setCoordinate({
+                              name: v.place_name,
+                              x: v.x,
+                              y: v.y,
+                            })
+                          }
+                          aria-hidden="true"
+                        >
+                          <Card data={v} user={user} />
+                        </div>
+                      ) : (
+                        <Link
+                          to={v.id}
+                          key={v.id}
+                          state={{
                             x: v.x,
                             y: v.y,
-                          })
-                        }
-                        aria-hidden="true"
-                      >
-                        <Card data={v} user={user} />
-                      </div>
-                    ) : (
-                      <Link
-                        to={v.id}
-                        key={v.id}
-                        state={{
-                          x: v.x,
-                          y: v.y,
-                          review: v.review,
-                          reviewId: v.reviewId,
-                        }}
-                      >
-                        <Card data={v} user={user} />
-                      </Link>
-                    );
-                  })}
-                </ul>
-              )}
-              {(!pagination || !pagination?.hasNextPage) &&
-                cafeData.current.length === 0 && (
-                  <div className="h-full w-full pt-36">
-                    <p className="text-center">카페를 찾지 못 했습니다.</p>
-                  </div>
+                            review: v.review,
+                            reviewId: v.reviewId,
+                          }}
+                        >
+                          <Card data={v} user={user} />
+                        </Link>
+                      );
+                    })}
+                  </ul>
                 )}
-            </div>
-          </>
-        )}
+                {(!pagination || !pagination?.hasNextPage) &&
+                  cafeData.current.length === 0 && (
+                    <div className="h-full w-full pt-36">
+                      <p className="text-center">카페를 찾지 못 했습니다.</p>
+                    </div>
+                  )}
+              </div>
+            </>
+          )}
+        </div>
+        <Outlet context={{ userReview, coordinate }} />
       </div>
-      <Outlet context={{ userReview, coordinate }} />
-    </div>
+      {isActiveMenu && location.pathname === "/search" && isIdle && (
+        <button
+          onClick={() => {
+            // remove
+            removeData();
+            removeMarker();
+            removewOverlay(overlayArr);
+            listOverlayArr[0]?.setMap(null);
+            clusterer?.clear();
+            setIdle(false);
+            // fetch
+            if (isActiveMenu.id === "search") {
+              handleSearch(searchInput);
+            } else {
+              setSearchInput("");
+              fetchCafeData(isActiveMenu.id, userReview as IReview[]);
+            }
+            searchLocation.current = address;
+          }}
+          className="bg-primary fixed bottom-6 left-1/2 z-50 ml-14 rounded-full px-5 py-2"
+        >
+          <div className="flex items-center gap-2">
+            <div className="w-5">
+              <img src={refresh} alt="새로고침" />
+            </div>
+            <span className="font-bold text-white">현 지도에서 검색</span>
+          </div>
+        </button>
+      )}
+    </>
   );
 }
