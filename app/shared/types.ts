@@ -149,4 +149,5 @@ export type IClusters = _.List<any>;
 export type IClusterer = {
   _clusters: _.List<any> | null | undefined;
   clear: () => void;
+  addMarkers: (arg: any) => void;
 };

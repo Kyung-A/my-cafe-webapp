@@ -68,13 +68,16 @@ export function useKeyword() {
             ...(cafeData.current as ICafeResponse[]),
             ...result,
           ];
+
           setPagination(paging);
-          addMarker(cafeData.current);
+          if (!paging.hasNextPage) {
+            addMarker(cafeData.current);
+          }
         },
         { useMapBounds: true }
       );
     },
-    [cafeData, mapData, markers.length, overlayArr, listOverlayArr]
+    [cafeData, mapData, markers, overlayArr, listOverlayArr]
   );
 
   return { searchKeyword };
