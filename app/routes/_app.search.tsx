@@ -43,7 +43,7 @@ export default function CafeSearchRoute() {
 
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const { GNB, cafeData, setGNB, clusterer, pagination } = useMap();
+  const { GNB, cafeData, setGNB, clusterer, pagination, mapData } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
@@ -51,6 +51,8 @@ export default function CafeSearchRoute() {
 
   const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
+  const searchLocation = useRef<string | null | undefined>(null);
+
   const [address, setAddress] = useState<string>();
   const [searchInput, setSearchInput] = useState<string>("");
   const [coordinate, setCoordinate] = useState<ICoord | null>();
@@ -77,26 +79,46 @@ export default function CafeSearchRoute() {
     [handleActive, searchKeyword, userReview]
   );
 
+  const getGeocoder = useCallback((kakao: any, lon: number, lat: number) => {
+    const geocoder = new kakao.maps.services.Geocoder();
+    geocoder.coord2RegionCode(
+      lon,
+      lat,
+      (result: IGeocoder[], status: string) => {
+        if (status === kakao.maps.services.Status.OK) {
+          setAddress(
+            `${result[0].region_1depth_name} ${result[0].region_2depth_name}`
+          );
+        }
+      }
+    );
+  }, []);
+
   useEffect(() => {
     const { kakao } = window;
     if (!kakao || !curLocation) return;
     const { latitude, longitude } = curLocation;
 
     kakao.maps.load(() => {
-      const geocoder = new kakao.maps.services.Geocoder();
-      geocoder.coord2RegionCode(
-        longitude,
-        latitude,
-        (result: IGeocoder[], status: string) => {
-          if (status === kakao.maps.services.Status.OK) {
-            setAddress(
-              `${result[0].region_1depth_name} ${result[0].region_2depth_name}`
-            );
-          }
-        }
-      );
+      getGeocoder(kakao, longitude, latitude);
     });
   }, [curLocation]);
+
+  useEffect(() => {
+    const { kakao } = window;
+    if (!mapData || !kakao) return;
+
+    kakao.maps.event?.addListener(mapData, "idle", function () {
+      const { La, Ma } = mapData.getCenter();
+      getGeocoder(kakao, La, Ma);
+    });
+  }, [mapData]);
+
+  useEffect(() => {
+    if (!isActiveLnb) {
+      searchLocation.current = address;
+    }
+  }, [address, isActiveLnb]);
 
   useEffect(() => {
     oldReview.current = userReview;
@@ -208,7 +230,11 @@ export default function CafeSearchRoute() {
           <>
             <div className="px-4 pb-2 pt-6">
               <h2 className="text-md mt-1 font-semibold leading-6">
-                {address} 주변 <br />
+                {isActiveLnb.id !== "search" && (
+                  <>
+                    {searchLocation.current} 주변 <br />
+                  </>
+                )}
               </h2>
               <h3 className="text-interaction text-xl font-semibold">
                 {isActiveLnb.id === "search"
@@ -216,9 +242,9 @@ export default function CafeSearchRoute() {
                   : isActiveLnb.name}
               </h3>
             </div>
-            <div className="h-screen w-full overflow-y-auto px-4 pb-[200px]">
+            <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
               {!pagination?.hasNextPage && cafeData.current.length > 0 && (
-                <ul className="mt-2 flex min-h-[550px] flex-col gap-6">
+                <ul className="mt-2 flex flex-col gap-6">
                   {cafeData.current.map((v: ICafeResponse) => {
                     const directions = location.pathname.includes("directions");
 

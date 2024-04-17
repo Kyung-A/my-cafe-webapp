@@ -156,8 +156,8 @@ export function useFetch() {
             ...(cafeData.current as ICafeResponse[]),
             ...result,
           ];
-          setPagination(paging);
 
+          setPagination(paging);
           if (!paging.hasNextPage) {
             addMarker(cafeData.current);
           }
