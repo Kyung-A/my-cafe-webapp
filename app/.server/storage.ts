@@ -37,8 +37,8 @@ function verifyToken(token: string) {
   try {
     return jwt.verify(token, sessionSecret!);
   } catch (err) {
-    // console.error(err);
-    return null;
+    console.error(err);
+    return err;
   }
 }
 
@@ -63,16 +63,21 @@ export async function getUser(request: Request) {
   }
 
   if (access && refresh) {
-    const user = await db.user.findUnique({
-      where: { id: userId },
-      select: { id: true, name: true, email: true },
-    });
-    return user;
+    try {
+      const user = await db.user.findUnique({
+        where: { id: userId },
+        select: { id: true, name: true, email: true },
+      });
+      return user;
+    } catch (err) {
+      console.error(err);
+      return err;
+    }
   }
 
   if (!access && refresh) {
     const accessToken = jwt.sign({ id: userId }, sessionSecret!, {
-      expiresIn: "3h",
+      expiresIn: "3d",
     });
     session.set("accessToken", accessToken);
     return null;
@@ -104,7 +109,7 @@ export async function createToken(userId: string) {
   const session = await storage.getSession();
 
   const accessToken = jwt.sign({ id: userId }, sessionSecret!, {
-    expiresIn: "3h",
+    expiresIn: "3d",
   });
   const refreshToken = jwt.sign({}, sessionSecret!, {
     expiresIn: "10d",

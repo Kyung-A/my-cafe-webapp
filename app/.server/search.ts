@@ -2,8 +2,13 @@ import axios from "axios";
 import { IDirection } from "~/shared/types";
 
 export async function getCafeDetail(id: string) {
-  const result = await axios.get(`https://place.map.kakao.com/main/v/${id}`);
-  return result.data;
+  try {
+    const result = await axios.get(`https://place.map.kakao.com/main/v/${id}`);
+    return result.data;
+  } catch (err) {
+    console.error(err);
+    return err;
+  }
 }
 
 export async function getDirection(data: IDirection) {
@@ -20,6 +25,6 @@ export async function getDirection(data: IDirection) {
     return result.data;
   } catch (err) {
     console.error(err);
-    return null;
+    return err;
   }
 }
