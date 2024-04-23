@@ -208,10 +208,10 @@ export default function CafeSearchRoute() {
             <div className="px-4 pb-40 pt-6">
               <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
               <ul className="mt-3 flex flex-col gap-2">
-                {GNB.map((v) => (
-                  <li key={v.id}>
-                    {v.id !== "search" && (
-                      <>
+                {GNB.map(
+                  (v) =>
+                    v.id !== "search" && (
+                      <li key={v.id}>
                         <button
                           type="button"
                           onClick={() => {
@@ -222,14 +222,18 @@ export default function CafeSearchRoute() {
                               fetchCafeData(v.id, userReview as IReview[]);
                             }
                           }}
-                          className={`border-primary w-full rounded border px-4 py-2 text-left ${v.active ? "bg-interaction border-interaction font-semibold text-white" : ""}`}
+                          className="border-primary w-full rounded border px-4 py-2 text-left"
                         >
                           {v.name}
                         </button>
-                      </>
-                    )}
-                  </li>
-                ))}
+                      </li>
+                    )
+                )}
+                <li className="border-primary w-full rounded border px-4 py-2 text-left">
+                  <Link to="/ranking" className="block w-full">
+                    베스트 리뷰어
+                  </Link>
+                </li>
               </ul>
             </div>
           ) : (
