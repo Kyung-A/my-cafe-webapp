@@ -34,16 +34,7 @@ export function Card({ data, user }: ICard) {
           <div className="w-2/3">
             <p className="break-keep text-sm">{data.address_name}</p>
             <p className="text-sm">{data.phone}</p>
-            {/* <div className="mt-2 box-border w-full rounded bg-neutral-100 px-2 py-1">
-              <p className="text-interaction font-semibold">메뉴</p>
-              <p className="mt-1 line-clamp-1 text-sm">
-                소금빵 2000 | 크로아상 1000
-              </p>
-            </div> */}
           </div>
-          {/* <div className="w-1/3 self-stretch overflow-hidden rounded bg-neutral-100">
-            이미지
-          </div> */}
         </div>
         {data.review && (
           <div className="mt-4 box-border rounded bg-neutral-100 px-2 py-1">

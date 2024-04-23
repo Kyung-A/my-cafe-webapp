@@ -21,7 +21,8 @@ export function useGeoLocation() {
           longitude,
         });
       },
-      (err) => console.error(err)
+      (err) => console.error(err),
+      { enableHighAccuracy: true }
     );
   }, []);
 

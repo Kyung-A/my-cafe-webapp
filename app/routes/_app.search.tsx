@@ -30,6 +30,7 @@ import { getReviewList } from "~/.server/review";
 import { useOverlay } from "~/shared/contexts/Overlay";
 import bar3 from "~/assets/bar3.svg";
 import refresh from "~/assets/refresh.svg";
+import targetView from "~/assets/target.svg";
 
 export async function loader({ request }: { request: Request }) {
   const result = await getReviewList(request);
@@ -326,6 +327,18 @@ export default function CafeSearchRoute() {
           </div>
         </button>
       )}
+      <button
+        onClick={() => {
+          const { kakao } = window;
+          if (!kakao || !curLocation || !mapData) return;
+
+          const { latitude, longitude } = curLocation;
+          mapData.panTo(new kakao.maps.LatLng(latitude, longitude));
+        }}
+        className="fixed right-4 top-4 flex h-8 w-8 flex-col items-center justify-center rounded bg-white shadow-[0px_0px_7px_0px_#0006]"
+      >
+        <img src={targetView} alt="현재 내위치" className="block w-6" />
+      </button>
     </>
   );
 }
