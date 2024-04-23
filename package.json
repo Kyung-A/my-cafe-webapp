@@ -18,7 +18,6 @@
     "axios": "^1.6.7",
     "bcryptjs": "^2.4.3",
     "isbot": "^4.1.0",
-    "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -26,7 +25,6 @@
   "devDependencies": {
     "@remix-run/dev": "^2.8.1",
     "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.6",
     "@types/lodash": "^4.17.0",
     "@types/navermaps": "^3.7.4",
     "@types/react": "^18.2.20",

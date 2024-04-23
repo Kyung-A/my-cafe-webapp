@@ -1,7 +1,7 @@
 import { ActionFunctionArgs, json } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 
-import { createToken, signin } from "~/.server/storage";
+import { createUserSession, signin } from "~/.server/storage";
 import arrowRight from "~/assets/arrowRight.svg";
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -19,7 +19,7 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ errors });
   }
 
-  return createToken(user!.id);
+  return createUserSession(user!.id);
 }
 
 export default function SigninRoute() {

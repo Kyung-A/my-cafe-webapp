@@ -1,6 +1,5 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 
 import { db } from "./db";
 import { IRegister, ISignin } from "~/shared/types";
@@ -28,65 +27,28 @@ export const storage = createCookieSessionStorage({
 });
 
 // token 가져오기
-export function getToken(request: Request) {
+export function getSession(request: Request) {
   return storage.getSession(request.headers.get("Cookie"));
-}
-
-// token 검증
-function verifyToken(token: string) {
-  try {
-    return jwt.verify(token, sessionSecret!);
-  } catch (err) {
-    console.error(err);
-    return err;
-  }
 }
 
 // 유저 정보 불러오기
 export async function getUser(request: Request) {
-  const session = await getToken(request);
-
-  const accessToken = session.get("accessToken");
-  const refreshToken = session.get("refreshToken");
+  const session = await getSession(request);
   const userId = session.get("userId");
 
-  const access = verifyToken(accessToken);
-  const refresh = verifyToken(refreshToken);
+  if (userId) {
+    const user = await db.user.findUnique({
+      where: { id: userId },
+      select: { id: true, name: true, email: true },
+    });
 
-  if (!access && !refresh) {
+    return user;
+  } else {
     redirect("/", {
       headers: {
         "Set-Cookie": await storage.destroySession(session),
       },
     });
-    return null;
-  }
-
-  if (access && refresh) {
-    try {
-      const user = await db.user.findUnique({
-        where: { id: userId },
-        select: { id: true, name: true, email: true },
-      });
-      return user;
-    } catch (err) {
-      console.error(err);
-      return err;
-    }
-  }
-
-  if (!access && refresh) {
-    const accessToken = jwt.sign({ id: userId }, sessionSecret!, {
-      expiresIn: "3d",
-    });
-    session.set("accessToken", accessToken);
-    return null;
-  }
-  if (access && !refresh) {
-    const refreshToken = jwt.sign({}, sessionSecret!, {
-      expiresIn: "10d",
-    });
-    session.set("refreshToken", refreshToken);
     return null;
   }
 }
@@ -105,19 +67,9 @@ export async function signin({ email, password }: ISignin) {
 }
 
 // token 생성
-export async function createToken(userId: string) {
+export async function createUserSession(userId: string) {
   const session = await storage.getSession();
-
-  const accessToken = jwt.sign({ id: userId }, sessionSecret!, {
-    expiresIn: "3d",
-  });
-  const refreshToken = jwt.sign({}, sessionSecret!, {
-    expiresIn: "10d",
-  });
-
   session.set("userId", userId);
-  session.set("accessToken", accessToken);
-  session.set("refreshToken", refreshToken);
 
   return redirect("/", {
     headers: {

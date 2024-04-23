@@ -7,7 +7,7 @@ export async function getCafeDetail(id: string) {
     return result.data;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }
 
@@ -25,6 +25,6 @@ export async function getDirection(data: IDirection) {
     return result.data;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }

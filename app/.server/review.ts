@@ -1,6 +1,6 @@
-import { IReview } from "~/shared/types";
+import { IRegister, IReview } from "~/shared/types";
 import { db } from "./db";
-import { getToken } from "./storage";
+import { getUser } from "./storage";
 
 export async function createReview(data: IReview) {
   try {
@@ -8,7 +8,7 @@ export async function createReview(data: IReview) {
     return result.id;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }
 
@@ -21,18 +21,17 @@ export async function updateReview(data: IReview) {
     return result.id;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }
 
 export async function getReviewList(request: Request) {
   try {
-    const session = await getToken(request);
-    const userId = session.get("userId");
+    const user: IRegister | null = await getUser(request);
 
-    if (userId) return null;
+    if (!user?.id) return null;
     const result = await db.user.findUnique({
-      where: { id: userId },
+      where: { id: user.id },
       include: { review: true },
     });
 
@@ -40,7 +39,7 @@ export async function getReviewList(request: Request) {
     return result?.review;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }
 
@@ -52,6 +51,6 @@ export async function getReview(id: string) {
     return result;
   } catch (err) {
     console.error(err);
-    return err;
+    return null;
   }
 }
