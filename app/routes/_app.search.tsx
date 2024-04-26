@@ -28,12 +28,16 @@ import {
 } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
 import { useOverlay } from "~/shared/contexts/Overlay";
+import { getUser } from "~/.server/storage";
 import bar3 from "~/assets/bar3.svg";
 import refresh from "~/assets/refresh.svg";
 import targetView from "~/assets/target.svg";
 
 export async function loader({ request }: { request: Request }) {
-  const result = await getReviewList(request);
+  const user: IRegister | null = await getUser(request);
+  if (!user?.id) return null;
+
+  const result = await getReviewList(user?.id);
   return json(result);
 }
 
@@ -175,7 +179,7 @@ export default function CafeSearchRoute() {
   return (
     <>
       <div>
-        <div className="bg-primary w-full px-4 py-4">
+        <div className="bg-primary w-full px-4 py-3">
           <div className="mb-2 flex items-center gap-2 text-white">
             <button
               onClick={() => {
@@ -254,7 +258,7 @@ export default function CafeSearchRoute() {
               </div>
               <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
                 {!pagination?.hasNextPage && cafeData.current.length > 0 && (
-                  <ul className="mt-2 flex flex-col gap-6">
+                  <div className="mt-2 flex flex-col gap-6">
                     {cafeData.current.map((v: ICafeResponse) => {
                       const directions =
                         location.pathname.includes("directions");
@@ -288,7 +292,7 @@ export default function CafeSearchRoute() {
                         </Link>
                       );
                     })}
-                  </ul>
+                  </div>
                 )}
                 {(!pagination || !pagination?.hasNextPage) &&
                   cafeData.current.length === 0 && (

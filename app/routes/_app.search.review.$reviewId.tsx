@@ -1,6 +1,18 @@
-import { Link, json, useLoaderData, useParams } from "@remix-run/react";
+import {
+  Link,
+  json,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@remix-run/react";
+
+import arrowLeft from "~/assets/arrowLeft.svg";
 import { getReview } from "~/.server/review";
 import { Panel } from "~/components";
+import { useEffect, useState } from "react";
+import { useMap } from "~/shared/contexts/Map";
+import { IMarker } from "~/shared/types";
 
 interface IParams {
   params: {
@@ -15,28 +27,80 @@ export async function loader({ params }: IParams) {
 }
 
 export default function ReviewDetailRoute() {
-  const { reviewId } = useParams();
   const data = useLoaderData<typeof loader>();
+  const { reviewId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const { mapData } = useMap();
+  const [marker, setMarker] = useState<IMarker | null>(null);
+
+  useEffect(() => {
+    if (
+      location.state?.prevUrl &&
+      location.state.prevUrl.includes("/ranking")
+    ) {
+      const { kakao } = window;
+      if (!kakao || !mapData) return;
+
+      const position = new kakao.maps.LatLng(data?.y, data?.x);
+      const marker = new kakao.maps.Marker({
+        position: position,
+        title: data?.name,
+        zIndex: 30,
+      });
+      setMarker(marker);
+      mapData.setCenter(position);
+    }
+  }, [data, location, mapData]);
+
+  useEffect(() => {
+    if (!mapData) return;
+    if (marker) {
+      marker?.setMap(mapData);
+    }
+  }, [marker, mapData]);
 
   return (
-    <Panel left="320px">
-      <div className="bg-primary flex w-full items-center justify-between px-4 py-3">
+    <Panel
+      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/ranking") ? "0px" : "320px"}`}
+    >
+      <div
+        className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/ranking") ? "gap-2" : "justify-between "}`}
+      >
+        {location.state?.prevUrl &&
+          location.state?.prevUrl.includes("/ranking") && (
+            <button
+              onClick={() => {
+                navigate(-1);
+                marker?.setMap(null);
+                setMarker(null);
+              }}
+              className="w-6"
+            >
+              <img src={arrowLeft} alt="이전" />
+            </button>
+          )}
         <h1 className="break-keep text-xl font-semibold leading-6">
           {data?.name}
         </h1>
-        <Link
-          to="/search/reviewForm"
-          state={{
-            cafeId: data?.cafeId,
-            reviewId: reviewId,
-            name: data?.name,
-          }}
-          className="bg-interaction shrink-0 rounded-full px-4 py-1 text-sm font-semibold "
-        >
-          수정
-        </Link>
+        {location.state?.prevUrl &&
+          !location.state?.prevUrl.includes("/ranking") && (
+            <Link
+              to="/search/reviewForm"
+              state={{
+                cafeId: data?.cafeId,
+                reviewId: reviewId,
+                name: data?.name,
+              }}
+              className="bg-interaction shrink-0 rounded-full px-4 py-1 text-sm font-semibold "
+            >
+              수정
+            </Link>
+          )}
       </div>
       <div className="h-full w-full overflow-y-auto">
+        <div className="bg-trueGray-100 h-40 w-full">{/* 이미지 */}</div>
         <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
           <div>
             <p className="text-lg font-semibold">☕ 후기</p>
