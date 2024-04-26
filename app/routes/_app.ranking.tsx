@@ -1,4 +1,10 @@
-import { json, useLoaderData, useNavigate } from "@remix-run/react";
+import {
+  Link,
+  Outlet,
+  json,
+  useLoaderData,
+  useNavigate,
+} from "@remix-run/react";
 
 import { getUsers } from "~/.server/users";
 import bar3 from "~/assets/bar3.svg";
@@ -14,7 +20,7 @@ export default function RankingRoute() {
 
   return (
     <>
-      <div className="bg-primary w-full px-4 py-4">
+      <div className="bg-primary w-full px-4 py-3">
         <div className="flex items-center gap-2 text-white">
           <button
             onClick={() => {
@@ -31,20 +37,24 @@ export default function RankingRoute() {
           ☕ <span className="text-interaction">TOP 10</span> 베스트 리뷰어
         </h2>
       </div>
-      <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
-        <ul className="mt-2 flex flex-col gap-6">
-          {users?.map((v, i) => (
-            <li
+      <div className="h-screen w-full overflow-y-auto px-4 pb-[150px]">
+        <div className="mt-2 flex flex-col gap-6">
+          {users?.map((v) => (
+            <Link
               key={v.id}
+              to={`${v.id}`}
+              state={{
+                name: v.name,
+              }}
               className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
             >
               <div className="p-4">
-                <div className="bg-primary flex h-5 w-5 flex-col items-center justify-center rounded-full text-xs font-semibold text-white">
-                  {i + 1}
-                </div>
-                <div className="flex items-center">
+                <div className="mt-1 flex items-center gap-2">
+                  <div className="bg-trueGray-300 h-10 w-10 rounded-full">
+                    {/* 이미지 */}
+                  </div>
                   <div>
-                    <h3 className="mt-1 text-lg font-semibold">{v.name}</h3>
+                    <h3 className="font-semibold">{v.name}</h3>
                     <div className="flex items-center">
                       <div className="text-trueGray-400 text-sm">
                         리뷰수 {v._count.review}
@@ -55,15 +65,22 @@ export default function RankingRoute() {
                       </div>
                     </div>
                   </div>
-                  <button className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold">
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      console.log("클릭");
+                    }}
+                    className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
+                  >
                     팔로우
                   </button>
                 </div>
               </div>
-            </li>
+            </Link>
           ))}
-        </ul>
+        </div>
       </div>
+      <Outlet />
     </>
   );
 }
