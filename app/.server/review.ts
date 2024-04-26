@@ -25,18 +25,16 @@ export async function updateReview(data: IReview) {
   }
 }
 
-export async function getReviewList(request: Request) {
+export async function getReviewList(userId: string) {
+  if (!userId) return null;
   try {
-    const user: IRegister | null = await getUser(request);
-
-    if (!user?.id) return null;
-    const result = await db.user.findUnique({
-      where: { id: user.id },
-      include: { review: true },
+    const result = await db.review.findMany({
+      where: { userId: userId },
+      take: 45,
     });
 
-    if (result?.review.length === 0) return null;
-    return result?.review;
+    if (result?.length === 0) return null;
+    return result;
   } catch (err) {
     console.error(err);
     return null;
