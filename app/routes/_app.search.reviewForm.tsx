@@ -152,6 +152,8 @@ export default function CafeReviewCreateRoute() {
                     readOnly
                     hidden
                   />
+                  <input name="x" value={location.state.x} readOnly hidden />
+                  <input name="y" value={location.state.y} readOnly hidden />
                   <input
                     name="name"
                     value={location.state.name}

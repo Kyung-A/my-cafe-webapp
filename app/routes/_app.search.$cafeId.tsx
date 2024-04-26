@@ -150,6 +150,7 @@ export default function CafeDetailRoute() {
                 <p>{location.state.review}</p>
                 <Link
                   to={`/search/review/${location.state.reviewId}`}
+                  state={{ prevUrl: location.pathname }}
                   className="text-interaction mt-3 flex items-center gap-2 text-sm font-semibold"
                 >
                   후기 자세히 보러가기
@@ -164,6 +165,8 @@ export default function CafeDetailRoute() {
                   state={{
                     cafeId: cafeId,
                     name: data.basicInfo.placenamefull,
+                    x: location.state.x,
+                    y: location.state.y,
                   }}
                   className="bg-interaction mt-2 rounded-full px-3 py-1 text-sm font-semibold text-white"
                 >
