@@ -1,6 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { json } from "@remix-run/node";
-import { Link, useLoaderData, useLocation, useParams } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useLocation,
+  useNavigate,
+  useParams,
+} from "@remix-run/react";
 
 import clock from "~/assets/clock.svg";
 import cafe from "~/assets/cafe.svg";
@@ -8,6 +14,10 @@ import menu from "~/assets/menu.svg";
 import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/components";
 import arrowRight from "~/assets/arrowRight.svg";
+import arrowLeft from "~/assets/arrowLeft.svg";
+import { useMap } from "~/shared/contexts/Map";
+import { useEffect, useState } from "react";
+import { IMarker } from "~/shared/types";
 
 interface IParams {
   params: {
@@ -25,11 +35,62 @@ export default function CafeDetailRoute() {
   const data = useLoaderData<typeof loader>();
   const { cafeId } = useParams<string>();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const { mapData } = useMap();
+  const [marker, setMarker] = useState<IMarker | null>(null);
+
+  useEffect(() => {
+    if (
+      location.state?.prevUrl &&
+      location.state.prevUrl.includes("/ranking")
+    ) {
+      const { kakao } = window;
+      if (!kakao || !mapData) return;
+
+      const position = new kakao.maps.LatLng(
+        location.state?.y,
+        location.state?.x
+      );
+      const marker = new kakao.maps.Marker({
+        position: position,
+        title: data?.basicInfo.placenamefull,
+        zIndex: 30,
+      });
+
+      setMarker(marker);
+      mapData.setCenter(position);
+    }
+  }, [data, mapData, location]);
+
+  useEffect(() => {
+    if (!mapData) return;
+    if (marker) {
+      marker?.setMap(mapData);
+    }
+  }, [marker, mapData]);
 
   return (
-    <Panel left="320px">
-      <div className="bg-primary flex h-12 w-full flex-col justify-center px-4">
-        <h1 className="text-xl font-semibold">
+    <Panel
+      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/ranking") ? "0px" : "320px"}`}
+    >
+      <div
+        className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/ranking") ? "gap-2" : "justify-between "}`}
+      >
+        {location.state?.prevUrl &&
+          location.state?.prevUrl.includes("/ranking") && (
+            <button
+              onClick={() => {
+                navigate(-1);
+                marker?.setMap(null);
+                setMarker(null);
+              }}
+              className="w-6"
+            >
+              <img src={arrowLeft} alt="이전" />
+            </button>
+          )}
+        <h1 className="break-keep text-xl font-semibold leading-6">
           {data.basicInfo.placenamefull}
         </h1>
       </div>

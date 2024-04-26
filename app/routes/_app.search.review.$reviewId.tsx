@@ -49,10 +49,11 @@ export default function ReviewDetailRoute() {
         title: data?.name,
         zIndex: 30,
       });
+
       setMarker(marker);
       mapData.setCenter(position);
     }
-  }, [data, location, mapData]);
+  }, [data, mapData, location]);
 
   useEffect(() => {
     if (!mapData) return;
@@ -81,9 +82,32 @@ export default function ReviewDetailRoute() {
               <img src={arrowLeft} alt="이전" />
             </button>
           )}
-        <h1 className="break-keep text-xl font-semibold leading-6">
-          {data?.name}
-        </h1>
+        {location.state?.prevUrl &&
+        location.state?.prevUrl.includes("/ranking") ? (
+          <Link
+            to={`/search/${data?.cafeId}`}
+            state={{
+              x: data?.x,
+              y: data?.y,
+              review: data?.description,
+              reviewId: data?.id,
+              ...(location.state?.prevUrl && {
+                prevUrl: location.state?.prevUrl,
+              }),
+            }}
+            onClick={() => {
+              marker?.setMap(null);
+              setMarker(null);
+            }}
+            className="break-keep text-xl font-semibold leading-6"
+          >
+            {data?.name}
+          </Link>
+        ) : (
+          <h1 className="break-keep text-xl font-semibold leading-6">
+            {data?.name}
+          </h1>
+        )}
         {location.state?.prevUrl &&
           !location.state?.prevUrl.includes("/ranking") && (
             <Link
