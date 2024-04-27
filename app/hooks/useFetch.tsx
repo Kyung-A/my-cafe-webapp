@@ -1,4 +1,4 @@
-import { useNavigate } from "@remix-run/react";
+import { useLocation, useNavigate } from "@remix-run/react";
 import { useCallback } from "react";
 
 import { useMap } from "~/shared/contexts/Map";
@@ -13,6 +13,7 @@ import markerImg from "~/assets/marker.png";
 
 export function useFetch() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { mapData, cafeData, setPagination, markers, setMarkers, clusterer } =
     useMap();
 
@@ -158,6 +159,7 @@ export function useFetch() {
           ];
 
           setPagination(paging);
+          if (location.pathname.includes("/directions")) return;
           if (!paging.hasNextPage) {
             addMarker(cafeData.current);
           }
@@ -165,7 +167,7 @@ export function useFetch() {
         { useMapBounds: true, useMapCenter: true, radius: 1000 }
       );
     },
-    [mapData, markers]
+    [mapData, markers, location]
   );
 
   const refetchCafeData = (newReview: IReview) => {

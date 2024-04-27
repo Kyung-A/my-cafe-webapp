@@ -4,8 +4,11 @@ import { useMap } from "~/shared/contexts/Map";
 import { useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
 import { useOverlay } from "~/shared/contexts/Overlay";
+import { useLocation } from "@remix-run/react";
 
 export function useKeyword() {
+  const location = useLocation();
+
   const { mapData, cafeData, markers, setPagination, clusterer } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
   const { removeData, removeMarker, removewOverlay } = useRemove();
@@ -70,6 +73,7 @@ export function useKeyword() {
           ];
 
           setPagination(paging);
+          if (location.pathname.includes("/directions")) return;
           if (!paging.hasNextPage) {
             addMarker(cafeData.current);
           }
@@ -77,7 +81,7 @@ export function useKeyword() {
         { useMapBounds: true }
       );
     },
-    [cafeData, mapData, markers, overlayArr, listOverlayArr]
+    [cafeData, mapData, markers, overlayArr, listOverlayArr, location]
   );
 
   return { searchKeyword };
