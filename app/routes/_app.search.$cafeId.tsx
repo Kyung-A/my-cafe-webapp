@@ -123,6 +123,10 @@ export default function CafeDetailRoute() {
               name: data.basicInfo.placenamefull,
               position: "start",
             }}
+            onClick={() => {
+              marker?.setMap(null);
+              setMarker(null);
+            }}
             className="border-interaction text-interaction inline-block rounded-full border px-4 py-[2px] text-sm font-semibold"
           >
             출발
@@ -134,6 +138,10 @@ export default function CafeDetailRoute() {
               y: location.state.y,
               name: data.basicInfo.placenamefull,
               position: "end",
+            }}
+            onClick={() => {
+              marker?.setMap(null);
+              setMarker(null);
             }}
             className="bg-interaction border-interaction ml-1 inline-block rounded-full border px-4 py-[2px] text-sm font-semibold text-white"
           >
