@@ -10,13 +10,14 @@ import {
 } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Card, SearchForm } from "~/components";
+import { Card, Menu, SearchForm, TargetViewButton } from "~/components";
 import {
   useClickActive,
   useFetch,
   useGeoLocation,
   useKeyword,
   useRemove,
+  useTargetView,
 } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
 import {
@@ -31,7 +32,6 @@ import { useOverlay } from "~/shared/contexts/Overlay";
 import { getUser } from "~/.server/storage";
 import bar3 from "~/assets/bar3.svg";
 import refresh from "~/assets/refresh.svg";
-import targetView from "~/assets/target.svg";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -54,6 +54,7 @@ export default function CafeSearchRoute() {
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();
+  const { targetView } = useTargetView();
 
   const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
@@ -100,6 +101,18 @@ export default function CafeSearchRoute() {
       }
     );
   }, []);
+
+  const handleMenu = useCallback(
+    (id: string) => {
+      if (id !== "default" && user === null) {
+        navigate("/signin");
+      } else {
+        handleActive(id);
+        fetchCafeData(id, userReview as IReview[]);
+      }
+    },
+    [navigate, user, userReview]
+  );
 
   useEffect(() => {
     const { kakao } = window;
@@ -207,6 +220,9 @@ export default function CafeSearchRoute() {
             onSubmit={handleSearch}
           />
         </div>
+        {/* 프로필 */}
+        <div></div>
+        {/* 탐색 */}
         <div>
           {!isActiveMenu ? (
             <div className="px-4 pb-40 pt-6">
@@ -216,26 +232,13 @@ export default function CafeSearchRoute() {
                   (v) =>
                     v.id !== "search" && (
                       <li key={v.id}>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (v.id !== "default" && user === null) {
-                              navigate("/signin");
-                            } else {
-                              handleActive(v.id);
-                              fetchCafeData(v.id, userReview as IReview[]);
-                            }
-                          }}
-                          className="border-primary w-full rounded border px-4 py-2 text-left"
-                        >
-                          {v.name}
-                        </button>
+                        <Menu onClick={() => handleMenu(v.id)} name={v.name} />
                       </li>
                     )
                 )}
-                <li className="border-primary w-full rounded border px-4 py-2 text-left">
+                <li>
                   <Link to="/ranking" className="block w-full">
-                    베스트 리뷰어
+                    <Menu name="베스트 리뷰어" />
                   </Link>
                 </li>
               </ul>
@@ -335,18 +338,7 @@ export default function CafeSearchRoute() {
           </div>
         </button>
       )}
-      <button
-        onClick={() => {
-          const { kakao } = window;
-          if (!kakao || !curLocation || !mapData) return;
-
-          const { latitude, longitude } = curLocation;
-          mapData.panTo(new kakao.maps.LatLng(latitude, longitude));
-        }}
-        className="fixed right-4 top-4 flex h-8 w-8 flex-col items-center justify-center rounded bg-white shadow-[0px_0px_7px_0px_#0006]"
-      >
-        <img src={targetView} alt="현재 내위치" className="block w-6" />
-      </button>
+      <TargetViewButton onClick={targetView} />
     </>
   );
 }

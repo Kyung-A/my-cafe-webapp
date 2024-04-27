@@ -7,12 +7,12 @@ interface ISearch {
   onSubmit: (text: string) => void;
 }
 
-export const SearchForm = ({
+export function SearchForm({
   searchInput,
   setSearchInput,
   handleEnter,
   onSubmit,
-}: ISearch) => {
+}: ISearch) {
   return (
     <div className="flex w-full items-center justify-between overflow-hidden rounded bg-white">
       <input
@@ -31,4 +31,4 @@ export const SearchForm = ({
       </button>
     </div>
   );
-};
+}

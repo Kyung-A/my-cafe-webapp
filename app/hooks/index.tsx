@@ -4,3 +4,4 @@ export { useRemove } from "./useRemove";
 export { useFetch } from "./useFetch";
 export { useKeyword } from "./useKeyword";
 export { useCustomOverlay } from "./useCustomOverlay";
+export { useTargetView } from "./useTargetView";
