@@ -11,7 +11,7 @@ export async function getUsers() {
         createdAt: false,
         updatedAt: false,
         _count: {
-          select: { review: true, follower: true, following: true },
+          select: { review: true, followers: true, following: true },
         },
       },
       orderBy: {
