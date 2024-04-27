@@ -220,8 +220,7 @@ export default function DirectionsRoute() {
           <div className="mt-2 w-full rounded border border-neutral-400">
             <input
               name="origin"
-              value={startInput?.value}
-              onChange={() => console.log()}
+              value={startInput?.value || ""}
               hidden
               readOnly
             />
@@ -238,8 +237,7 @@ export default function DirectionsRoute() {
             </button>
             <input
               name="destination"
-              value={endInput?.value}
-              onChange={() => console.log()}
+              value={endInput?.value || ""}
               hidden
               readOnly
             />
