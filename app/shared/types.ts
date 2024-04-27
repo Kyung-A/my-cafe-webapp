@@ -97,6 +97,8 @@ export interface IReview {
   notGood: string;
   tags: string;
   recommend: string;
+  x: string;
+  y: string;
 }
 
 export interface IDirection {

@@ -1,6 +1,5 @@
-import { IRegister, IReview } from "~/shared/types";
+import { IReview } from "~/shared/types";
 import { db } from "./db";
-import { getUser } from "./storage";
 
 export async function createReview(data: IReview) {
   try {

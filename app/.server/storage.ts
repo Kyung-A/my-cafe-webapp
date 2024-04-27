@@ -6,7 +6,6 @@ import { IRegister, ISignin } from "~/shared/types";
 
 const sessionSecret = process.env.SESSION_SECRET;
 
-// 회원가입
 export async function register({ email, password, name }: IRegister) {
   const passwordHash = await bcrypt.hash(password as string, 10);
   await db.user.create({
@@ -26,12 +25,10 @@ export const storage = createCookieSessionStorage({
   },
 });
 
-// token 가져오기
 export function getSession(request: Request) {
   return storage.getSession(request.headers.get("Cookie"));
 }
 
-// 유저 정보 불러오기
 export async function getUser(request: Request) {
   const session = await getSession(request);
   const userId = session.get("userId");
@@ -53,7 +50,6 @@ export async function getUser(request: Request) {
   }
 }
 
-// 로그인
 export async function signin({ email, password }: ISignin) {
   const user = await db.user.findUnique({
     where: { email },
@@ -66,7 +62,6 @@ export async function signin({ email, password }: ISignin) {
   return { id: user.id, email, name: user.name };
 }
 
-// token 생성
 export async function createUserSession(userId: string) {
   const session = await storage.getSession();
   session.set("userId", userId);
