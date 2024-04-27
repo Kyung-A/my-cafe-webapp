@@ -1,22 +1,47 @@
+import { ActionFunctionArgs } from "@remix-run/node";
 import {
   Link,
   Outlet,
   json,
   useLoaderData,
   useNavigate,
+  useOutletContext,
+  useSubmit,
 } from "@remix-run/react";
+import { createFollow, getFollowings } from "~/.server/follow";
+import { getUser } from "~/.server/storage";
 
 import { getUsers } from "~/.server/users";
 import bar3 from "~/assets/bar3.svg";
+import { IRegister } from "~/shared/types";
 
-export async function loader() {
+export async function loader({ request }: { request: Request }) {
+  const user: IRegister | null = await getUser(request);
   const result = await getUsers();
+
+  if (!user?.id) {
+    return json({ users: result, followings: null });
+  } else {
+    const followings = await getFollowings(user.id);
+    return json({ users: result, followings: followings });
+  }
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+  const formData = await request.formData();
+  const followingId = String(formData.get("followingId"));
+  const followerId = String(formData.get("followerId"));
+
+  const result = await createFollow({ followingId, followerId });
   return json(result);
 }
 
 export default function RankingRoute() {
-  const users = useLoaderData<typeof loader>();
+  const submit = useSubmit();
   const navigate = useNavigate();
+
+  const data = useLoaderData<typeof loader>();
+  const { user } = useOutletContext<{ user: IRegister }>();
 
   return (
     <>
@@ -39,7 +64,7 @@ export default function RankingRoute() {
       </div>
       <div className="h-screen w-full overflow-y-auto px-4 pb-[150px]">
         <div className="mt-2 flex flex-col gap-6">
-          {users?.map((v) => (
+          {data?.users?.map((v) => (
             <Link
               key={v.id}
               to={`${v.id}`}
@@ -61,19 +86,44 @@ export default function RankingRoute() {
                       </div>
                       <hr className="divide-y-1 border-trueGray-300 mx-1 h-[1px] w-3 rotate-90" />
                       <div className="text-trueGray-400 text-sm ">
-                        팔로워 {v._count.follower}
+                        팔로워 {v._count.followers}
                       </div>
                     </div>
                   </div>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      console.log("클릭");
-                    }}
-                    className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
-                  >
-                    팔로우
-                  </button>
+                  {user ? (
+                    v.id !== user.id && (
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          submit(
+                            { followingId: v.id, followerId: user.id ?? null },
+                            { method: "post" }
+                          );
+                        }}
+                        className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
+                          !data?.followings ||
+                          data?.followings?.some((id) => v.id === id)
+                            ? "bg-trueGray-100 text-trueGray-400"
+                            : "text-interaction bg-[rgb(255_243_221)]"
+                        }`}
+                      >
+                        {!data?.followings ||
+                        data?.followings?.some((id) => v.id === id)
+                          ? "팔로잉"
+                          : "팔로우"}
+                      </button>
+                    )
+                  ) : (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate("/signin");
+                      }}
+                      className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
+                    >
+                      팔로우
+                    </button>
+                  )}
                 </div>
               </div>
             </Link>

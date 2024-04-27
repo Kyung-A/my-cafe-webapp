@@ -153,3 +153,8 @@ export type IClusterer = {
   clear: () => void;
   addMarkers: (arg: any) => void;
 };
+
+export interface IFollow {
+  followerId: string;
+  followingId: string;
+}
