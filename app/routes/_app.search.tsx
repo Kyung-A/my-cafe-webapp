@@ -120,7 +120,7 @@ export default function CafeSearchRoute() {
         fetchCafeData(id, userReview as IReview[]);
       }
     },
-    [navigate, user, userReview]
+    [navigate, user, userReview, mapData]
   );
 
   useEffect(() => {
