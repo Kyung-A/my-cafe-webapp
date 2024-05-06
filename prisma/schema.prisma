@@ -33,20 +33,21 @@ model Follows {
 }
 
 model Review {
-  id          String   @id @default(uuid())
-  cafeId      String   @unique
-  name        String
-  description String
-  starRating  Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  visited     Boolean  @default(false)
-  good        String
-  notGood     String
-  tags        String?
-  recommend   String
-  x           String
-  y           String
-  user        User?    @relation(fields: [userId], references: [id])
-  userId      String
+  id           String   @id @default(uuid())
+  cafeId       String   @unique
+  name         String
+  reviewImages String?
+  description  String
+  starRating   Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  visited      Boolean  @default(false)
+  good         String
+  notGood      String
+  tags         String?
+  recommend    String
+  x            String
+  y            String
+  user         User?    @relation(fields: [userId], references: [id])
+  userId       String
 }

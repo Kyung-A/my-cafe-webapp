@@ -1,11 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  json,
+  redirect,
+  unstable_composeUploadHandlers,
+  unstable_createFileUploadHandler,
+  unstable_createMemoryUploadHandler,
+  unstable_parseMultipartFormData,
+} from "@remix-run/node";
 import { Form, useFetcher, useLocation } from "@remix-run/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Slider from "react-slick";
 
 import { getReview, createReview, updateReview } from "~/.server/review";
-import { getUser } from "~/.server/storage";
+import { getUser, uploadImage } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
 import minus from "~/assets/minus.svg";
@@ -22,46 +30,75 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
   const user = await getUser(request);
+  if (!user) return redirect("/signin");
+
+  const uploadHandler = unstable_composeUploadHandlers(
+    unstable_createFileUploadHandler({
+      file: ({ filename }) => filename,
+    }),
+    unstable_createMemoryUploadHandler()
+  );
+
+  const formData = await unstable_parseMultipartFormData(
+    request,
+    uploadHandler
+  );
+
+  const data: any = {};
+  const goodArr: FormDataEntryValue[] = [];
+  const notGoodArr: FormDataEntryValue[] = [];
+  const imageUrls = [];
+
+  const reviewImages = formData.getAll("reviewImages");
   const reviewId = String(formData.get("reviewId"));
 
-  if (!user) {
-    return redirect("/signin");
-  } else {
-    const data: any = {};
+  [...formData.entries()].forEach(([key, value]) => {
+    if (key === "reviewId") return;
 
-    const goodArr: FormDataEntryValue[] = [];
-    const notGoodArr: FormDataEntryValue[] = [];
-
-    [...formData.entries()].forEach(([key, value]) => {
-      if (key === "reviewId") return;
-
-      if (key === "good") {
-        goodArr.push(value);
-        data[key] = goodArr.join(",");
-      } else if (key === "notGood") {
-        notGoodArr.push(value);
-        data[key] = notGoodArr.join(",");
-      } else if (key === "starRating") {
-        data[key] = Number(value);
-      } else {
-        data[key] = value;
-      }
-    });
-
-    data["userId"] = user.id;
-    data["visited"] = true;
-
-    if (reviewId) {
-      data["id"] = reviewId;
-
-      const id = await updateReview(data as IReview);
-      return redirect(`/search/review/${id}`);
+    if (key === "good") {
+      goodArr.push(value);
+      data[key] = goodArr.join(",");
+    } else if (key === "notGood") {
+      notGoodArr.push(value);
+      data[key] = notGoodArr.join(",");
+    } else if (key === "starRating") {
+      data[key] = Number(value);
     } else {
-      const id = await createReview(data as IReview);
-      return redirect(`/search/review/${id}`);
+      data[key] = value;
     }
+  });
+
+  data["userId"] = user.id;
+  data["visited"] = true;
+
+  if ((reviewImages as any).size !== 0) {
+    for (const img of reviewImages) {
+      const uploadPromise = async () => {
+        try {
+          const form = new FormData();
+          form.append("image", img);
+          const result = await uploadImage(form);
+          return new Promise((resolve) => resolve(result));
+        } catch (err) {
+          console.error(err);
+          return;
+        }
+      };
+      const imageUrl = await uploadPromise();
+      imageUrls.push(imageUrl);
+    }
+    data["reviewImages"] = imageUrls.length > 0 ? imageUrls.join(",") : "";
+  }
+
+  if (reviewId) {
+    data["id"] = reviewId;
+
+    const id = await updateReview(data as IReview);
+    return redirect(`/search/review/${id}`);
+  } else {
+    const id = await createReview(data as IReview);
+    return redirect(`/search/review/${id}`);
   }
 }
 
@@ -128,6 +165,7 @@ export default function CafeReviewCreateRoute() {
 
   useEffect(() => {
     if (fetcher.data) {
+      console.log(fetcher.data);
       const { good, notGood } = fetcher.data;
 
       const goodArr = good.split(",").map((v, i) => ({ id: i, text: v }));
@@ -139,7 +177,7 @@ export default function CafeReviewCreateRoute() {
 
   return (
     <Panel left="320px">
-      <Form method="post">
+      <Form method="post" encType="multipart/form-data">
         <div className="bg-primary flex h-12 w-full items-center justify-between px-4">
           <h1 className="text-xl font-semibold">
             {location.state?.reviewId ? "후기 수정" : "후기 등록"}
@@ -190,7 +228,7 @@ export default function CafeReviewCreateRoute() {
             </button>
           )}
           <input
-            name="profile"
+            name="reviewImages"
             ref={fileRef}
             onChange={(e) => {
               if (e.target.files) {

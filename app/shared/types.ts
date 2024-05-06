@@ -105,6 +105,7 @@ export interface IReview {
   recommend: string;
   x: string;
   y: string;
+  reviewImages: string;
 }
 
 export interface IDirection {
