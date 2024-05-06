@@ -74,6 +74,11 @@ export interface IRegister {
   password2?: string;
   passwordHash?: string;
   profile?: string | null;
+  _count?: {
+    review?: number;
+    followers?: number;
+    following?: number;
+  };
 }
 
 export interface ISignin {

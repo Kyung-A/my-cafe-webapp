@@ -10,7 +10,13 @@ import {
 } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { Card, Menu, SearchForm, TargetViewButton } from "~/components";
+import {
+  Card,
+  Menu,
+  ProfileEditDialog,
+  SearchForm,
+  TargetViewButton,
+} from "~/components";
 import {
   useClickActive,
   useFetch,
@@ -32,6 +38,8 @@ import { useOverlay } from "~/shared/contexts/Overlay";
 import { getUser } from "~/.server/storage";
 import bar3 from "~/assets/bar3.svg";
 import refresh from "~/assets/refresh.svg";
+import userImg from "~/assets/user.svg";
+import edit from "~/assets/edit.svg";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -64,6 +72,7 @@ export default function CafeSearchRoute() {
   const [searchInput, setSearchInput] = useState<string>("");
   const [coordinate, setCoordinate] = useState<ICoord | null>();
   const [isIdle, setIdle] = useState<boolean>(false);
+  const [isOpen, setOpened] = useState<boolean>(false);
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
@@ -221,11 +230,60 @@ export default function CafeSearchRoute() {
           />
         </div>
         {/* 프로필 */}
-        <div></div>
+        {!isActiveMenu && user && (
+          <div className="mb-2 px-4 pt-6">
+            <h2 className="text-lg font-semibold">
+              👋 안녕하세요 {user.name}님!
+            </h2>
+            <div className="relative mt-2 flex w-full items-center">
+              <button onClick={() => setOpened(true)}>
+                <div className="bg-trueGray-100 absolute bottom-0 left-12 h-5 w-5 rounded-full p-[3px]">
+                  <img src={edit} alt="프로필 수정" />
+                </div>
+                <div className="h-16 w-16 overflow-hidden rounded-full">
+                  <img
+                    src={user.profile ?? userImg}
+                    alt="프로필 이미지"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              </button>
+              <div className="flex-1">
+                <p className="break-keep pl-3 text-sm">{user.email}</p>
+                <table className="mt-1 w-full text-left text-xs">
+                  <tbody>
+                    <tr>
+                      <th className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
+                        리뷰수
+                      </th>
+                      <th className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
+                        팔로워
+                      </th>
+                      <th className="text-trueGray-500 w-1/3 px-3 font-normal">
+                        팔로잉
+                      </th>
+                    </tr>
+                    <tr>
+                      <td className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
+                        {user._count?.review}
+                      </td>
+                      <td className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
+                        {user._count?.followers}
+                      </td>
+                      <td className="text-trueGray-500 w-1/3 px-3 font-normal">
+                        {user._count?.following}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )}
         {/* 탐색 */}
         <div>
           {!isActiveMenu ? (
-            <div className="px-4 pb-40 pt-6">
+            <div className="px-4 pt-6">
               <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
               <ul className="mt-3 flex flex-col gap-2">
                 {GNB.map(
@@ -339,6 +397,11 @@ export default function CafeSearchRoute() {
         </button>
       )}
       <TargetViewButton onClick={targetView} />
+      <ProfileEditDialog
+        user={{ email: user.email, profile: user.profile, name: user.name }}
+        isOpen={isOpen}
+        setOpened={setOpened}
+      />
     </>
   );
 }
