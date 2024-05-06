@@ -1,49 +1,112 @@
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
+import {
+  ActionFunctionArgs,
+  json,
+  redirect,
+  unstable_composeUploadHandlers,
+  unstable_createFileUploadHandler,
+  unstable_createMemoryUploadHandler,
+  unstable_parseMultipartFormData,
+} from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 
 import arrowRight from "~/assets/arrowRight.svg";
 import { db } from "~/.server/db";
-import { register } from "~/.server/storage";
+import { register, uploadImage } from "~/.server/storage";
+import { useCallback, useRef, useState } from "react";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
+  const uploadHandler = unstable_composeUploadHandlers(
+    unstable_createFileUploadHandler({
+      file: ({ filename }) => filename,
+    }),
+    unstable_createMemoryUploadHandler()
+  );
+
+  const formData = await unstable_parseMultipartFormData(
+    request,
+    uploadHandler
+  );
+
   const email = String(formData.get("email"));
   const name = String(formData.get("name"));
   const password = String(formData.get("password"));
   const password2 = String(formData.get("password2"));
+  const profile = formData.get("profile") as File;
 
   const errors: Record<string, string> = {};
 
-  if (!email.includes("@")) {
-    errors.email = "올바른 이메일 형식이 아닙니다.";
-  }
-  if (password === password2) {
-    errors.password = "비밀번호가 일치하지 않습니다";
-  }
+  if (!email.includes("@")) errors.email = "올바른 이메일 형식이 아닙니다.";
+  if (password === password2) errors.password = "비밀번호가 일치하지 않습니다";
 
   const userExists = await db.user.findFirst({
     where: { email },
   });
-  if (userExists) {
-    errors.userExists = "이미 가입한 유저입니다.";
-  }
 
-  if (Object.keys(errors).length > 0) {
-    return json({ errors });
+  if (userExists) errors.userExists = "이미 가입한 유저입니다.";
+  if (Object.keys(errors).length > 0) return json({ errors });
+
+  if (profile?.size === 0) {
+    await register({ email, name, password });
+    return redirect("/signin");
+  } else {
+    const form = new FormData();
+    form.append("image", profile!);
+
+    await uploadImage(form).then(async (resp) => {
+      await register({ email, name, password, profile: resp });
+    });
+    return redirect("/signin");
   }
-  await register({ email, name, password });
-  return redirect("/signin");
 }
 
 export default function SignupRoute() {
   const actionData = useActionData<typeof action>();
+  const fileRef = useRef<HTMLInputElement | null>(null);
+  const [preview, setPreview] = useState<string>();
+
+  const handleFileUpload = useCallback(() => {
+    if (fileRef?.current) {
+      fileRef.current.click();
+    }
+  }, [fileRef]);
 
   return (
-    <Form method="post">
+    <Form method="post" encType="multipart/form-data">
       <h1 className="w-full text-center text-xl font-semibold">
         ☕ myCafe 회원가입
       </h1>
       <div className="mt-8 space-y-3">
+        <div>
+          <div className="bg-trueGray-200 relative mx-auto h-20 w-20 overflow-hidden rounded-full">
+            <button
+              type="button"
+              onClick={handleFileUpload}
+              className="absolute left-0 top-0 z-10 block h-full w-full bg-transparent"
+            ></button>
+            {preview && (
+              <img
+                src={preview}
+                alt="프로필 이미지"
+                className="absolute z-[5] h-full w-full object-cover"
+              />
+            )}
+          </div>
+          <input
+            name="profile"
+            ref={fileRef}
+            onChange={(e) => {
+              if (e.target.files) {
+                for (const file of e.target.files) {
+                  setPreview(URL.createObjectURL(file));
+                }
+              }
+            }}
+            type="file"
+            accept=".jpg, .jpeg, .png"
+            size={3145728}
+            hidden
+          />
+        </div>
         <div>
           <input
             name="email"

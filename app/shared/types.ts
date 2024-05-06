@@ -73,6 +73,7 @@ export interface IRegister {
   password?: string;
   password2?: string;
   passwordHash?: string;
+  profile?: string | null;
 }
 
 export interface ISignin {

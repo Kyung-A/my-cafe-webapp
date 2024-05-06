@@ -1,15 +1,16 @@
 import { createCookieSessionStorage, redirect } from "@remix-run/node";
 import bcrypt from "bcryptjs";
+import axios from "axios";
 
 import { db } from "./db";
 import { IRegister, ISignin } from "~/shared/types";
 
 const sessionSecret = process.env.SESSION_SECRET;
 
-export async function register({ email, password, name }: IRegister) {
+export async function register({ email, password, name, profile }: IRegister) {
   const passwordHash = await bcrypt.hash(password as string, 10);
   await db.user.create({
-    data: { email, passwordHash, name },
+    data: { email, passwordHash, name, profile },
   });
 }
 
@@ -71,4 +72,17 @@ export async function createUserSession(userId: string) {
       "Set-Cookie": await storage.commitSession(session),
     },
   });
+}
+
+export async function uploadImage(data: FormData) {
+  try {
+    const result = await axios.post(
+      `https://api.imgbb.com/1/upload?key=${process.env.IMG_STORAGE_KEY}`,
+      data
+    );
+    return result.data.data.display_url;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
