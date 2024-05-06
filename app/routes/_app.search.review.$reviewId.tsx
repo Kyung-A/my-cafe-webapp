@@ -13,6 +13,7 @@ import { Panel } from "~/components";
 import { useEffect, useState } from "react";
 import { useMap } from "~/shared/contexts/Map";
 import { IMarker } from "~/shared/types";
+import Slider from "react-slick";
 
 interface IParams {
   params: {
@@ -34,6 +35,14 @@ export default function ReviewDetailRoute() {
 
   const { mapData } = useMap();
   const [marker, setMarker] = useState<IMarker | null>(null);
+
+  const sliderInit = {
+    dots: false,
+    Infinity: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
 
   useEffect(() => {
     if (
@@ -124,7 +133,22 @@ export default function ReviewDetailRoute() {
           )}
       </div>
       <div className="h-full w-full overflow-y-auto">
-        <div className="bg-trueGray-100 h-40 w-full">{/* 이미지 */}</div>
+        {data?.reviewImages !== "" && (
+          <div className="slider-container max-h-[208px] overflow-hidden">
+            <Slider {...sliderInit}>
+              {data?.reviewImages?.split(",").map((src) => (
+                <div key={src} className="h-full w-full">
+                  <input
+                    type="image"
+                    src={src}
+                    className="top-1/4 aspect-square w-full -translate-y-1/4 object-cover"
+                    alt="이미지"
+                  />
+                </div>
+              ))}
+            </Slider>
+          </div>
+        )}
         <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
           <div>
             <p className="text-lg font-semibold">☕ 후기</p>

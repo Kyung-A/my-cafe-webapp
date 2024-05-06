@@ -165,13 +165,13 @@ export default function CafeReviewCreateRoute() {
 
   useEffect(() => {
     if (fetcher.data) {
-      console.log(fetcher.data);
       const { good, notGood } = fetcher.data;
 
       const goodArr = good.split(",").map((v, i) => ({ id: i, text: v }));
       const notGoodArr = notGood.split(",").map((v, i) => ({ id: i, text: v }));
       setGoodInput(goodArr);
       setNotGoodInput(notGoodArr);
+      setPreview(fetcher.data.reviewImages.split(","));
     }
   }, [fetcher.data]);
 
@@ -197,7 +197,7 @@ export default function CafeReviewCreateRoute() {
               <>{location.state?.name}</>
             )}
           </h2>
-          {preview ? (
+          {preview && preview[0] !== "" ? (
             <div className="mt-4">
               <div className="slider-container max-h-[208px] overflow-hidden">
                 <Slider {...sliderInit}>
