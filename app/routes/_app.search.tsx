@@ -398,11 +398,7 @@ export default function CafeSearchRoute() {
       )}
       <TargetViewButton onClick={targetView} />
       {user && (
-        <ProfileEditDialog
-          user={{ email: user.email, profile: user.profile, name: user.name }}
-          isOpen={isOpen}
-          setOpened={setOpened}
-        />
+        <ProfileEditDialog user={user} isOpen={isOpen} setOpened={setOpened} />
       )}
     </>
   );

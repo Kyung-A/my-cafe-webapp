@@ -164,3 +164,9 @@ export interface IFollow {
   followerId: string;
   followingId: string;
 }
+
+export interface IProfileUpdate {
+  id: string;
+  name: string;
+  profile?: string | null;
+}

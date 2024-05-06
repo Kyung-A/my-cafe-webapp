@@ -1,23 +1,21 @@
-import { Form } from "@remix-run/react";
+import { Form, useSubmit } from "@remix-run/react";
 import { useCallback, useRef, useState } from "react";
 
 import userImg from "~/assets/user.svg";
+import { IRegister } from "~/shared/types";
 
 interface IDialog {
-  user: {
-    email: string;
-    profile: string | null | undefined;
-    name: string;
-  };
+  user: IRegister;
   isOpen: boolean;
   setOpened: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export async function action() {}
-
 export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
+  const submit = useSubmit();
+
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string>(user.profile ?? userImg);
+  const [username, setUsername] = useState<string>(user.name);
 
   const handleFileUpload = useCallback(() => {
     if (fileRef?.current) {
@@ -34,7 +32,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
         <div className=" w-80 rounded-md bg-white p-6">
           <h3 className="text-xl font-semibold">프로필 수정</h3>
           <div className="mt-6">
-            <div className="bg-trueGray-200 relative mx-auto h-20 w-20 overflow-hidden rounded-full">
+            <div className="relative mx-auto h-20 w-20 overflow-hidden rounded-full">
               <button
                 type="button"
                 onClick={handleFileUpload}
@@ -48,31 +46,54 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
                 />
               )}
             </div>
-            <input
-              name="profile"
-              ref={fileRef}
-              onChange={(e) => {
-                if (e.target.files) {
-                  for (const file of e.target.files) {
-                    setPreview(URL.createObjectURL(file));
-                  }
-                }
-              }}
-              type="file"
-              accept=".jpg, .jpeg, .png"
-              size={3145728}
-              hidden
-            />
           </div>
           <div className="mt-2">
             <p className="text-center">{user.email}</p>
             <input
-              defaultValue={user.name}
+              defaultValue={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="border-trueGray-300 outline-primary mx-auto mt-2 block w-60 rounded-full border px-3 py-1"
             />
           </div>
           <div className="mt-8 flex items-center justify-center gap-2">
-            <Form>
+            <Form
+              action="profileUpdate"
+              method="post"
+              encType="multipart/form-data"
+              onSubmit={(e) => {
+                submit(e.currentTarget);
+                setOpened(false);
+              }}
+            >
+              <input
+                name="profile"
+                ref={fileRef}
+                onChange={(e) => {
+                  if (e.target.files) {
+                    for (const file of e.target.files) {
+                      setPreview(URL.createObjectURL(file));
+                    }
+                  }
+                }}
+                type="file"
+                accept=".jpg, .jpeg, .png"
+                size={3145728}
+                hidden
+              />
+              <input
+                type="text"
+                name="id"
+                value={user.id || ""}
+                hidden
+                readOnly
+              />
+              <input
+                type="text"
+                name="name"
+                value={username || ""}
+                hidden
+                readOnly
+              />
               <button
                 type="submit"
                 className="bg-interaction rounded px-4 py-1 text-sm font-semibold text-white"

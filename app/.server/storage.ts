@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import axios from "axios";
 
 import { db } from "./db";
-import { IRegister, ISignin } from "~/shared/types";
+import { IProfileUpdate, IRegister, ISignin } from "~/shared/types";
 
 const sessionSecret = process.env.SESSION_SECRET;
 
@@ -89,6 +89,20 @@ export async function logout(request: Request) {
       "Set-cookie": await storage.destroySession(session),
     },
   });
+}
+
+export async function updateUser(data: IProfileUpdate) {
+  try {
+    await db.user.update({
+      where: {
+        id: data.id,
+      },
+      data,
+    });
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
 }
 
 export async function uploadImage(data: FormData) {
