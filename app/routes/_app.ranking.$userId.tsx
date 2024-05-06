@@ -33,11 +33,17 @@ export default function UserDetailRoute() {
               key={v.id}
               to={`/search/review/${v.id}`}
               state={{ prevUrl: location.pathname }}
-              className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
+              className="cursor-pointer overflow-hidden rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
             >
-              <div className="bg-trueGray-100 h-24 w-full overflow-hidden">
-                {/* 이미지 */}
-              </div>
+              {v.reviewImages !== "" && (
+                <div className="h-24 w-full overflow-hidden">
+                  <img
+                    src={v.reviewImages?.split(",")[0]}
+                    alt="미리보기"
+                    className="w-full object-cover"
+                  />
+                </div>
+              )}
               <div className="p-4">
                 <div className="flex items-center gap-1">
                   <h3 className="line-clamp-1 text-lg font-semibold">

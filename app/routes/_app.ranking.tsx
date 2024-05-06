@@ -12,8 +12,9 @@ import { createFollow, getFollowings } from "~/.server/follow";
 import { getUser } from "~/.server/storage";
 
 import { getUsers } from "~/.server/users";
-import bar3 from "~/assets/bar3.svg";
 import { IRegister } from "~/shared/types";
+import userImg from "~/assets/user.svg";
+import bar3 from "~/assets/bar3.svg";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -75,8 +76,12 @@ export default function RankingRoute() {
             >
               <div className="p-4">
                 <div className="mt-1 flex items-center gap-2">
-                  <div className="bg-trueGray-300 h-10 w-10 rounded-full">
-                    {/* 이미지 */}
+                  <div className="h-12 w-12 overflow-hidden rounded-full">
+                    <img
+                      src={v.profile ?? userImg}
+                      alt="프로필 이미지"
+                      className="h-full w-full object-cover"
+                    />
                   </div>
                   <div>
                     <h3 className="font-semibold">{v.name}</h3>

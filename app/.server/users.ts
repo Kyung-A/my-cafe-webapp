@@ -10,6 +10,7 @@ export async function getUsers() {
         name: true,
         createdAt: false,
         updatedAt: false,
+        profile: true,
         _count: {
           select: { review: true, followers: true, following: true },
         },
