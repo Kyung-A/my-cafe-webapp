@@ -82,6 +82,15 @@ export async function createUserSession(userId: string) {
   });
 }
 
+export async function logout(request: Request) {
+  const session = await getSession(request);
+  return redirect("/", {
+    headers: {
+      "Set-cookie": await storage.destroySession(session),
+    },
+  });
+}
+
 export async function uploadImage(data: FormData) {
   try {
     const result = await axios.post(
