@@ -8,6 +8,8 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 import stylesheet from "~/tailwind.css?url";
 import MapProvider from "./shared/contexts/Map";
 import OverlayProvider from "./shared/contexts/Overlay";

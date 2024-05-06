@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, useFetcher, useLocation } from "@remix-run/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import Slider from "react-slick";
 
 import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
 import minus from "~/assets/minus.svg";
+import photo from "~/assets/photo.svg";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -73,6 +75,16 @@ export default function CafeReviewCreateRoute() {
   const [notGoodInput, setNotGoodInput] = useState<IFieldInput[]>([
     { id: 0, text: "" },
   ]);
+  const [preview, setPreview] = useState<string[]>();
+  const fileRef = useRef<HTMLInputElement | null>(null);
+
+  const sliderInit = {
+    dots: false,
+    Infinity: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+  };
 
   const addInput = useCallback(
     (name: string) => {
@@ -101,6 +113,12 @@ export default function CafeReviewCreateRoute() {
     },
     [goodInput, notGoodInput]
   );
+
+  const handleFileUpload = useCallback(() => {
+    if (fileRef?.current) {
+      fileRef.current.click();
+    }
+  }, [fileRef]);
 
   useEffect(() => {
     if (location.state.reviewId) {
@@ -141,6 +159,63 @@ export default function CafeReviewCreateRoute() {
               <>{location.state?.name}</>
             )}
           </h2>
+          {preview ? (
+            <div className="mt-4">
+              <div className="slider-container max-h-[208px] overflow-hidden">
+                <Slider {...sliderInit}>
+                  {preview.map((src) => (
+                    <div key={src} className="h-full w-full">
+                      <input
+                        type="image"
+                        src={src}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleFileUpload();
+                        }}
+                        className="top-1/4 aspect-square w-full -translate-y-1/4 object-cover"
+                        alt="이미지"
+                      />
+                    </div>
+                  ))}
+                </Slider>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleFileUpload}
+              className="bg-trueGray-100 mt-4 h-52 w-full outline-none"
+            >
+              <img src={photo} alt="이미지 업로드" className="mx-auto w-10" />
+            </button>
+          )}
+          <input
+            name="profile"
+            ref={fileRef}
+            onChange={(e) => {
+              if (e.target.files) {
+                if (
+                  e.target.files.length === 0 &&
+                  preview &&
+                  preview?.length > 0
+                ) {
+                  return setPreview(preview);
+                }
+
+                const files: string[] = [];
+                for (const file of e.target.files) {
+                  const url = URL.createObjectURL(file);
+                  files.push(url);
+                }
+                setPreview(files);
+              }
+            }}
+            type="file"
+            accept=".jpg, .jpeg, .png"
+            size={3145728}
+            multiple
+            hidden
+          />
           <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>

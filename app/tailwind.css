@@ -83,3 +83,19 @@ html, body {
     @apply truncate font-bold text-sm border-b px-4 py-2 last:border-b-0 border-trueGray-300
     
 }
+
+.slider-container:hover .slick-arrow{
+ @apply opacity-100
+}
+
+.slick-list {
+    max-height: 208px;
+}
+
+.slick-arrow.slick-next {
+    @apply right-2 opacity-0
+}
+
+.slick-arrow.slick-prev {
+    @apply left-2 z-10 opacity-0
+}
