@@ -1,9 +1,10 @@
-import { ActionFunctionArgs } from "@remix-run/node";
+import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import {
   Link,
   Outlet,
   json,
   useLoaderData,
+  useLocation,
   useNavigate,
   useOutletContext,
   useSubmit,
@@ -16,15 +17,26 @@ import { IRegister } from "~/shared/types";
 import userImg from "~/assets/user.svg";
 import bar3 from "~/assets/bar3.svg";
 
-export async function loader({ request }: { request: Request }) {
-  const user: IRegister | null = await getUser(request);
-  const result = await getUsers();
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const filter = url.searchParams.get("filter");
 
-  if (!user?.id) {
+  const user: IRegister | null = await getUser(request);
+
+  if (filter === "ranking") {
+    const result = await getUsers();
+
+    if (!user?.id) {
+      return json({ users: result, followings: null });
+    } else {
+      const followings = await getFollowings(user.id);
+      return json({ users: result, followings: followings });
+    }
+  }
+
+  if (filter === "follow" && user?.id) {
+    const result = await getUsers(user.id);
     return json({ users: result, followings: null });
-  } else {
-    const followings = await getFollowings(user.id);
-    return json({ users: result, followings: followings });
   }
 }
 
@@ -40,6 +52,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function RankingRoute() {
   const submit = useSubmit();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const data = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
@@ -60,7 +73,13 @@ export default function RankingRoute() {
       </div>
       <div className="px-4 py-6">
         <h2 className="text-xl font-semibold">
-          ☕ <span className="text-interaction">TOP 10</span> 베스트 리뷰어
+          {location.state.filter === "ranking" ? (
+            <>
+              ☕ <span className="text-interaction">TOP 10</span> 베스트 리뷰어
+            </>
+          ) : (
+            "👀 내가 팔로잉한 유저"
+          )}
         </h2>
       </div>
       <div className="h-screen w-full overflow-y-auto px-4 pb-[150px]">
@@ -68,7 +87,10 @@ export default function RankingRoute() {
           {data?.users?.map((v) => (
             <Link
               key={v.id}
-              to={`${v.id}`}
+              to={{
+                pathname: v.id,
+                search: location.search,
+              }}
               state={{
                 name: v.name,
               }}
@@ -95,40 +117,44 @@ export default function RankingRoute() {
                       </div>
                     </div>
                   </div>
-                  {user ? (
-                    v.id !== user.id && (
+                  {location.state.filter === "ranking" &&
+                    (user ? (
+                      v.id !== user.id && (
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            submit(
+                              {
+                                followingId: v.id,
+                                followerId: user.id ?? null,
+                              },
+                              { method: "post" }
+                            );
+                          }}
+                          className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
+                            !data?.followings ||
+                            data?.followings?.some((id) => v.id === id)
+                              ? "bg-trueGray-100 text-trueGray-400"
+                              : "text-interaction bg-[rgb(255_243_221)]"
+                          }`}
+                        >
+                          {!data?.followings ||
+                          data?.followings?.some((id) => v.id === id)
+                            ? "팔로잉"
+                            : "팔로우"}
+                        </button>
+                      )
+                    ) : (
                       <button
                         onClick={(e) => {
                           e.preventDefault();
-                          submit(
-                            { followingId: v.id, followerId: user.id ?? null },
-                            { method: "post" }
-                          );
+                          navigate("/signin");
                         }}
-                        className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
-                          !data?.followings ||
-                          data?.followings?.some((id) => v.id === id)
-                            ? "bg-trueGray-100 text-trueGray-400"
-                            : "text-interaction bg-[rgb(255_243_221)]"
-                        }`}
+                        className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
                       >
-                        {!data?.followings ||
-                        data?.followings?.some((id) => v.id === id)
-                          ? "팔로잉"
-                          : "팔로우"}
+                        팔로우
                       </button>
-                    )
-                  ) : (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        navigate("/signin");
-                      }}
-                      className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
-                    >
-                      팔로우
-                    </button>
-                  )}
+                    ))}
                 </div>
               </div>
             </Link>

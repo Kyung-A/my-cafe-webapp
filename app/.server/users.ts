@@ -1,8 +1,17 @@
 import { db } from "./db";
 
-export async function getUsers() {
+export async function getUsers(userId?: string) {
   try {
     const result = await db.user.findMany({
+      ...(userId && {
+        where: {
+          followers: {
+            some: {
+              followerId: userId,
+            },
+          },
+        },
+      }),
       select: {
         id: true,
         passwordHash: false,
@@ -15,12 +24,14 @@ export async function getUsers() {
           select: { review: true, followers: true, following: true },
         },
       },
-      orderBy: {
-        review: {
-          _count: "desc",
+      ...(!userId && {
+        orderBy: {
+          review: {
+            _count: "desc",
+          },
         },
-      },
-      take: 10,
+        take: 10,
+      }),
     });
     return result;
   } catch (err) {

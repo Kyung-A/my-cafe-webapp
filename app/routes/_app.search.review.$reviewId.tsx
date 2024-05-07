@@ -43,13 +43,13 @@ export default function ReviewDetailRoute() {
 
   return (
     <Panel
-      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/ranking") ? "0px" : "320px"}`}
+      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/users") ? "0px" : "320px"}`}
     >
       <div
-        className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/ranking") ? "gap-2" : "justify-between "}`}
+        className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/users") ? "gap-2" : "justify-between "}`}
       >
         {location.state?.prevUrl &&
-          location.state?.prevUrl.includes("/ranking") && (
+          location.state?.prevUrl.includes("/users") && (
             <button
               onClick={() => {
                 navigate(-1);
@@ -62,7 +62,7 @@ export default function ReviewDetailRoute() {
             </button>
           )}
         {location.state?.prevUrl &&
-        location.state?.prevUrl.includes("/ranking") ? (
+        location.state?.prevUrl.includes("/users") ? (
           <Link
             to={`/search/${data?.cafeId}`}
             state={{
@@ -88,7 +88,7 @@ export default function ReviewDetailRoute() {
           </h1>
         )}
         {location.state?.prevUrl &&
-          !location.state?.prevUrl.includes("/ranking") && (
+          !location.state?.prevUrl.includes("/users") && (
             <Link
               to="/search/reviewForm"
               state={{

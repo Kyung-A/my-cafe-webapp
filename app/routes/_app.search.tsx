@@ -296,9 +296,22 @@ export default function CafeSearchRoute() {
                     )
                 )}
                 <li>
-                  <Link to="/ranking" className="block w-full">
+                  <Link
+                    to="/users?filter=ranking"
+                    state={{ filter: "ranking" }}
+                    className="block w-full"
+                  >
                     <Menu name="베스트 리뷰어" />
                   </Link>
+                  {user && (
+                    <Link
+                      to="/users?filter=follow"
+                      state={{ filter: "follow" }}
+                      className="mt-2 block w-full"
+                    >
+                      <Menu name="나의 팔로잉 목록" />
+                    </Link>
+                  )}
                 </li>
               </ul>
             </div>

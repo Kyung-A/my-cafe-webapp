@@ -15,10 +15,7 @@ export function useMoveTheMap(coord: IReview | locationState | null) {
   const [marker, setMarker] = useState<IMarker | null>(null);
 
   useEffect(() => {
-    if (
-      location.state?.prevUrl &&
-      location.state.prevUrl.includes("/ranking")
-    ) {
+    if (location.state?.prevUrl && location.state.prevUrl.includes("/users")) {
       const { kakao } = window;
       if (!kakao || !mapData) return;
 

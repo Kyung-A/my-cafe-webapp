@@ -30,7 +30,7 @@ export default function MainLayoutRoute() {
         <Outlet context={{ user }} />
         <button
           onClick={() => setPanelOpen((prev) => !prev)}
-          className={`absolute top-1/2 z-10 -mt-6 h-12 w-5 ${location.state?.prevUrl && location.state.prevUrl.includes("/ranking") ? "hidden" : ""} ${location.pathname === "/search" || location.pathname === "/ranking" ? "-right-5" : "-right-[340px]"}`}
+          className={`absolute top-1/2 z-10 -mt-6 h-12 w-5 ${location.state?.prevUrl && location.state.prevUrl.includes("/users") ? "hidden" : ""} ${location.pathname === "/search" || location.pathname === "/users" ? "-right-5" : "-right-[340px]"}`}
         >
           <div className="flex h-full w-full items-center justify-center bg-white">
             <img
