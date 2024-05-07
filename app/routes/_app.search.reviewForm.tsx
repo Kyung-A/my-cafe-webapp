@@ -13,6 +13,7 @@ import photo from "~/assets/photo.svg";
 import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/utils/uploadPromise";
 import { formDataPromise } from "~/shared/utils/formData";
+import { imageMaxSize } from "~/shared/utils/imageMaxSize";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -139,7 +140,10 @@ export default function CafeReviewCreateRoute() {
       const notGoodArr = notGood.split(",").map((v, i) => ({ id: i, text: v }));
       setGoodInput(goodArr);
       setNotGoodInput(notGoodArr);
-      setPreview(fetcher.data.reviewImages.split(","));
+
+      if (fetcher.data.reviewImages) {
+        setPreview(fetcher.data.reviewImages.split(","));
+      }
     }
   }, [fetcher.data]);
 
@@ -209,7 +213,9 @@ export default function CafeReviewCreateRoute() {
                 }
 
                 const files: string[] = [];
+                const maxSize = 1024 * 1024 * 1024;
                 for (const file of e.target.files) {
+                  if (imageMaxSize(file, maxSize)) return;
                   const url = URL.createObjectURL(file);
                   files.push(url);
                 }
@@ -218,7 +224,6 @@ export default function CafeReviewCreateRoute() {
             }}
             type="file"
             accept=".jpg, .jpeg, .png"
-            size={3145728}
             multiple
             hidden
           />

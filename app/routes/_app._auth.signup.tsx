@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/utils/uploadPromise";
 import { formDataPromise } from "~/shared/utils/formData";
+import { imageMaxSize } from "~/shared/utils/imageMaxSize";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await formDataPromise(request);
@@ -73,13 +74,13 @@ export default function SignupRoute() {
             onChange={(e) => {
               if (e.target.files) {
                 for (const file of e.target.files) {
+                  if (imageMaxSize(file)) return;
                   setPreview(URL.createObjectURL(file));
                 }
               }
             }}
             type="file"
             accept=".jpg, .jpeg, .png"
-            size={3145728}
             hidden
           />
         </div>
