@@ -1,9 +1,10 @@
 import { Form, useSubmit } from "@remix-run/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import userImg from "~/assets/user.svg";
 import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
+import { imageMaxSize } from "~/shared/utils/imageMaxSize";
 
 interface IDialog {
   user: IRegister;
@@ -15,8 +16,17 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
   const submit = useSubmit();
   const { handleFileUpload, fileRef } = useImageUpload();
 
+  const inputRef = useRef<HTMLInputElement | null>(null);
+  const previewRef = useRef<HTMLImageElement | null>(null);
   const [preview, setPreview] = useState<string>(user.profile ?? userImg);
   const [username, setUsername] = useState<string>(user.name);
+
+  useEffect(() => {
+    if (!isOpen && inputRef.current && previewRef.current) {
+      inputRef.current.value = user.name;
+      previewRef.current.src = user.profile ?? userImg;
+    }
+  }, [isOpen, inputRef, user]);
 
   return (
     <dialog
@@ -35,6 +45,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
               ></button>
               {preview && (
                 <img
+                  ref={previewRef}
                   src={preview}
                   alt="프로필 이미지"
                   className="absolute z-[5] h-full w-full object-cover"
@@ -45,6 +56,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
           <div className="mt-2">
             <p className="text-center">{user.email}</p>
             <input
+              ref={inputRef}
               defaultValue={username}
               onChange={(e) => setUsername(e.target.value)}
               className="border-trueGray-300 outline-primary mx-auto mt-2 block w-60 rounded-full border px-3 py-1"
@@ -66,13 +78,13 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
                 onChange={(e) => {
                   if (e.target.files) {
                     for (const file of e.target.files) {
+                      if (imageMaxSize(file)) return;
                       setPreview(URL.createObjectURL(file));
                     }
                   }
                 }}
                 type="file"
                 accept=".jpg, .jpeg, .png"
-                size={3145728}
                 hidden
               />
               <input
@@ -108,7 +120,11 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
         </div>
       </div>
       <div
-        onClick={() => setOpened(false)}
+        onClick={() => {
+          setOpened(false);
+          setPreview(user.profile ?? userImg);
+          setUsername(user.name);
+        }}
         aria-hidden="true"
         className="absolute left-0 top-0 h-full w-full bg-black bg-opacity-30"
       ></div>

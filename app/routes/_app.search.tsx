@@ -227,6 +227,7 @@ export default function CafeSearchRoute() {
             setSearchInput={setSearchInput}
             handleEnter={handleEnter}
             onSubmit={handleSearch}
+            isActiveMenu={isActiveMenu}
           />
         </div>
         {/* 프로필 */}
