@@ -1,7 +1,8 @@
 import { ActionFunctionArgs, redirect } from "@remix-run/node";
 
-import { updateUser, uploadImage } from "~/.server/storage";
+import { updateUser } from "~/.server/storage";
 import { formDataPromise } from "~/shared/utils/formData";
+import { uploadPromise } from "~/shared/utils/uploadPromise";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await formDataPromise(request);
@@ -14,12 +15,9 @@ export async function action({ request }: ActionFunctionArgs) {
     await updateUser({ id, name });
     return redirect("/");
   } else {
-    const form = new FormData();
-    form.append("image", profile!);
+    const imageUrl = await uploadPromise(profile);
+    await updateUser({ id, name, profile: imageUrl as string });
 
-    await uploadImage(form).then(async (resp) => {
-      await updateUser({ id, name, profile: resp });
-    });
     return redirect("/");
   }
 }
