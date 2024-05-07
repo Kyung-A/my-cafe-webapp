@@ -39,6 +39,8 @@ export async function loader() {
 export function Layout({ children }: { children: React.ReactNode }) {
   const { mapKey } = useLoaderData<typeof loader>();
 
+  console.log(mapKey);
+
   return (
     <html lang="en">
       <head>
