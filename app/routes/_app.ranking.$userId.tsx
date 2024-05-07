@@ -35,7 +35,7 @@ export default function UserDetailRoute() {
               state={{ prevUrl: location.pathname }}
               className="cursor-pointer overflow-hidden rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
             >
-              {v.reviewImages !== "" && (
+              {v.reviewImages && (
                 <div className="h-24 w-full overflow-hidden">
                   <img
                     src={v.reviewImages?.split(",")[0]}

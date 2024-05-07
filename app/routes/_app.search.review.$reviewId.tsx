@@ -133,7 +133,7 @@ export default function ReviewDetailRoute() {
           )}
       </div>
       <div className="h-full w-full overflow-y-auto">
-        {data?.reviewImages !== "" && (
+        {data?.reviewImages && (
           <div className="slider-container max-h-[208px] overflow-hidden">
             <Slider {...sliderInit}>
               {data?.reviewImages?.split(",").map((src) => (
