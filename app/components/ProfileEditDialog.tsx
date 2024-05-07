@@ -1,7 +1,8 @@
 import { Form, useSubmit } from "@remix-run/react";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 
 import userImg from "~/assets/user.svg";
+import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
 
 interface IDialog {
@@ -12,16 +13,10 @@ interface IDialog {
 
 export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
   const submit = useSubmit();
+  const { handleFileUpload, fileRef } = useImageUpload();
 
-  const fileRef = useRef<HTMLInputElement | null>(null);
   const [preview, setPreview] = useState<string>(user.profile ?? userImg);
   const [username, setUsername] = useState<string>(user.name);
-
-  const handleFileUpload = useCallback(() => {
-    if (fileRef?.current) {
-      fileRef.current.click();
-    }
-  }, [fileRef]);
 
   return (
     <dialog

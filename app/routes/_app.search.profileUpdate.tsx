@@ -1,26 +1,10 @@
-import {
-  ActionFunctionArgs,
-  redirect,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-} from "@remix-run/node";
+import { ActionFunctionArgs, redirect } from "@remix-run/node";
 
 import { updateUser, uploadImage } from "~/.server/storage";
+import { formDataPromise } from "~/shared/utils/formData";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const uploadHandler = unstable_composeUploadHandlers(
-    unstable_createFileUploadHandler({
-      file: ({ filename }) => filename,
-    }),
-    unstable_createMemoryUploadHandler()
-  );
-
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    uploadHandler
-  );
+  const formData = await formDataPromise(request);
 
   const id = String(formData.get("id"));
   const name = String(formData.get("name"));

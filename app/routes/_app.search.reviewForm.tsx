@@ -1,23 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  ActionFunctionArgs,
-  json,
-  redirect,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-} from "@remix-run/node";
+import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, useFetcher, useLocation } from "@remix-run/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Slider from "react-slick";
 
 import { getReview, createReview, updateReview } from "~/.server/review";
-import { getUser, uploadImage } from "~/.server/storage";
+import { getUser } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
 import minus from "~/assets/minus.svg";
 import photo from "~/assets/photo.svg";
+import { useImageUpload } from "~/hooks";
+import { uploadPromise } from "~/shared/utils/uploadPromise";
+import { formDataPromise } from "~/shared/utils/formData";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -33,17 +28,7 @@ export async function action({ request }: ActionFunctionArgs) {
   const user = await getUser(request);
   if (!user) return redirect("/signin");
 
-  const uploadHandler = unstable_composeUploadHandlers(
-    unstable_createFileUploadHandler({
-      file: ({ filename }) => filename,
-    }),
-    unstable_createMemoryUploadHandler()
-  );
-
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    uploadHandler
-  );
+  const formData = await formDataPromise(request);
 
   const data: any = {};
   const goodArr: FormDataEntryValue[] = [];
@@ -74,18 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   if ((reviewImages as any).size !== 0) {
     for (const img of reviewImages) {
-      const uploadPromise = async () => {
-        try {
-          const form = new FormData();
-          form.append("image", img);
-          const result = await uploadImage(form);
-          return new Promise((resolve) => resolve(result));
-        } catch (err) {
-          console.error(err);
-          return;
-        }
-      };
-      const imageUrl = await uploadPromise();
+      const imageUrl = await uploadPromise(img);
       imageUrls.push(imageUrl);
     }
     data["reviewImages"] = imageUrls.length > 0 ? imageUrls.join(",") : "";
@@ -105,6 +79,7 @@ export async function action({ request }: ActionFunctionArgs) {
 export default function CafeReviewCreateRoute() {
   const location = useLocation();
   const fetcher = useFetcher<IReview>();
+  const { handleFileUpload, fileRef } = useImageUpload();
 
   const [goodInput, setGoodInput] = useState<IFieldInput[]>([
     { id: 0, text: "" },
@@ -113,7 +88,6 @@ export default function CafeReviewCreateRoute() {
     { id: 0, text: "" },
   ]);
   const [preview, setPreview] = useState<string[]>();
-  const fileRef = useRef<HTMLInputElement | null>(null);
 
   const sliderInit = {
     dots: false,
@@ -150,12 +124,6 @@ export default function CafeReviewCreateRoute() {
     },
     [goodInput, notGoodInput]
   );
-
-  const handleFileUpload = useCallback(() => {
-    if (fileRef?.current) {
-      fileRef.current.click();
-    }
-  }, [fileRef]);
 
   useEffect(() => {
     if (location.state.reviewId) {

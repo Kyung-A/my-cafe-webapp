@@ -1,31 +1,16 @@
-import {
-  ActionFunctionArgs,
-  json,
-  redirect,
-  unstable_composeUploadHandlers,
-  unstable_createFileUploadHandler,
-  unstable_createMemoryUploadHandler,
-  unstable_parseMultipartFormData,
-} from "@remix-run/node";
+import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 
 import arrowRight from "~/assets/arrowRight.svg";
 import { db } from "~/.server/db";
-import { register, uploadImage } from "~/.server/storage";
-import { useCallback, useRef, useState } from "react";
+import { register } from "~/.server/storage";
+import { useState } from "react";
+import { useImageUpload } from "~/hooks";
+import { uploadPromise } from "~/shared/utils/uploadPromise";
+import { formDataPromise } from "~/shared/utils/formData";
 
 export async function action({ request }: ActionFunctionArgs) {
-  const uploadHandler = unstable_composeUploadHandlers(
-    unstable_createFileUploadHandler({
-      file: ({ filename }) => filename,
-    }),
-    unstable_createMemoryUploadHandler()
-  );
-
-  const formData = await unstable_parseMultipartFormData(
-    request,
-    uploadHandler
-  );
+  const formData = await formDataPromise(request);
 
   const email = String(formData.get("email"));
   const name = String(formData.get("name"));
@@ -49,26 +34,17 @@ export async function action({ request }: ActionFunctionArgs) {
     await register({ email, name, password });
     return redirect("/signin");
   } else {
-    const form = new FormData();
-    form.append("image", profile!);
+    const imageUrl = await uploadPromise(profile);
+    await register({ email, name, password, profile: imageUrl as string });
 
-    await uploadImage(form).then(async (resp) => {
-      await register({ email, name, password, profile: resp });
-    });
     return redirect("/signin");
   }
 }
 
 export default function SignupRoute() {
   const actionData = useActionData<typeof action>();
-  const fileRef = useRef<HTMLInputElement | null>(null);
+  const { handleFileUpload, fileRef } = useImageUpload();
   const [preview, setPreview] = useState<string>();
-
-  const handleFileUpload = useCallback(() => {
-    if (fileRef?.current) {
-      fileRef.current.click();
-    }
-  }, [fileRef]);
 
   return (
     <Form method="post" encType="multipart/form-data">

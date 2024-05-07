@@ -5,3 +5,4 @@ export { useFetch } from "./useFetch";
 export { useKeyword } from "./useKeyword";
 export { useCustomOverlay } from "./useCustomOverlay";
 export { useTargetView } from "./useTargetView";
+export { useImageUpload } from "./useImageUpload";
