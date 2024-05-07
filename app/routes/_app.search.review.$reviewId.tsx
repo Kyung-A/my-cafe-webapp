@@ -6,14 +6,12 @@ import {
   useNavigate,
   useParams,
 } from "@remix-run/react";
+import Slider from "react-slick";
 
 import arrowLeft from "~/assets/arrowLeft.svg";
 import { getReview } from "~/.server/review";
 import { Panel } from "~/components";
-import { useEffect, useState } from "react";
-import { useMap } from "~/shared/contexts/Map";
-import { IMarker } from "~/shared/types";
-import Slider from "react-slick";
+import { useMoveTheMap } from "~/hooks";
 
 interface IParams {
   params: {
@@ -33,8 +31,7 @@ export default function ReviewDetailRoute() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { mapData } = useMap();
-  const [marker, setMarker] = useState<IMarker | null>(null);
+  const { marker, setMarker } = useMoveTheMap(data);
 
   const sliderInit = {
     dots: false,
@@ -43,33 +40,6 @@ export default function ReviewDetailRoute() {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
-
-  useEffect(() => {
-    if (
-      location.state?.prevUrl &&
-      location.state.prevUrl.includes("/ranking")
-    ) {
-      const { kakao } = window;
-      if (!kakao || !mapData) return;
-
-      const position = new kakao.maps.LatLng(data?.y, data?.x);
-      const marker = new kakao.maps.Marker({
-        position: position,
-        title: data?.name,
-        zIndex: 30,
-      });
-
-      setMarker(marker);
-      mapData.setCenter(position);
-    }
-  }, [data, mapData, location]);
-
-  useEffect(() => {
-    if (!mapData) return;
-    if (marker) {
-      marker?.setMap(mapData);
-    }
-  }, [marker, mapData]);
 
   return (
     <Panel

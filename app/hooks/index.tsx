@@ -6,3 +6,4 @@ export { useKeyword } from "./useKeyword";
 export { useCustomOverlay } from "./useCustomOverlay";
 export { useTargetView } from "./useTargetView";
 export { useImageUpload } from "./useImageUpload";
+export { useMoveTheMap } from "./useMoveTheMap";

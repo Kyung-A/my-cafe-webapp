@@ -15,9 +15,7 @@ import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/components";
 import arrowRight from "~/assets/arrowRight.svg";
 import arrowLeft from "~/assets/arrowLeft.svg";
-import { useMap } from "~/shared/contexts/Map";
-import { useEffect, useState } from "react";
-import { IMarker } from "~/shared/types";
+import { useMoveTheMap } from "~/hooks";
 
 interface IParams {
   params: {
@@ -37,38 +35,7 @@ export default function CafeDetailRoute() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { mapData } = useMap();
-  const [marker, setMarker] = useState<IMarker | null>(null);
-
-  useEffect(() => {
-    if (
-      location.state?.prevUrl &&
-      location.state.prevUrl.includes("/ranking")
-    ) {
-      const { kakao } = window;
-      if (!kakao || !mapData) return;
-
-      const position = new kakao.maps.LatLng(
-        location.state?.y,
-        location.state?.x
-      );
-      const marker = new kakao.maps.Marker({
-        position: position,
-        title: data?.basicInfo.placenamefull,
-        zIndex: 30,
-      });
-
-      setMarker(marker);
-      mapData.setCenter(position);
-    }
-  }, [data, mapData, location]);
-
-  useEffect(() => {
-    if (!mapData) return;
-    if (marker) {
-      marker?.setMap(mapData);
-    }
-  }, [marker, mapData]);
+  const { marker, setMarker } = useMoveTheMap(location.state);
 
   return (
     <Panel
