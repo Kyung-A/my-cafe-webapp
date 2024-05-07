@@ -354,7 +354,7 @@ export default function CafeSearchRoute() {
                         </div>
                       ) : (
                         <Link
-                          to={v.id}
+                          to={v.x && v.y && v.id}
                           key={v.id}
                           state={{
                             x: v.x,

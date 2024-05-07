@@ -94,7 +94,7 @@ export interface IFieldInput {
 export interface IReview {
   id: string;
   cafeId: string;
-  userId: string;
+  authorId: string;
   name: string;
   description: string;
   starRating: number;
@@ -105,6 +105,7 @@ export interface IReview {
   recommend: string;
   x: string;
   y: string;
+  likedBy?: IRegister;
   reviewImages: string;
 }
 
