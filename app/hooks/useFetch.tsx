@@ -175,6 +175,7 @@ export function useFetch() {
       if (v.id === newReview.cafeId) {
         cafeData.current![i] = {
           ...v,
+          reviewId: newReview.id,
           review: newReview.description,
           visited: newReview.visited,
         };

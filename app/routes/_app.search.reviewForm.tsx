@@ -41,6 +41,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   [...formData.entries()].forEach(([key, value]) => {
     if (key === "reviewId") return;
+    if (key === "reviewImages") return;
 
     if (key === "good") {
       goodArr.push(value);
@@ -58,7 +59,7 @@ export async function action({ request }: ActionFunctionArgs) {
   data["userId"] = user.id;
   data["visited"] = true;
 
-  if ((reviewImages as any).size !== 0) {
+  if (reviewImages[0] && (reviewImages as any)[0].size !== 0) {
     for (const img of reviewImages) {
       const imageUrl = await uploadPromise(img);
       imageUrls.push(imageUrl);

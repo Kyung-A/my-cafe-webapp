@@ -19,6 +19,7 @@ export async function formDataPromise(request: Request): Promise<FormData> {
 
     return new Promise((resolve) => resolve(formData));
   } catch (err) {
+    console.error(err);
     throw Error();
   }
 }
