@@ -56,7 +56,7 @@ export async function action({ request }: ActionFunctionArgs) {
     }
   });
 
-  data["userId"] = user.id;
+  data["authorId"] = user.id;
   data["visited"] = true;
 
   if (reviewImages[0] && (reviewImages as any)[0].size !== 0) {

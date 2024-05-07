@@ -28,8 +28,7 @@ export async function getReviewList(userId: string) {
   if (!userId) return null;
   try {
     const result = await db.review.findMany({
-      where: { userId: userId },
-      take: 45,
+      where: { authorId: userId },
     });
 
     if (result?.length === 0) return null;
@@ -44,6 +43,49 @@ export async function getReview(id: string) {
   try {
     const result = await db.review.findUnique({
       where: { id },
+      include: {
+        likedBy: true,
+      },
+    });
+    return result;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export async function createReviewLike(data: {
+  reviewId: string;
+  userId: string;
+}) {
+  try {
+    const result = await db.review.update({
+      where: { id: data.reviewId },
+      data: {
+        likedBy: {
+          connect: { id: data.userId },
+        },
+      },
+    });
+    return result;
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+}
+
+export async function removeReviewLike(data: {
+  reviewId: string;
+  userId: string;
+}) {
+  try {
+    const result = await db.review.update({
+      where: { id: data.reviewId },
+      data: {
+        likedBy: {
+          disconnect: { id: data.userId },
+        },
+      },
     });
     return result;
   } catch (err) {

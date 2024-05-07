@@ -18,7 +18,8 @@ model User {
   passwordHash String    @unique
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  review       Review[]
+  review       Review[]  @relation("author")
+  likes        Review[]
   followers    Follows[] @relation("following")
   following    Follows[] @relation("follower")
 }
@@ -48,6 +49,7 @@ model Review {
   recommend    String
   x            String
   y            String
-  user         User?    @relation(fields: [userId], references: [id])
-  userId       String
+  authorId     String
+  author       User?    @relation("author", fields: [authorId], references: [id])
+  likedBy      User[]
 }

@@ -1,9 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { json } from "@remix-run/node";
-import { Link, useLoaderData, useLocation } from "@remix-run/react";
+import {
+  Link,
+  useLoaderData,
+  useLocation,
+  useOutletContext,
+} from "@remix-run/react";
 
 import { Panel } from "~/components";
 import { getReviewList } from "~/.server/review";
+import { IRegister } from "~/shared/types";
 
 interface IParams {
   params: {
@@ -20,6 +26,7 @@ export async function loader({ params }: IParams) {
 export default function UserDetailRoute() {
   const data = useLoaderData<typeof loader>();
   const location = useLocation();
+  const { user } = useOutletContext<{ user: IRegister }>();
 
   return (
     <Panel left="320px">
@@ -33,7 +40,7 @@ export default function UserDetailRoute() {
               <Link
                 key={v.id}
                 to={`/search/review/${v.id}`}
-                state={{ prevUrl: location.pathname }}
+                state={{ prevUrl: location.pathname, myId: user.id }}
                 className="cursor-pointer overflow-hidden rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
               >
                 {v.reviewImages && (

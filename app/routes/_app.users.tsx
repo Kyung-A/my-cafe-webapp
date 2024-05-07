@@ -128,7 +128,7 @@ export default function RankingRoute() {
                                 followingId: v.id,
                                 followerId: user.id ?? null,
                               },
-                              { method: "post" }
+                              { method: "post", navigate: false }
                             );
                           }}
                           className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
@@ -161,7 +161,7 @@ export default function RankingRoute() {
           ))}
         </div>
       </div>
-      <Outlet />
+      <Outlet context={{ user }} />
     </>
   );
 }
