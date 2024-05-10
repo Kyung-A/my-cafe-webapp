@@ -37,7 +37,7 @@ export async function loader() {
 }
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const { mapKey } = useLoaderData<typeof loader>();
+  const { mapKey } = useLoaderData<typeof loader>() || {};
 
   return (
     <html lang="en">
