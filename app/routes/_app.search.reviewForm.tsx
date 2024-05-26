@@ -214,9 +214,8 @@ export default function CafeReviewCreateRoute() {
                 }
 
                 const files: string[] = [];
-                const maxSize = 1024 * 1024 * 1024;
                 for (const file of e.target.files) {
-                  if (imageMaxSize(file, maxSize)) return;
+                  if (imageMaxSize(file)) return;
                   const url = URL.createObjectURL(file);
                   files.push(url);
                 }

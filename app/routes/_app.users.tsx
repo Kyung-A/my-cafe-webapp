@@ -73,7 +73,7 @@ export default function RankingRoute() {
       </div>
       <div className="px-4 py-6">
         <h2 className="text-xl font-semibold">
-          {location.state.filter === "ranking" ? (
+          {location.search.includes("ranking") ? (
             <>
               ☕ <span className="text-interaction">TOP 10</span> 베스트 리뷰어
             </>
@@ -84,81 +84,85 @@ export default function RankingRoute() {
       </div>
       <div className="h-screen w-full overflow-y-auto px-4 pb-[150px]">
         <div className="mt-2 flex flex-col gap-6">
-          {data?.users?.map((v) => (
-            <Link
-              key={v.id}
-              to={{
-                pathname: v.id,
-                search: location.search,
-              }}
-              state={{
-                name: v.name,
-              }}
-              className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
-            >
-              <div className="p-4">
-                <div className="mt-1 flex items-center gap-2">
-                  <div className="h-12 w-12 overflow-hidden rounded-full">
-                    <img
-                      src={v.profile ?? userImg}
-                      alt="프로필 이미지"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold">{v.name}</h3>
-                    <div className="flex items-center">
-                      <div className="text-trueGray-400 text-sm">
-                        리뷰수 {v._count.review}
-                      </div>
-                      <hr className="divide-y-1 border-trueGray-300 mx-1 h-[1px] w-3 rotate-90" />
-                      <div className="text-trueGray-400 text-sm ">
-                        팔로워 {v._count.followers}
+          {data?.users && data?.users?.length > 0 ? (
+            data?.users?.map((v) => (
+              <Link
+                key={v.id}
+                to={{
+                  pathname: v.id,
+                  search: location.search,
+                }}
+                state={{
+                  name: v.name,
+                }}
+                className="cursor-pointer rounded-md shadow-[0px_0px_10px_-2px_#4343432e]"
+              >
+                <div className="p-4">
+                  <div className="mt-1 flex items-center gap-2">
+                    <div className="h-12 w-12 overflow-hidden rounded-full">
+                      <img
+                        src={v.profile ?? userImg}
+                        alt="프로필 이미지"
+                        className="h-full w-full object-cover"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold">{v.name}</h3>
+                      <div className="flex items-center">
+                        <div className="text-trueGray-400 text-sm">
+                          리뷰수 {v._count.review}
+                        </div>
+                        <hr className="divide-y-1 border-trueGray-300 mx-1 h-[1px] w-3 rotate-90" />
+                        <div className="text-trueGray-400 text-sm ">
+                          팔로워 {v._count.followers}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  {location.state.filter === "ranking" &&
-                    (user ? (
-                      v.id !== user.id && (
+                    {location.state.filter === "ranking" &&
+                      (user ? (
+                        v.id !== user.id && (
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              submit(
+                                {
+                                  followingId: v.id,
+                                  followerId: user.id ?? null,
+                                },
+                                { method: "post", navigate: false }
+                              );
+                            }}
+                            className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
+                              !data?.followings ||
+                              data?.followings?.some((id) => v.id === id)
+                                ? "bg-trueGray-100 text-trueGray-400"
+                                : "text-interaction bg-[rgb(255_243_221)]"
+                            }`}
+                          >
+                            {!data?.followings ||
+                            data?.followings?.some((id) => v.id === id)
+                              ? "팔로잉"
+                              : "팔로우"}
+                          </button>
+                        )
+                      ) : (
                         <button
                           onClick={(e) => {
                             e.preventDefault();
-                            submit(
-                              {
-                                followingId: v.id,
-                                followerId: user.id ?? null,
-                              },
-                              { method: "post", navigate: false }
-                            );
+                            navigate("/signin");
                           }}
-                          className={`ml-auto rounded px-3 py-1 text-sm font-semibold ${
-                            !data?.followings ||
-                            data?.followings?.some((id) => v.id === id)
-                              ? "bg-trueGray-100 text-trueGray-400"
-                              : "text-interaction bg-[rgb(255_243_221)]"
-                          }`}
+                          className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
                         >
-                          {!data?.followings ||
-                          data?.followings?.some((id) => v.id === id)
-                            ? "팔로잉"
-                            : "팔로우"}
+                          팔로우
                         </button>
-                      )
-                    ) : (
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          navigate("/signin");
-                        }}
-                        className="text-interaction ml-auto rounded bg-[rgb(255_243_221)] px-3 py-1 text-sm font-semibold"
-                      >
-                        팔로우
-                      </button>
-                    ))}
+                      ))}
+                  </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          ) : (
+            <div className="pt-40 text-center">팔로잉한 유저가 없습니다.</div>
+          )}
         </div>
       </div>
       <Outlet context={{ user }} />
