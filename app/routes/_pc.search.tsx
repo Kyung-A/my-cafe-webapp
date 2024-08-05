@@ -38,8 +38,8 @@ import { useOverlay } from "~/shared/contexts/Overlay";
 import { getUser } from "~/.server/storage";
 import bar3 from "~/assets/bar3.svg";
 import refresh from "~/assets/refresh.svg";
-import userImg from "~/assets/user.svg";
 import edit from "~/assets/edit.svg";
+import UserIcon from "~/assets/user";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -242,11 +242,15 @@ export default function CafeSearchRoute() {
                   <img src={edit} alt="프로필 수정" />
                 </div>
                 <div className="h-16 w-16 overflow-hidden rounded-full">
-                  <img
-                    src={user.profile ?? userImg}
-                    alt="프로필 이미지"
-                    className="h-full w-full object-cover"
-                  />
+                  {user.profile ? (
+                    <img
+                      src={user.profile}
+                      alt="프로필 이미지"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <UserIcon className="w-full fill-neutral-300" />
+                  )}
                 </div>
               </button>
               <div className="flex-1">

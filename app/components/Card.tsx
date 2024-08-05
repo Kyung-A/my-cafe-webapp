@@ -1,7 +1,7 @@
 import { ICafeResponse, IRegister } from "~/shared/types";
 
-import visited from "~/assets/visited.svg";
-import unvisited from "~/assets/unvisited.svg";
+import Visitied from "~/assets/visited";
+import UnVisitied from "~/assets/unvisited";
 
 interface ICard {
   data: ICafeResponse;
@@ -18,13 +18,9 @@ export function Card({ data, user }: ICard) {
             {user && (
               <button className="mr-1 w-[18px]">
                 {data.visited ? (
-                  <img
-                    src={visited}
-                    className="fill-interaction w-full"
-                    alt="방문함"
-                  />
+                  <Visitied className="fill-interaction w-full" />
                 ) : (
-                  <img src={unvisited} className="w-full" alt="방문하지 못함" />
+                  <UnVisitied className="w-full fill-none stroke-stone-400" />
                 )}
               </button>
             )}
