@@ -11,8 +11,6 @@ export function useGeoLocation() {
   useEffect(() => {
     const { geolocation } = navigator;
 
-    if (!geolocation) return;
-
     geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
@@ -21,7 +19,13 @@ export function useGeoLocation() {
           longitude,
         });
       },
-      (err) => console.error(err),
+      (err) => {
+        console.error(err);
+        setLocation({
+          latitude: 37.566765678409546,
+          longitude: 126.97887724160043,
+        });
+      },
       { enableHighAccuracy: true }
     );
   }, []);

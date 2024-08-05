@@ -70,7 +70,7 @@ const MapProvider = ({ children }: IMapProvider) => {
     kakao.maps.load(() => {
       const options = {
         center: new kakao.maps.LatLng(latitude, longitude),
-        level: 5,
+        level: 4,
       };
 
       const map = new kakao.maps.Map(mapEl.current, options);
