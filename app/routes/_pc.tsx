@@ -17,7 +17,7 @@ export async function loader({ request }: { request: Request }) {
   return json(user);
 }
 
-export default function MainLayoutRoute() {
+export default function MainPCLayoutRoute() {
   const [isPanelOpen, setPanelOpen] = useState(false);
 
   const location = useLocation();
