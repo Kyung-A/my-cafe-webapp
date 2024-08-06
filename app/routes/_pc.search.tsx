@@ -18,6 +18,7 @@ import {
   TargetViewButton,
 } from "~/components";
 import {
+  useClear,
   useClickActive,
   useFetch,
   useGeoLocation,
@@ -57,21 +58,30 @@ export default function CafeSearchRoute() {
 
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { fetchCafeData, refetchCafeData } = useFetch();
-  const { GNB, cafeData, setGNB, clusterer, pagination, mapData } = useMap();
+  const {
+    GNB,
+    cafeData,
+    clusterer,
+    pagination,
+    mapData,
+    searchInput,
+    setSearchInput,
+    isIdle,
+    setIdle,
+  } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
   const { curLocation } = useGeoLocation();
   const { handleActive } = useClickActive();
   const { searchKeyword } = useKeyword();
   const { targetView } = useTargetView();
+  const { handleClear } = useClear();
 
   const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
   const searchLocation = useRef<string | null | undefined>(null);
 
   const [address, setAddress] = useState<string>();
-  const [searchInput, setSearchInput] = useState<string>("");
   const [coordinate, setCoordinate] = useState<ICoord | null>();
-  const [isIdle, setIdle] = useState<boolean>(false);
   const [isOpen, setOpened] = useState<boolean>(false);
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
@@ -122,32 +132,6 @@ export default function CafeSearchRoute() {
     },
     [navigate, user, userReview, mapData, location]
   );
-
-  const handleClear = useCallback(() => {
-    setGNB(GNB.map((v) => ({ ...v, active: false })));
-    removeData();
-    removeMarker();
-    removewOverlay(overlayArr);
-    listOverlayArr[0]?.setMap(null);
-    clusterer?.clear();
-    setSearchInput("");
-    setIdle(false);
-
-    if (!location.pathname.includes("directions")) {
-      navigate("/search");
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    GNB,
-    clusterer,
-    listOverlayArr,
-    location.pathname,
-    navigate,
-    overlayArr,
-    removeData,
-    removeMarker,
-    removewOverlay,
-  ]);
 
   useEffect(() => {
     const { kakao } = window;

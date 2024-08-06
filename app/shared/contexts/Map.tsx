@@ -32,6 +32,10 @@ interface IMap {
   pagination: ICafePagination | undefined;
   setPagination: Dispatch<SetStateAction<ICafePagination | undefined>>;
   clusterer: IClusterer | undefined;
+  searchInput: string;
+  setSearchInput: Dispatch<SetStateAction<string>>;
+  isIdle: boolean;
+  setIdle: Dispatch<SetStateAction<boolean>>;
 }
 
 interface IMapProvider {
@@ -49,6 +53,10 @@ const MapContext = createContext<IMap>({
   pagination: undefined,
   setPagination: () => null,
   clusterer: undefined,
+  searchInput: "",
+  setSearchInput: () => "",
+  isIdle: false,
+  setIdle: () => false,
 });
 
 const MapProvider = ({ children }: IMapProvider) => {
@@ -61,6 +69,8 @@ const MapProvider = ({ children }: IMapProvider) => {
   const [markers, setMarkers] = useState<IMarker[]>([]);
   const [pagination, setPagination] = useState<ICafePagination>();
   const [clusterer, setClusterer] = useState<IClusterer>();
+  const [searchInput, setSearchInput] = useState<string>("");
+  const [isIdle, setIdle] = useState<boolean>(false);
 
   useEffect(() => {
     const { kakao } = window;
@@ -108,6 +118,10 @@ const MapProvider = ({ children }: IMapProvider) => {
         pagination,
         setPagination,
         clusterer,
+        searchInput,
+        setSearchInput,
+        isIdle,
+        setIdle,
       }}
     >
       {children}
