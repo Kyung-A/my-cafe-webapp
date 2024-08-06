@@ -325,9 +325,13 @@ export default function CafeSearchRoute() {
                     type="button"
                     onClick={() => {
                       handleClear();
-                      handleMenu("visited", userReview as IReview[]);
+                      if (isActiveMenu.id === "visited") {
+                        handleMenu("default", userReview as IReview[]);
+                      } else {
+                        handleMenu("visited", userReview as IReview[]);
+                      }
                     }}
-                    className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary text-white" : "text-zinc-400"}`}
+                    className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary font-semibold text-white" : "text-zinc-400"}`}
                   >
                     방문한 카페
                   </button>
@@ -371,12 +375,24 @@ export default function CafeSearchRoute() {
                     })}
                   </div>
                 )}
-                {(!pagination || !pagination?.hasNextPage) &&
+                {user === null ? (
+                  <div className="flex h-full w-full flex-col items-center pt-36">
+                    <p className="text-center">로그인이 필요한 서비스입니다.</p>
+                    <Link
+                      to="/signin"
+                      className="bg-interaction mx-auto mt-3 inline-block rounded-full px-8 py-2 text-center text-sm font-semibold text-white"
+                    >
+                      로그인 하기
+                    </Link>
+                  </div>
+                ) : (
+                  (!pagination || !pagination?.hasNextPage) &&
                   cafeData.current.length === 0 && (
                     <div className="h-full w-full pt-36">
                       <p className="text-center">카페를 찾지 못 했습니다.</p>
                     </div>
-                  )}
+                  )
+                )}
               </div>
             </>
           )}

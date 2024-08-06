@@ -23,12 +23,8 @@ export function useClickActive() {
 
   const handleMenu = useCallback(
     (id: string, userReview: IReview[] | null) => {
-      if (id !== "default" && user === null) {
-        navigate("/signin");
-      } else {
-        handleActive(id);
-        fetchCafeData(id, userReview);
-      }
+      handleActive(id);
+      fetchCafeData(id, userReview);
     },
     [navigate, user, mapData, location]
   );
