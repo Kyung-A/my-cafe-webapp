@@ -5,7 +5,6 @@ import {
   json,
   useLoaderData,
   useLocation,
-  useNavigate,
   useOutletContext,
 } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -51,7 +50,6 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export default function CafeSearchRoute() {
-  const navigate = useNavigate();
   const location = useLocation();
   const userReview = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
@@ -71,7 +69,7 @@ export default function CafeSearchRoute() {
   } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
   const { curLocation } = useGeoLocation();
-  const { handleActive } = useClickActive();
+  const { handleActive, handleMenu } = useClickActive();
   const { searchKeyword } = useKeyword();
   const { targetView } = useTargetView();
   const { handleClear } = useClear();
@@ -120,18 +118,6 @@ export default function CafeSearchRoute() {
       }
     );
   }, []);
-
-  const handleMenu = useCallback(
-    (id: string) => {
-      if (id !== "default" && user === null) {
-        navigate("/signin");
-      } else {
-        handleActive(id);
-        fetchCafeData(id, userReview as IReview[]);
-      }
-    },
-    [navigate, user, userReview, mapData, location]
-  );
 
   useEffect(() => {
     const { kakao } = window;
@@ -292,7 +278,7 @@ export default function CafeSearchRoute() {
                     type="button"
                     onClick={() => {
                       handleClear();
-                      handleMenu("default");
+                      handleMenu("default", userReview as IReview[]);
                     }}
                     className="border-primary w-full rounded border px-4 py-2 text-left"
                   >
@@ -339,7 +325,7 @@ export default function CafeSearchRoute() {
                     type="button"
                     onClick={() => {
                       handleClear();
-                      handleMenu("visited");
+                      handleMenu("visited", userReview as IReview[]);
                     }}
                     className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary text-white" : "text-zinc-400"}`}
                   >
