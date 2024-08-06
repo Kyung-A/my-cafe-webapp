@@ -82,77 +82,61 @@ export function useFetch() {
 
           /* 카페 목록 */
           let result: ICafeResponse[] = [];
+          result = data.reduce((acc: ICafeResponse[], cur, index) => {
+            // 리뷰 X && 주변검색
+            if (!reviewData && type === "default") {
+              acc[index] = {
+                ...cur,
+                visited: false,
+              };
+            }
 
-          if (type !== "notVisited") {
-            result = data.reduce((acc: ICafeResponse[], cur, index) => {
-              // 리뷰 X && 주변검색
-              if (!reviewData && type === "default") {
-                acc[index] = {
-                  ...cur,
-                  visited: false,
-                };
+            // 리뷰 O
+            if (reviewData) {
+              // 주변검색
+              if (type === "default") {
+                for (const review of reviewData) {
+                  const { id, cafeId, description, visited } = review;
+
+                  if (cur.id === cafeId) {
+                    acc[index] = {
+                      ...cur,
+                      reviewId: id,
+                      review: description,
+                      visited: visited,
+                    };
+                    break;
+                  } else {
+                    // 리뷰 있/없 총 데이터 반환
+                    acc[index] = {
+                      ...cur,
+                      visited: false,
+                    };
+                  }
+                }
               }
 
-              // 리뷰 O
-              if (reviewData) {
-                // 주변검색
-                if (type === "default") {
-                  for (const review of reviewData) {
-                    const { id, cafeId, description, visited } = review;
-
-                    if (cur.id === cafeId) {
-                      acc[index] = {
+              // 방문 O
+              if (type === "visited") {
+                reviewData.forEach((review) => {
+                  const { id, cafeId, description, visited } = review;
+                  if (cur.id === cafeId) {
+                    if (visited) {
+                      return acc.push({
                         ...cur,
                         reviewId: id,
                         review: description,
                         visited: visited,
-                      };
-                      break;
-                    } else {
-                      // 리뷰 있/없 총 데이터 반환
-                      acc[index] = {
-                        ...cur,
-                        visited: false,
-                      };
+                      });
                     }
                   }
-                }
-
-                // 방문 O
-                if (type === "visited") {
-                  reviewData.forEach((review) => {
-                    const { id, cafeId, description, visited } = review;
-                    if (cur.id === cafeId) {
-                      if (visited) {
-                        return acc.push({
-                          ...cur,
-                          reviewId: id,
-                          review: description,
-                          visited: visited,
-                        });
-                      }
-                    }
-                  });
-                }
+                });
               }
-
-              return acc;
-            }, []);
-          }
-
-          if (type === "notVisited") {
-            if (reviewData) {
-              result = data.filter((v) => {
-                return !reviewData.some(
-                  (review) =>
-                    review.cafeId === v.id && {
-                      ...v,
-                      visited: false,
-                    }
-                );
-              });
             }
-          }
+
+            return acc;
+          }, []);
+
           cafeData.current = [
             ...(cafeData.current as ICafeResponse[]),
             ...result,

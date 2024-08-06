@@ -6,12 +6,7 @@ export const GNB = [
   },
   {
     id: "visited",
-    name: "방문한 카페 보기",
-    active: false,
-  },
-  {
-    id: "notVisited",
-    name: "방문하지 못한 카페 보기",
+    name: "방문한 카페",
     active: false,
   },
   {

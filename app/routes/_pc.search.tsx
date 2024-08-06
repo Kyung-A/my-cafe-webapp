@@ -123,6 +123,32 @@ export default function CafeSearchRoute() {
     [navigate, user, userReview, mapData, location]
   );
 
+  const handleClear = useCallback(() => {
+    setGNB(GNB.map((v) => ({ ...v, active: false })));
+    removeData();
+    removeMarker();
+    removewOverlay(overlayArr);
+    listOverlayArr[0]?.setMap(null);
+    clusterer?.clear();
+    setSearchInput("");
+    setIdle(false);
+
+    if (!location.pathname.includes("directions")) {
+      navigate("/search");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    GNB,
+    clusterer,
+    listOverlayArr,
+    location.pathname,
+    navigate,
+    overlayArr,
+    removeData,
+    removeMarker,
+    removewOverlay,
+  ]);
+
   useEffect(() => {
     const { kakao } = window;
     if (!kakao || !curLocation) return;
@@ -203,21 +229,7 @@ export default function CafeSearchRoute() {
       <div>
         <div className="bg-primary w-full px-4 py-3">
           <div className="mb-2 flex items-center gap-2 text-white">
-            <button
-              onClick={() => {
-                setGNB(GNB.map((v) => ({ ...v, active: false })));
-                removeData();
-                removeMarker();
-                removewOverlay(overlayArr);
-                listOverlayArr[0]?.setMap(null);
-                clusterer?.clear();
-                setSearchInput("");
-                setIdle(false);
-                if (!location.pathname.includes("directions")) {
-                  navigate("/search");
-                }
-              }}
-            >
+            <button onClick={handleClear}>
               <img src={bar3} alt="gnb" className="w-5" />
             </button>
             <h1>myCafe</h1>
@@ -291,14 +303,18 @@ export default function CafeSearchRoute() {
             <div className="px-4 pt-6">
               <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
               <ul className="mt-3 flex flex-col gap-2">
-                {GNB.map(
-                  (v) =>
-                    v.id !== "search" && (
-                      <li key={v.id}>
-                        <Menu onClick={() => handleMenu(v.id)} name={v.name} />
-                      </li>
-                    )
-                )}
+                <li>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleClear();
+                      handleMenu("default");
+                    }}
+                    className="border-primary w-full rounded border px-4 py-2 text-left"
+                  >
+                    카페 보기
+                  </button>
+                </li>
                 <li>
                   <Link
                     to="/users?filter=ranking"
@@ -334,6 +350,18 @@ export default function CafeSearchRoute() {
                     ? `${keyword.current} ${isActiveMenu.name}`
                     : isActiveMenu.name}
                 </h3>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      handleClear();
+                      handleMenu("visited");
+                    }}
+                    className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary text-white" : "text-zinc-400"}`}
+                  >
+                    방문한 카페
+                  </button>
+                </div>
               </div>
               <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
                 {!pagination?.hasNextPage && cafeData.current.length > 0 && (
