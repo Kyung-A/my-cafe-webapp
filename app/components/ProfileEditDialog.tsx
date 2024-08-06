@@ -1,7 +1,7 @@
 import { Form, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
+import UserIcon from "~/assets/user";
 
-import userImg from "~/assets/user.svg";
 import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
 import { imageMaxSize } from "~/shared/utils/imageMaxSize";
@@ -18,13 +18,15 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
 
   const inputRef = useRef<HTMLInputElement | null>(null);
   const previewRef = useRef<HTMLImageElement | null>(null);
-  const [preview, setPreview] = useState<string>(user.profile ?? userImg);
+  const [preview, setPreview] = useState<string | null | undefined>(
+    user.profile
+  );
   const [username, setUsername] = useState<string>(user.name);
 
   useEffect(() => {
     if (!isOpen && inputRef.current && previewRef.current) {
       inputRef.current.value = user.name;
-      previewRef.current.src = user.profile ?? userImg;
+      previewRef.current.src = user.profile as string;
     }
   }, [isOpen, inputRef, user]);
 
@@ -43,13 +45,15 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
                 onClick={handleFileUpload}
                 className="absolute left-0 top-0 z-10 block h-full w-full bg-transparent"
               ></button>
-              {preview && (
+              {preview ? (
                 <img
                   ref={previewRef}
                   src={preview}
                   alt="프로필 이미지"
                   className="absolute z-[5] h-full w-full object-cover"
                 />
+              ) : (
+                <UserIcon className="w-full fill-neutral-300" />
               )}
             </div>
           </div>
@@ -122,7 +126,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
       <div
         onClick={() => {
           setOpened(false);
-          setPreview(user.profile ?? userImg);
+          setPreview(user.profile);
           setUsername(user.name);
         }}
         aria-hidden="true"

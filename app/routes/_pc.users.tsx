@@ -14,8 +14,8 @@ import { getUser } from "~/.server/storage";
 
 import { getUsers } from "~/.server/users";
 import { IRegister } from "~/shared/types";
-import userImg from "~/assets/user.svg";
 import bar3 from "~/assets/bar3.svg";
+import UserIcon from "~/assets/user";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -100,11 +100,15 @@ export default function RankingRoute() {
                 <div className="p-4">
                   <div className="mt-1 flex items-center gap-2">
                     <div className="h-12 w-12 overflow-hidden rounded-full">
-                      <img
-                        src={v.profile ?? userImg}
-                        alt="프로필 이미지"
-                        className="h-full w-full object-cover"
-                      />
+                      {v.profile ? (
+                        <img
+                          src={v.profile}
+                          alt="프로필 이미지"
+                          className="h-full w-full object-cover"
+                        />
+                      ) : (
+                        <UserIcon className="w-full fill-neutral-300" />
+                      )}
                     </div>
                     <div>
                       <h3 className="font-semibold">{v.name}</h3>
