@@ -5,9 +5,10 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 interface IHeader {
   handleHeader: (type: string) => void;
+  isActiveMenu: { id: string; name: string; active: boolean } | undefined;
 }
 
-export function Header({ handleHeader }: IHeader) {
+export function Header({ handleHeader, isActiveMenu }: IHeader) {
   const location = useLocation();
 
   return (
@@ -16,26 +17,24 @@ export function Header({ handleHeader }: IHeader) {
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
           <button onClick={() => handleHeader("default")} type="button">
             <MapPinIcon
-              className={`w-7 fill-none ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
+              className={`w-7 fill-none ${isActiveMenu?.id === "default" || isActiveMenu?.id === "search" ? "stroke-interaction" : "stroke-neutral-800"}`}
             />
             <span
-              className={`text-center text-sm ${location.pathname.includes("/m") ? "text-interaction font-semibold" : "text-neutral-800"}`}
+              className={`text-center text-sm ${isActiveMenu?.id === "default" || isActiveMenu?.id === "search" ? "text-interaction font-semibold" : "text-neutral-800"}`}
             >
               주변
             </span>
           </button>
         </li>
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
-          <button type="button">
-            <TrophyIcon
-              className={`w-7 ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
-            />
-            <span
-              className={`text-center text-sm ${location.pathname.includes("/m") ? "text-interaction font-semibold" : "text-neutral-800"}`}
-            >
-              리뷰어
-            </span>
-          </button>
+          <TrophyIcon
+            className={`w-7 ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
+          />
+          <span
+            className={`text-center text-sm ${location.pathname.includes("/m") ? "text-interaction font-semibold" : "text-neutral-800"}`}
+          >
+            리뷰어
+          </span>
         </li>
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
           <UsersIcon

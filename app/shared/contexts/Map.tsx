@@ -59,7 +59,7 @@ const MapContext = createContext<IMap>({
   setIdle: () => false,
 });
 
-const MapProvider = ({ children }: IMapProvider) => {
+function MapProvider({ children }: IMapProvider) {
   const mapEl = useRef<HTMLDivElement>(null);
   const cafeData = useRef<ICafeResponse[]>([]);
   const { curLocation } = useGeoLocation();
@@ -127,7 +127,7 @@ const MapProvider = ({ children }: IMapProvider) => {
       {children}
     </MapContext.Provider>
   );
-};
+}
 
 export default MapProvider;
 export const useMap = () => useContext(MapContext);

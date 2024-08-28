@@ -8,11 +8,13 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 
+import MapProvider from "./shared/contexts/Map";
+import OverlayProvider from "./shared/contexts/Overlay";
+import AddressProvider from "./shared/contexts/Address";
+
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import stylesheet from "~/tailwind.css?url";
-import MapProvider from "./shared/contexts/Map";
-import OverlayProvider from "./shared/contexts/Overlay";
 
 declare global {
   interface Window {
@@ -66,9 +68,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <MapProvider>
-      <OverlayProvider>
-        <Outlet />
-      </OverlayProvider>
+      <AddressProvider>
+        <OverlayProvider>
+          <Outlet />
+        </OverlayProvider>
+      </AddressProvider>
     </MapProvider>
   );
 }

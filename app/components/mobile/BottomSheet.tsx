@@ -14,7 +14,7 @@ export function BottomSheet({
 }: IMobilePanel) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [startY, setStartY] = useState<number>(0);
-  const [currentY, setCurrentY] = useState<number>(450);
+  const [currentY, setCurrentY] = useState<number>(300);
   const bottomSheetRef = useRef<HTMLDivElement>(null);
 
   const handleTouchStart = useCallback(
