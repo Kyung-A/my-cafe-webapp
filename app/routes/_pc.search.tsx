@@ -377,7 +377,7 @@ export default function CafeSearchRoute() {
                     })}
                   </div>
                 )}
-                {user === null ? (
+                {user === null && isActiveMenu.id === "visited" ? (
                   <div className="flex h-full w-full flex-col items-center pt-36">
                     <p className="text-center">로그인이 필요한 서비스입니다.</p>
                     <Link

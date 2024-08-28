@@ -3,22 +3,18 @@ import { useLocation } from "@remix-run/react";
 import { MapPinIcon, TrophyIcon, UsersIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
 
-export function Header({ gnb }) {
+interface IHeader {
+  handleHeader: (type: string) => void;
+}
+
+export function Header({ handleHeader }: IHeader) {
   const location = useLocation();
-  console.log(gnb);
-  // console.log(location.pathname);
 
   return (
     <nav className="fixed bottom-0 z-50 box-border h-20 w-full max-w-[480px] bg-white px-5 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.08)]">
       <ul className="flex h-full w-full items-center justify-between gap-2">
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
-          <button
-            type="button"
-            // onClick={() => {
-            //   handleClear();
-            //   handleMenu("default");
-            // }}
-          >
+          <button onClick={() => handleHeader("default")} type="button">
             <MapPinIcon
               className={`w-7 fill-none ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
             />
@@ -30,14 +26,16 @@ export function Header({ gnb }) {
           </button>
         </li>
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
-          <TrophyIcon
-            className={`w-7 ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
-          />
-          <span
-            className={`text-center text-sm ${location.pathname.includes("/m") ? "text-interaction font-semibold" : "text-neutral-800"}`}
-          >
-            리뷰어
-          </span>
+          <button type="button">
+            <TrophyIcon
+              className={`w-7 ${location.pathname.includes("/m") ? "stroke-interaction" : "stroke-neutral-800"}`}
+            />
+            <span
+              className={`text-center text-sm ${location.pathname.includes("/m") ? "text-interaction font-semibold" : "text-neutral-800"}`}
+            >
+              리뷰어
+            </span>
+          </button>
         </li>
         <li className="flex h-full flex-col items-center justify-center gap-1 px-6">
           <UsersIcon

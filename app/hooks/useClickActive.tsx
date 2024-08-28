@@ -1,14 +1,13 @@
 import { useCallback } from "react";
-import { useLocation, useNavigate, useOutletContext } from "@remix-run/react";
+import { useLocation, useNavigate } from "@remix-run/react";
 
 import { useMap } from "~/shared/contexts/Map";
-import { IRegister, IReview } from "~/shared/types";
+import { IReview } from "~/shared/types";
 import { useFetch } from "./useFetch";
 
 export function useClickActive() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user } = useOutletContext<{ user: IRegister }>();
 
   const { GNB, setGNB, mapData } = useMap();
   const { fetchCafeData } = useFetch();
@@ -26,7 +25,7 @@ export function useClickActive() {
       handleActive(id);
       fetchCafeData(id, userReview);
     },
-    [navigate, user, mapData, location]
+    [navigate, mapData, location]
   );
 
   return { handleActive, handleMenu };

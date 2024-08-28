@@ -58,7 +58,7 @@ export default function SigninRoute() {
           className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
         >
           <span>회원가입 하기</span>
-          <ArrowLongRightIcon />
+          <ArrowLongRightIcon className="w-6" />
         </Link>
       </div>
       <button
