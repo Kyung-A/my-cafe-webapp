@@ -1,6 +1,6 @@
 import { MetaFunction, json } from "@remix-run/node";
 import { Outlet, useLoaderData, useLocation } from "@remix-run/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { getUser } from "~/.server/storage";
 import { Header } from "~/components/mobile";
 
@@ -21,7 +21,12 @@ export default function MainMobileLayoutRoute() {
 
   //   const location = useLocation();
   // const user = useLoaderData<typeof loader>();
-  const { mapEl } = useMap();
+  const { mapEl, GNB } = useMap();
+
+  // const test = () => {
+  //   handleClear();
+  //   handleMenu("default");
+  // };
 
   return (
     <div
@@ -30,7 +35,7 @@ export default function MainMobileLayoutRoute() {
       className="relative mx-auto h-screen w-full max-w-[480px] overflow-hidden"
     >
       <Outlet />
-      <Header />
+      <Header gnb={GNB} />
     </div>
   );
 }

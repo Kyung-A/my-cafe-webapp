@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import search from "~/assets/search.svg";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { IMenu } from "~/shared/types";
 
 interface ISearch {
@@ -42,7 +42,7 @@ export function SearchForm({
         onClick={() => onSubmit(searchInput)}
         className="p-2"
       >
-        <img src={search} className="w-5" alt="검색" />
+        <MagnifyingGlassIcon className="w-5 text-gray-400" />
       </button>
     </div>
   );

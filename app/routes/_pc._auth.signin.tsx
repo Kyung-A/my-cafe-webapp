@@ -1,8 +1,8 @@
+import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 import { ActionFunctionArgs, json } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 
 import { createUserSession, signin } from "~/.server/storage";
-import arrowRight from "~/assets/arrowRight.svg";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -58,7 +58,7 @@ export default function SigninRoute() {
           className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
         >
           <span>회원가입 하기</span>
-          <img src={arrowRight} className="w-5" alt="icon" />
+          <ArrowLongRightIcon />
         </Link>
       </div>
       <button

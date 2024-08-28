@@ -9,7 +9,6 @@ import {
 } from "@remix-run/react";
 import Slider from "react-slick";
 
-import arrowLeft from "~/assets/arrowLeft.svg";
 import {
   createReviewLike,
   getReview,
@@ -18,6 +17,7 @@ import {
 import { Panel } from "~/components";
 import { useMoveTheMap } from "~/hooks";
 import { ActionFunctionArgs } from "@remix-run/node";
+import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
 
 interface IParams {
   params: {
@@ -79,7 +79,7 @@ export default function ReviewDetailRoute() {
                 }}
                 className="w-6"
               >
-                <img src={arrowLeft} alt="이전" />
+                <ArrowLongLeftIcon />
               </button>
             )}
           {location.state?.prevUrl &&

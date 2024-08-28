@@ -36,10 +36,12 @@ import {
 import { getReviewList } from "~/.server/review";
 import { useOverlay } from "~/shared/contexts/Overlay";
 import { getUser } from "~/.server/storage";
-import bar3 from "~/assets/bar3.svg";
-import refresh from "~/assets/refresh.svg";
-import edit from "~/assets/edit.svg";
-import UserIcon from "~/assets/user";
+import {
+  Bars3Icon,
+  PencilSquareIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -200,7 +202,7 @@ export default function CafeSearchRoute() {
         <div className="bg-primary w-full px-4 py-3">
           <div className="mb-2 flex items-center gap-2 text-white">
             <button onClick={handleClear}>
-              <img src={bar3} alt="gnb" className="w-5" />
+              <Bars3Icon className="w-5" />
             </button>
             <h1>myCafe</h1>
           </div>
@@ -221,7 +223,7 @@ export default function CafeSearchRoute() {
             <div className="relative mt-2 flex w-full items-center">
               <button onClick={() => setOpened(true)}>
                 <div className="bg-trueGray-100 absolute bottom-0 left-12 h-5 w-5 rounded-full p-[3px]">
-                  <img src={edit} alt="프로필 수정" />
+                  <PencilSquareIcon />
                 </div>
                 <div className="h-16 w-16 overflow-hidden rounded-full">
                   {user.profile ? (
@@ -231,7 +233,7 @@ export default function CafeSearchRoute() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <UserIcon className="w-full fill-neutral-300" />
+                    <UserCircleIcon className="w-full fill-neutral-300" />
                   )}
                 </div>
               </button>
@@ -422,7 +424,7 @@ export default function CafeSearchRoute() {
         >
           <div className="flex items-center gap-2">
             <div className="w-5">
-              <img src={refresh} alt="새로고침" />
+              <ArrowPathIcon className="text-white" />
             </div>
             <span className="font-bold text-white">현 지도에서 검색</span>
           </div>

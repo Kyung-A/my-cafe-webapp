@@ -8,12 +8,11 @@ import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
-import minus from "~/assets/minus.svg";
-import photo from "~/assets/photo.svg";
 import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/utils/uploadPromise";
 import { formDataPromise } from "~/shared/utils/formData";
 import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -197,7 +196,7 @@ export default function CafeReviewCreateRoute() {
               onClick={handleFileUpload}
               className="bg-trueGray-100 mt-4 h-52 w-full outline-none"
             >
-              <img src={photo} alt="이미지 업로드" className="mx-auto w-10" />
+              <PhotoIcon className="mx-auto w-10" />
             </button>
           )}
           <input
@@ -283,7 +282,7 @@ export default function CafeReviewCreateRoute() {
                       type="button"
                       className="pr-2 text-neutral-400"
                     >
-                      <img src={minus} className="w-6" alt="삭제" />
+                      <MinusIcon />
                     </button>
                   </div>
                 ))}
@@ -317,7 +316,7 @@ export default function CafeReviewCreateRoute() {
                       type="button"
                       className="pr-2 text-neutral-400"
                     >
-                      <img src={minus} className="w-6" alt="삭제" />
+                      <MinusIcon />
                     </button>
                   </div>
                 ))}

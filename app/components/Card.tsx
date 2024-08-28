@@ -1,7 +1,6 @@
 import { ICafeResponse, IRegister } from "~/shared/types";
 
-import Visitied from "~/assets/visited";
-import UnVisitied from "~/assets/unvisited";
+import { CheckBadgeIcon } from "@heroicons/react/24/outline";
 
 interface ICard {
   data: ICafeResponse;
@@ -18,9 +17,9 @@ export function Card({ data, user }: ICard) {
             {user && (
               <button className="mr-1 w-[18px]">
                 {data.visited ? (
-                  <Visitied className="fill-interaction w-full" />
+                  <CheckBadgeIcon className="fill-interaction w-full" />
                 ) : (
-                  <UnVisitied className="w-full fill-none stroke-stone-400" />
+                  <CheckBadgeIcon className="w-full fill-none stroke-stone-400" />
                 )}
               </button>
             )}

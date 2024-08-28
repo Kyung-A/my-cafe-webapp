@@ -1,7 +1,6 @@
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
 import { Form, Link, useActionData } from "@remix-run/react";
 
-import arrowRight from "~/assets/arrowRight.svg";
 import { db } from "~/.server/db";
 import { register } from "~/.server/storage";
 import { useState } from "react";
@@ -9,6 +8,7 @@ import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/utils/uploadPromise";
 import { formDataPromise } from "~/shared/utils/formData";
 import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await formDataPromise(request);
@@ -137,7 +137,7 @@ export default function SignupRoute() {
             className="text-interaction mt-1 flex items-center justify-center gap-2 text-center font-semibold"
           >
             <span>로그인 하기</span>
-            <img src={arrowRight} className="w-5" alt="icon" />
+            <ArrowLongRightIcon />
           </Link>
         </div>
       )}
