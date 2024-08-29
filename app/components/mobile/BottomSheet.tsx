@@ -5,12 +5,14 @@ interface IMobilePanel {
   children: React.ReactNode;
   isDragging: boolean;
   setIsDragging: React.Dispatch<React.SetStateAction<boolean>>;
+  fullSheet: boolean;
 }
 
 export function BottomSheet({
   children,
   isDragging,
   setIsDragging,
+  fullSheet,
 }: IMobilePanel) {
   const [mounted, setMounted] = useState<boolean>(false);
   const [startY, setStartY] = useState<number>(0);
@@ -39,13 +41,18 @@ export function BottomSheet({
   const translateY = useMemo(
     () =>
       typeof window !== "undefined" &&
-      Math.min(Math.max(currentY, 80), window.innerHeight - 120),
-    [currentY]
+      Math.min(
+        Math.max(currentY, fullSheet ? -100 : 80),
+        window.innerHeight - 120
+      ),
+    [currentY, fullSheet]
   );
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  console.log(translateY);
 
   return (
     <>
@@ -55,8 +62,9 @@ export function BottomSheet({
           onMouseMove={handleTouchMove}
           style={{
             transform: `translateY(${translateY}px)`,
+            borderRadius: (translateY as number) <= -100 ? "" : "1.5rem",
           }}
-          className={`absolute z-10 h-screen w-full overflow-hidden rounded-t-3xl bg-white shadow-[4px_-1px_9px_0px_#52525230]`}
+          className="absolute z-10 h-screen w-full overflow-hidden bg-white shadow-[4px_-1px_9px_0px_#52525230]"
         >
           <button onMouseDown={handleTouchStart} className="w-full">
             <MinusIcon className="text-primary mx-auto w-12" />

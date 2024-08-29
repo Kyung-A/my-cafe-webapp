@@ -106,8 +106,6 @@ export function useKeyword() {
     [handleActive, searchKeyword]
   );
 
-  // console.log(keyword);
-
   return {
     searchKeyword,
     handleEnter,

@@ -28,6 +28,7 @@ export async function loader({ request }: { request: Request }) {
 export default function MobileMainLayoutRoute() {
   const userReview = useLoaderData<typeof loader>();
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const [fullSheet, setFullSheet] = useState<boolean>(true);
 
   const { handleMenu } = useClickActive();
   const {
@@ -126,9 +127,18 @@ export default function MobileMainLayoutRoute() {
       )}
 
       {isActiveMenu && (
-        <BottomSheet isDragging={isDragging} setIsDragging={setIsDragging}>
+        <BottomSheet
+          isDragging={isDragging}
+          setIsDragging={setIsDragging}
+          fullSheet={fullSheet}
+        >
           <Outlet
-            context={{ address: searchLocation.current, isActiveMenu, keyword }}
+            context={{
+              address: searchLocation.current,
+              isActiveMenu,
+              keyword,
+              setFullSheet,
+            }}
           />
         </BottomSheet>
       )}
