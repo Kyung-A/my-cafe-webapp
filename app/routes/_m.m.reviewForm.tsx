@@ -1,18 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useFetcher, useLocation } from "@remix-run/react";
+import { Form, useFetcher, useLocation, Link } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 import Slider from "react-slick";
 
 import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
-import { Panel } from "~/components";
 import { IFieldInput, IReview } from "~/shared/types";
 import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/utils/uploadPromise";
 import { formDataPromise } from "~/shared/utils/formData";
 import { imageMaxSize } from "~/shared/utils/imageMaxSize";
-import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
+import {
+  PhotoIcon,
+  MinusIcon,
+  ChevronLeftIcon,
+} from "@heroicons/react/24/outline";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -70,14 +73,14 @@ export async function action({ request }: ActionFunctionArgs) {
     data["id"] = reviewId;
 
     const id = await updateReview(data as IReview);
-    return redirect(`/search/review/${id}`);
+    return redirect(`/m/review/${id}`);
   } else {
     const id = await createReview(data as IReview);
-    return redirect(`/search/review/${id}`);
+    return redirect(`/m/review/${id}`);
   }
 }
 
-export default function CafeReviewCreateRoute() {
+export default function MobileCafeReviewCreateRoute() {
   const location = useLocation();
   const fetcher = useFetcher<IReview>();
   const { handleFileUpload, fileRef } = useImageUpload();
@@ -148,20 +151,36 @@ export default function CafeReviewCreateRoute() {
   }, [fetcher.data]);
 
   return (
-    <Panel left="320px">
-      <Form method="post" encType="multipart/form-data">
-        <div className="bg-primary flex h-12 w-full items-center justify-between px-4">
+    <div className="absolute z-10 h-[calc(100vh-80px)] w-full bg-white">
+      <Form
+        method="post"
+        encType="multipart/form-data"
+        className="h-full w-full"
+      >
+        <div className="bg-primary flex h-12 w-full items-center gap-x-2 px-4">
+          <Link
+            to="/m/search"
+            state={{
+              cafeId: location.state.cafeId,
+              name: location.state.name,
+              x: location.state?.x,
+              y: location.state?.y,
+            }}
+            className="w-6"
+          >
+            <ChevronLeftIcon className="w-full" />
+          </Link>
           <h1 className="text-xl font-semibold">
             {location.state?.reviewId ? "후기 수정" : "후기 등록"}
           </h1>
           <button
             type="submit"
-            className="bg-interaction rounded-full px-4 py-1 text-sm font-semibold"
+            className="bg-interaction ml-auto rounded-full px-4 py-1 text-sm font-semibold"
           >
             저장
           </button>
         </div>
-        <div className="h-screen w-full overflow-y-auto">
+        <div className="h-[calc(100vh-128px)] w-full overflow-y-auto">
           <h2 className="mt-2 px-4 text-xl font-semibold">
             {fetcher.data ? (
               <>{fetcher.data.name}</>
@@ -226,7 +245,7 @@ export default function CafeReviewCreateRoute() {
             multiple
             hidden
           />
-          <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
+          <div className="flex flex-col gap-12 px-4 py-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>
               {location.state && (
@@ -370,6 +389,6 @@ export default function CafeReviewCreateRoute() {
           </div>
         </div>
       </Form>
-    </Panel>
+    </div>
   );
 }

@@ -1,1 +1,4 @@
-export { Header } from "./Header";
+import { Header } from "./Header";
+import { BottomSheet } from "./BottomSheet";
+
+export { Header, BottomSheet };

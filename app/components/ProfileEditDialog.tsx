@@ -1,6 +1,6 @@
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { Form, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
-import UserIcon from "~/assets/user";
 
 import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
@@ -53,7 +53,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
                   className="absolute z-[5] h-full w-full object-cover"
                 />
               ) : (
-                <UserIcon className="w-full fill-neutral-300" />
+                <UserCircleIcon className="w-full fill-neutral-300" />
               )}
             </div>
           </div>

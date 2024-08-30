@@ -8,14 +8,16 @@ import {
   useParams,
 } from "@remix-run/react";
 
-import clock from "~/assets/clock.svg";
-import cafe from "~/assets/cafe.svg";
-import menu from "~/assets/menu.svg";
 import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/components";
-import arrowRight from "~/assets/arrowRight.svg";
-import arrowLeft from "~/assets/arrowLeft.svg";
 import { useMoveTheMap } from "~/hooks";
+import {
+  ClockIcon,
+  ArrowLongRightIcon,
+  ClipboardIcon,
+  MapPinIcon,
+  ArrowLongLeftIcon,
+} from "@heroicons/react/24/outline";
 
 interface IParams {
   params: {
@@ -54,7 +56,7 @@ export default function CafeDetailRoute() {
               }}
               className="w-6"
             >
-              <img src={arrowLeft} alt="이전" />
+              <ArrowLongLeftIcon />
             </button>
           )}
         <h1 className="break-keep text-xl font-semibold leading-6">
@@ -117,7 +119,7 @@ export default function CafeDetailRoute() {
           <ul className="mt-2 space-y-2">
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <img src={clock} className="w-5" alt="clock" />
+                <ClockIcon className="w-5" />
                 <p className="font-semibold">영업시간</p>
               </div>
               <div>
@@ -137,7 +139,7 @@ export default function CafeDetailRoute() {
             </li>
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <img src={cafe} className="w-5" alt="cafe" />
+                <MapPinIcon className="w-5" />
                 <p className="font-semibold">위치</p>
               </div>
               <p className="break-keep">
@@ -148,7 +150,7 @@ export default function CafeDetailRoute() {
             </li>
             <li className="flex items-start gap-3">
               <div className="flex min-w-20 items-center gap-1">
-                <img src={menu} className="w-5" alt="menu" />
+                <ClipboardIcon className="w-5" />
                 <p className="font-semibold">메뉴</p>
               </div>
               <details className="w-full cursor-pointer outline-none">
@@ -190,7 +192,7 @@ export default function CafeDetailRoute() {
                   className="text-interaction mt-3 flex items-center gap-2 text-sm font-semibold"
                 >
                   후기 자세히 보러가기
-                  <img src={arrowRight} className="w-[18px]" alt="icon" />
+                  <ArrowLongRightIcon className="w-[18px]" />
                 </Link>
               </div>
             ) : (

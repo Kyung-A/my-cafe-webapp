@@ -4,7 +4,7 @@ import {
   json,
   useLoaderData,
   useLocation,
-  useNavigate,
+  // useNavigate,
   useParams,
 } from "@remix-run/react";
 import Slider from "react-slick";
@@ -14,10 +14,9 @@ import {
   getReview,
   removeReviewLike,
 } from "~/.server/review";
-import { Panel } from "~/components";
-import { useMoveTheMap } from "~/hooks";
+// import { useMoveTheMap } from "~/hooks";
 import { ActionFunctionArgs } from "@remix-run/node";
-import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
+import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 
 interface IParams {
   params: {
@@ -45,13 +44,10 @@ export async function action({ request }: ActionFunctionArgs) {
   return null;
 }
 
-export default function ReviewDetailRoute() {
+export default function MobileReviewDetailRoute() {
   const data = useLoaderData<typeof loader>();
   const { reviewId } = useParams();
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const { marker, setMarker } = useMoveTheMap(data);
 
   const sliderInit = {
     dots: false,
@@ -62,68 +58,64 @@ export default function ReviewDetailRoute() {
   };
 
   return (
-    <Panel
-      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/users") ? "0px" : "320px"}`}
-    >
+    <div className="absolute z-10 h-[calc(100vh-80px)] w-full bg-white">
       <div className="relative h-full w-full">
         <div
-          className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/users") ? "gap-2" : "justify-between "}`}
+          className={`bg-primary flex w-full items-center gap-x-2 px-4 py-3`}
         >
-          {location.state?.prevUrl &&
-            location.state?.prevUrl.includes("/users") && (
-              <button
-                onClick={() => {
-                  navigate(-1);
-                  marker?.setMap(null);
-                  setMarker(null);
-                }}
-                className="w-6"
-              >
-                <ArrowLongLeftIcon />
-              </button>
-            )}
+          <Link
+            to="/m/search"
+            state={{
+              cafeId: location.state?.cafeId,
+              name: location.state?.name,
+              x: location.state?.x,
+              y: location.state?.y,
+              reviewId: reviewId,
+              review: data?.description,
+            }}
+            className="w-6"
+          >
+            <ChevronLeftIcon className="w-full" />
+          </Link>
           {location.state?.prevUrl &&
           location.state?.prevUrl.includes("/users") ? (
-            <Link
-              to={`/search/${data?.cafeId}`}
-              state={{
-                x: data?.x,
-                y: data?.y,
-                review: data?.description,
-                reviewId: data?.id,
-                ...(location.state?.prevUrl && {
-                  prevUrl: location.state?.prevUrl,
-                }),
-              }}
-              onClick={() => {
-                marker?.setMap(null);
-                setMarker(null);
-              }}
+            <p
+              // to={`/search/${data?.cafeId}`}
+              // state={{
+              //   x: data?.x,
+              //   y: data?.y,
+              //   review: data?.description,
+              //   reviewId: data?.id,
+              //   ...(location.state?.prevUrl && {
+              //     prevUrl: location.state?.prevUrl,
+              //   }),
+              // }}
+              // onClick={() => {
+              //   marker?.setMap(null);
+              //   setMarker(null);
+              // }}
               className="break-keep text-xl font-semibold leading-6"
             >
               {data?.name}
-            </Link>
+            </p>
           ) : (
             <h1 className="break-keep text-xl font-semibold leading-6">
               {data?.name}
             </h1>
           )}
-          {location.state?.prevUrl &&
-            !location.state?.prevUrl.includes("/users") && (
-              <Link
-                to="/search/reviewForm"
-                state={{
-                  cafeId: data?.cafeId,
-                  reviewId: reviewId,
-                  name: data?.name,
-                }}
-                className="bg-interaction shrink-0 rounded-full px-4 py-1 text-sm font-semibold "
-              >
-                수정
-              </Link>
-            )}
+          <Link
+            to="/m/reviewForm"
+            state={{
+              cafeId: data?.cafeId,
+              reviewId: reviewId,
+              name: data?.name,
+            }}
+            className="bg-interaction ml-auto shrink-0 rounded-full px-4 py-1 text-sm font-semibold"
+          >
+            수정
+          </Link>
         </div>
-        <div className="h-full w-full overflow-y-auto">
+        <div className="h-[calc(100vh-132px)] w-full overflow-y-auto">
           {data?.reviewImages && (
             <div className="slider-container max-h-[208px] overflow-hidden">
               <Slider {...sliderInit}>
@@ -140,7 +132,7 @@ export default function ReviewDetailRoute() {
               </Slider>
             </div>
           )}
-          <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
+          <div className="flex flex-col gap-12 px-4 py-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>
               <p className="mt-2 rounded bg-neutral-100 px-3 py-2">
@@ -209,6 +201,6 @@ export default function ReviewDetailRoute() {
             </Form>
           )}
       </div>
-    </Panel>
+    </div>
   );
 }

@@ -9,13 +9,13 @@ import {
   useOutletContext,
   useSubmit,
 } from "@remix-run/react";
+
+import { Bars3Icon } from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { createFollow, getFollowings } from "~/.server/follow";
 import { getUser } from "~/.server/storage";
-
 import { getUsers } from "~/.server/users";
 import { IRegister } from "~/shared/types";
-import bar3 from "~/assets/bar3.svg";
-import UserIcon from "~/assets/user";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
@@ -66,7 +66,7 @@ export default function RankingRoute() {
               navigate("/search");
             }}
           >
-            <img src={bar3} alt="gnb" className="w-5" />
+            <Bars3Icon className="w-5" />
           </button>
           <h1>myCafe</h1>
         </div>
@@ -107,7 +107,7 @@ export default function RankingRoute() {
                           className="h-full w-full object-cover"
                         />
                       ) : (
-                        <UserIcon className="w-full fill-neutral-300" />
+                        <UserCircleIcon className="w-full fill-neutral-300" />
                       )}
                     </div>
                     <div>

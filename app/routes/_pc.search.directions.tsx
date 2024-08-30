@@ -16,10 +16,10 @@ import { Panel } from "~/components";
 import { useRemove } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
 import { IPolyline } from "~/shared/types";
-import xMark from "~/assets/xMark.svg";
 import { converTime } from "~/shared/utils/converTime";
 import { converDistance } from "~/shared/utils/converDistance";
 import { useOverlay } from "~/shared/contexts/Overlay";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface IDirectionInput {
   value: string;
@@ -200,7 +200,7 @@ export default function DirectionsRoute() {
         }}
         className="bg-primary absolute left-80 top-0 flex h-12 w-12 flex-col items-center justify-center"
       >
-        <img src={xMark} alt="닫기" className="w-8" />
+        <XMarkIcon className="w-8" />
       </button>
       <Form
         method="post"

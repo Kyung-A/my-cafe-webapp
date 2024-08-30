@@ -1,18 +1,20 @@
-import { useCallback } from "react";
+import { useCallback, useRef } from "react";
 
 import { useMap } from "~/shared/contexts/Map";
-import { useFetch, useRemove } from ".";
+import { useClickActive, useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
 import { useOverlay } from "~/shared/contexts/Overlay";
 import { useLocation } from "@remix-run/react";
 
 export function useKeyword() {
   const location = useLocation();
+  const keyword = useRef<string | null>(null);
 
   const { mapData, cafeData, markers, setPagination, clusterer } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { addMarker } = useFetch();
+  const { handleActive } = useClickActive();
 
   const searchKeyword = useCallback(
     (text: string, reviewData: IReview[]) => {
@@ -84,5 +86,30 @@ export function useKeyword() {
     [cafeData, mapData, markers, overlayArr, listOverlayArr, location]
   );
 
-  return { searchKeyword };
+  const handleEnter = useCallback(
+    (e: { key: string }, text: string, userReview: IReview[] | null) => {
+      if (e.key === "Enter") {
+        keyword.current = text;
+        handleActive("search");
+        searchKeyword(text, userReview as IReview[]);
+      }
+    },
+    [handleActive, searchKeyword]
+  );
+
+  const handleSearch = useCallback(
+    (text: string, userReview: IReview[] | null) => {
+      keyword.current = text;
+      handleActive("search");
+      searchKeyword(text, userReview as IReview[]);
+    },
+    [handleActive, searchKeyword]
+  );
+
+  return {
+    searchKeyword,
+    handleEnter,
+    handleSearch,
+    keyword: keyword?.current,
+  };
 }

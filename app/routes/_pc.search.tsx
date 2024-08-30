@@ -20,26 +20,22 @@ import {
   useClear,
   useClickActive,
   useFetch,
-  useGeoLocation,
   useKeyword,
   useRemove,
   useTargetView,
 } from "~/hooks";
 import { useMap } from "~/shared/contexts/Map";
-import {
-  ICafeResponse,
-  ICoord,
-  IGeocoder,
-  IRegister,
-  IReview,
-} from "~/shared/types";
+import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
 import { useOverlay } from "~/shared/contexts/Overlay";
 import { getUser } from "~/.server/storage";
-import bar3 from "~/assets/bar3.svg";
-import refresh from "~/assets/refresh.svg";
-import edit from "~/assets/edit.svg";
-import UserIcon from "~/assets/user";
+import {
+  Bars3Icon,
+  PencilSquareIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/24/outline";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { useAddress } from "~/shared/contexts/Address";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -61,84 +57,52 @@ export default function CafeSearchRoute() {
     cafeData,
     clusterer,
     pagination,
-    mapData,
     searchInput,
     setSearchInput,
     isIdle,
     setIdle,
   } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
-  const { curLocation } = useGeoLocation();
-  const { handleActive, handleMenu } = useClickActive();
-  const { searchKeyword } = useKeyword();
+  const { handleMenu } = useClickActive();
+  const { handleEnter, handleSearch, keyword } = useKeyword();
   const { targetView } = useTargetView();
   const { handleClear } = useClear();
+  const { address } = useAddress();
 
-  const keyword = useRef<string | null>(null);
   const oldReview = useRef<any>(null);
   const searchLocation = useRef<string | null | undefined>(null);
 
-  const [address, setAddress] = useState<string>();
   const [coordinate, setCoordinate] = useState<ICoord | null>();
   const [isOpen, setOpened] = useState<boolean>(false);
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
-  const handleEnter = useCallback(
-    (e: { key: string }, text: string) => {
-      if (e.key === "Enter") {
-        keyword.current = text;
-        handleActive("search");
-        searchKeyword(text, userReview as IReview[]);
-      }
-    },
-    [handleActive, searchKeyword, userReview]
-  );
-
-  const handleSearch = useCallback(
-    (text: string) => {
-      keyword.current = text;
-      handleActive("search");
-      searchKeyword(text, userReview as IReview[]);
-    },
-    [handleActive, searchKeyword, userReview]
-  );
-
-  const getGeocoder = useCallback((kakao: any, lon: number, lat: number) => {
-    const geocoder = new kakao.maps.services.Geocoder();
-    geocoder.coord2RegionCode(
-      lon,
-      lat,
-      (result: IGeocoder[], status: string) => {
-        if (status === kakao.maps.services.Status.OK) {
-          setAddress(
-            `${result[0].region_1depth_name} ${result[0].region_2depth_name}`
-          );
-        }
-      }
-    );
-  }, []);
-
-  useEffect(() => {
-    const { kakao } = window;
-    if (!kakao || !curLocation) return;
-    const { latitude, longitude } = curLocation;
-
-    kakao.maps.load(() => {
-      getGeocoder(kakao, longitude, latitude);
-    });
-  }, [curLocation]);
-
-  useEffect(() => {
-    const { kakao } = window;
-    if (!mapData || !kakao) return;
-
-    kakao.maps.event?.addListener(mapData, "idle", function () {
-      const { La, Ma } = mapData.getCenter();
-      getGeocoder(kakao, La, Ma);
-      setIdle(true);
-    });
-  }, [mapData]);
+  const handleRefetch = useCallback(() => {
+    if (!isActiveMenu) return;
+    // remove
+    removeData();
+    removeMarker();
+    removewOverlay(overlayArr);
+    listOverlayArr[0]?.setMap(null);
+    clusterer?.clear();
+    setIdle(false);
+    // fetch
+    if (isActiveMenu.id === "search") {
+      handleSearch(searchInput, userReview as IReview[]);
+    } else {
+      setSearchInput("");
+      fetchCafeData(isActiveMenu.id, userReview as IReview[]);
+    }
+    searchLocation.current = address;
+  }, [
+    address,
+    clusterer,
+    isActiveMenu,
+    listOverlayArr,
+    overlayArr,
+    searchInput,
+    userReview,
+  ]);
 
   useEffect(() => {
     if (!isActiveMenu) {
@@ -200,7 +164,7 @@ export default function CafeSearchRoute() {
         <div className="bg-primary w-full px-4 py-3">
           <div className="mb-2 flex items-center gap-2 text-white">
             <button onClick={handleClear}>
-              <img src={bar3} alt="gnb" className="w-5" />
+              <Bars3Icon className="w-5" />
             </button>
             <h1>myCafe</h1>
           </div>
@@ -210,6 +174,7 @@ export default function CafeSearchRoute() {
             handleEnter={handleEnter}
             onSubmit={handleSearch}
             isActiveMenu={isActiveMenu}
+            userReview={userReview as IReview[]}
           />
         </div>
         {/* 프로필 */}
@@ -221,7 +186,7 @@ export default function CafeSearchRoute() {
             <div className="relative mt-2 flex w-full items-center">
               <button onClick={() => setOpened(true)}>
                 <div className="bg-trueGray-100 absolute bottom-0 left-12 h-5 w-5 rounded-full p-[3px]">
-                  <img src={edit} alt="프로필 수정" />
+                  <PencilSquareIcon />
                 </div>
                 <div className="h-16 w-16 overflow-hidden rounded-full">
                   {user.profile ? (
@@ -231,7 +196,7 @@ export default function CafeSearchRoute() {
                       className="h-full w-full object-cover"
                     />
                   ) : (
-                    <UserIcon className="w-full fill-neutral-300" />
+                    <UserCircleIcon className="w-full fill-neutral-300" />
                   )}
                 </div>
               </button>
@@ -308,33 +273,35 @@ export default function CafeSearchRoute() {
           ) : (
             <>
               <div className="px-4 pb-2 pt-6">
-                <h2 className="text-md mt-1 font-semibold leading-6">
-                  {isActiveMenu.id !== "search" && (
+                {isActiveMenu.id !== "search" && (
+                  <h2 className="text-md mt-1 font-semibold leading-6">
                     <>
                       {searchLocation.current} 주변 <br />
                     </>
-                  )}
-                </h2>
+                  </h2>
+                )}
                 <h3 className="text-interaction text-xl font-semibold">
                   {isActiveMenu.id === "search"
-                    ? `${keyword.current} ${isActiveMenu.name}`
+                    ? `${keyword} ${isActiveMenu.name}`
                     : isActiveMenu.name}
                 </h3>
                 <div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClear();
-                      if (isActiveMenu.id === "visited") {
-                        handleMenu("default", userReview as IReview[]);
-                      } else {
-                        handleMenu("visited", userReview as IReview[]);
-                      }
-                    }}
-                    className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary font-semibold text-white" : "text-zinc-400"}`}
-                  >
-                    방문한 카페
-                  </button>
+                  {isActiveMenu.id !== "search" && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        handleClear();
+                        if (isActiveMenu.id === "visited") {
+                          handleMenu("default", userReview as IReview[]);
+                        } else {
+                          handleMenu("visited", userReview as IReview[]);
+                        }
+                      }}
+                      className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary font-semibold text-white" : "text-zinc-400"}`}
+                    >
+                      방문한 카페
+                    </button>
+                  )}
                 </div>
               </div>
               <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
@@ -375,7 +342,7 @@ export default function CafeSearchRoute() {
                     })}
                   </div>
                 )}
-                {user === null ? (
+                {user === null && isActiveMenu.id === "visited" ? (
                   <div className="flex h-full w-full flex-col items-center pt-36">
                     <p className="text-center">로그인이 필요한 서비스입니다.</p>
                     <Link
@@ -401,28 +368,12 @@ export default function CafeSearchRoute() {
       </div>
       {isActiveMenu && location.pathname === "/search" && isIdle && (
         <button
-          onClick={() => {
-            // remove
-            removeData();
-            removeMarker();
-            removewOverlay(overlayArr);
-            listOverlayArr[0]?.setMap(null);
-            clusterer?.clear();
-            setIdle(false);
-            // fetch
-            if (isActiveMenu.id === "search") {
-              handleSearch(searchInput);
-            } else {
-              setSearchInput("");
-              fetchCafeData(isActiveMenu.id, userReview as IReview[]);
-            }
-            searchLocation.current = address;
-          }}
+          onClick={handleRefetch}
           className="bg-primary fixed bottom-6 left-1/2 z-50 ml-14 rounded-full px-5 py-2"
         >
           <div className="flex items-center gap-2">
             <div className="w-5">
-              <img src={refresh} alt="새로고침" />
+              <ArrowPathIcon className="text-white" />
             </div>
             <span className="font-bold text-white">현 지도에서 검색</span>
           </div>
