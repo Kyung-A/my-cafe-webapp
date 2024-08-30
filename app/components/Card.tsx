@@ -17,7 +17,7 @@ export function Card({ data, user }: ICard) {
             {user && (
               <button className="mr-1 w-[18px]">
                 {data.visited ? (
-                  <CheckBadgeIcon className="fill-interaction w-full" />
+                  <CheckBadgeIcon className="fill-interaction w-[22px] stroke-white" />
                 ) : (
                   <CheckBadgeIcon className="w-full fill-none stroke-stone-400" />
                 )}
