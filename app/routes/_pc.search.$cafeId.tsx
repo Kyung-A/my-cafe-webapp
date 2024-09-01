@@ -5,6 +5,7 @@ import {
   useLoaderData,
   useLocation,
   useNavigate,
+  useOutletContext,
   useParams,
 } from "@remix-run/react";
 
@@ -18,6 +19,7 @@ import {
   MapPinIcon,
   ArrowLongLeftIcon,
 } from "@heroicons/react/24/outline";
+import { IRegister } from "~/entities/auth/types";
 
 interface IParams {
   params: {
@@ -33,6 +35,7 @@ export async function loader({ params }: IParams) {
 
 export default function CafeDetailRoute() {
   const data = useLoaderData<typeof loader>();
+  const { user } = useOutletContext<{ user: IRegister }>();
   const { cafeId } = useParams<string>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -199,7 +202,7 @@ export default function CafeDetailRoute() {
               <div className="mt-10 flex w-full flex-col items-center justify-center">
                 <p>등록된 후기가 없습니다.</p>
                 <Link
-                  to="/search/reviewForm"
+                  to={!user ? "/signin" : "/search/reviewForm"}
                   state={{
                     cafeId: cafeId,
                     name: data.basicInfo.placenamefull,
