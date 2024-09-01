@@ -6,12 +6,12 @@ import Slider from "react-slick";
 
 import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
-import { Panel } from "~/components";
+import { Panel } from "~/shared/ui";
 import { IFieldInput, IReview } from "~/shared/types";
 import { useImageUpload } from "~/hooks";
-import { uploadPromise } from "~/shared/utils/uploadPromise";
-import { formDataPromise } from "~/shared/utils/formData";
-import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { uploadPromise } from "~/shared/lib/uploadPromise";
+import { formDataPromise } from "~/shared/lib/formData";
+import { imageMaxSize } from "~/shared/lib/imageMaxSize";
 import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
 
 export async function loader({ request }: { request: Request }) {

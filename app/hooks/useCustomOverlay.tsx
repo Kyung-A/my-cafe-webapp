@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import _ from "lodash";
 
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { IClusterer, IClusters, IMarker } from "~/shared/types";
 
 export function useCustomOverlay() {

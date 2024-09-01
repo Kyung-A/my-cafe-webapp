@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 import { useCustomOverlay, useRemove } from "~/hooks";
-import { IMarker } from "../types";
+import { IMarker } from "../shared/types";
 import { useMap } from "./Map";
 
 interface IOverlay {

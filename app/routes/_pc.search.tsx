@@ -15,7 +15,7 @@ import {
   ProfileEditDialog,
   SearchForm,
   TargetViewButton,
-} from "~/components";
+} from "~/shared/ui";
 import {
   useClear,
   useClickActive,
@@ -24,10 +24,10 @@ import {
   useRemove,
   useTargetView,
 } from "~/hooks";
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
 import { getReviewList } from "~/.server/review";
-import { useOverlay } from "~/shared/contexts/Overlay";
+import { useOverlay } from "~/providers/Overlay";
 import { getUser } from "~/.server/storage";
 import {
   Bars3Icon,
@@ -35,7 +35,7 @@ import {
   ArrowPathIcon,
 } from "@heroicons/react/24/outline";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
-import { useAddress } from "~/shared/contexts/Address";
+import { useAddress } from "~/providers/Address";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);

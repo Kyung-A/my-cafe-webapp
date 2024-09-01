@@ -1,8 +1,8 @@
 import { ActionFunctionArgs, redirect } from "@remix-run/node";
 
 import { updateUser } from "~/.server/storage";
-import { formDataPromise } from "~/shared/utils/formData";
-import { uploadPromise } from "~/shared/utils/uploadPromise";
+import { formDataPromise } from "~/shared/lib/formData";
+import { uploadPromise } from "~/shared/lib/uploadPromise";
 
 export async function action({ request }: ActionFunctionArgs) {
   const formData = await formDataPromise(request);

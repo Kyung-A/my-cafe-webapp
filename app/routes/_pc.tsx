@@ -4,8 +4,8 @@ import { Outlet, useLoaderData, useLocation } from "@remix-run/react";
 import { useState } from "react";
 import { getUser } from "~/.server/storage";
 
-import { Panel } from "~/components";
-import { useMap } from "~/shared/contexts/Map";
+import { Panel } from "~/shared/ui";
+import { useMap } from "~/providers/Map";
 
 export const meta: MetaFunction = () => {
   return [{ title: "myCafe" }];

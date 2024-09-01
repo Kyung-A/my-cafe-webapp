@@ -12,14 +12,13 @@ import {
 
 import marker from "~/assets/marker.png";
 import { useGeoLocation } from "~/hooks";
-import { GNB } from "../consts/gnb";
 import {
   ICafePagination,
   ICafeResponse,
   IClusterer,
   IMarker,
   IMenu,
-} from "../types";
+} from "../shared/types";
 
 interface IMap {
   mapEl: RefObject<HTMLDivElement> | null;
@@ -41,6 +40,24 @@ interface IMap {
 interface IMapProvider {
   children: JSX.Element | JSX.Element[];
 }
+
+const GNB = [
+  {
+    id: "default",
+    name: "카페 보기",
+    active: false,
+  },
+  {
+    id: "visited",
+    name: "방문한 카페",
+    active: false,
+  },
+  {
+    id: "search",
+    name: "검색",
+    active: false,
+  },
+];
 
 const MapContext = createContext<IMap>({
   mapEl: null,

@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { IMarker } from "~/shared/types";
 
 export function useRemove() {

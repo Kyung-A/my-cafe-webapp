@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
-import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { imageMaxSize } from "~/shared/lib/imageMaxSize";
 
 interface IDialog {
   user: IRegister;

@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { IGeocoder } from "../types";
+import { IGeocoder } from "../shared/types";
 import { useGeoLocation } from "~/hooks";
 import { useMap } from "./Map";
 

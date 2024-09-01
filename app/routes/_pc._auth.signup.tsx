@@ -5,9 +5,9 @@ import { db } from "~/.server/db";
 import { register } from "~/.server/storage";
 import { useState } from "react";
 import { useImageUpload } from "~/hooks";
-import { uploadPromise } from "~/shared/utils/uploadPromise";
-import { formDataPromise } from "~/shared/utils/formData";
-import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { uploadPromise } from "~/shared/lib/uploadPromise";
+import { formDataPromise } from "~/shared/lib/formData";
+import { imageMaxSize } from "~/shared/lib/imageMaxSize";
 import { ArrowLongRightIcon } from "@heroicons/react/24/outline";
 
 export async function action({ request }: ActionFunctionArgs) {

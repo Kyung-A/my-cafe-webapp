@@ -1,7 +1,7 @@
 import { useLocation, useNavigate } from "@remix-run/react";
 import { useCallback } from "react";
 
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import {
   ICafePagination,
   ICafeResponse,

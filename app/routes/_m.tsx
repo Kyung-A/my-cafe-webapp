@@ -10,13 +10,13 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getReviewList } from "~/.server/review";
 import { getUser } from "~/.server/storage";
-import { SearchForm } from "~/components";
-import { Header, BottomSheet } from "~/components/mobile";
+import { SearchForm } from "~/shared/ui";
+import { Header, BottomSheet } from "~/shared/ui/mobile";
 import { useClickActive, useFetch, useKeyword, useRemove } from "~/hooks";
-import { useAddress } from "~/shared/contexts/Address";
+import { useAddress } from "~/providers/Address";
 
-import { useMap } from "~/shared/contexts/Map";
-import { useOverlay } from "~/shared/contexts/Overlay";
+import { useMap } from "~/providers/Map";
+import { useOverlay } from "~/providers/Overlay";
 import { IRegister, IReview } from "~/shared/types";
 
 export const meta: MetaFunction = () => {

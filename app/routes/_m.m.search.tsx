@@ -10,8 +10,8 @@ import {
 } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
 import { getUser } from "~/.server/storage";
-import { Card } from "~/components";
-import { useMap } from "~/shared/contexts/Map";
+import { Card } from "~/shared/ui";
+import { useMap } from "~/providers/Map";
 import { ICafeResponse, ICoord } from "~/shared/types";
 import {
   ClockIcon,

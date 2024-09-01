@@ -1,6 +1,6 @@
 import { useLocation } from "@remix-run/react";
 import { useEffect, useState } from "react";
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { IMarker, IReview } from "~/shared/types";
 
 interface locationState {

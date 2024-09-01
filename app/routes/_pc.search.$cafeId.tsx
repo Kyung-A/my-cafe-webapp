@@ -9,7 +9,7 @@ import {
 } from "@remix-run/react";
 
 import { getCafeDetail } from "~/.server/search";
-import { Panel } from "~/components";
+import { Panel } from "~/shared/ui";
 import { useMoveTheMap } from "~/hooks";
 import {
   ClockIcon,

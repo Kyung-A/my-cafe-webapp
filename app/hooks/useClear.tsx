@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { useRemove } from "./useRemove";
-import { useOverlay } from "~/shared/contexts/Overlay";
+import { useOverlay } from "~/providers/Overlay";
 import { useLocation, useNavigate } from "@remix-run/react";
 
 export function useClear() {

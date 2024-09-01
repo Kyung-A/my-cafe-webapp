@@ -12,13 +12,13 @@ import {
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 import { getDirection } from "~/.server/search";
-import { Panel } from "~/components";
+import { Panel } from "~/shared/ui";
 import { useRemove } from "~/hooks";
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { IPolyline } from "~/shared/types";
-import { converTime } from "~/shared/utils/converTime";
-import { converDistance } from "~/shared/utils/converDistance";
-import { useOverlay } from "~/shared/contexts/Overlay";
+import { converTime } from "~/shared/lib/converTime";
+import { converDistance } from "~/shared/lib/converDistance";
+import { useOverlay } from "~/providers/Overlay";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface IDirectionInput {

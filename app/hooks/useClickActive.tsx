@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "@remix-run/react";
 
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { IReview } from "~/shared/types";
 import { useFetch } from "./useFetch";
 

@@ -8,9 +8,9 @@ import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { IFieldInput, IReview } from "~/shared/types";
 import { useImageUpload } from "~/hooks";
-import { uploadPromise } from "~/shared/utils/uploadPromise";
-import { formDataPromise } from "~/shared/utils/formData";
-import { imageMaxSize } from "~/shared/utils/imageMaxSize";
+import { uploadPromise } from "~/shared/lib/uploadPromise";
+import { formDataPromise } from "~/shared/lib/formData";
+import { imageMaxSize } from "~/shared/lib/imageMaxSize";
 import {
   PhotoIcon,
   MinusIcon,

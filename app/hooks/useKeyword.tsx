@@ -1,9 +1,9 @@
 import { useCallback, useRef } from "react";
 
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { useClickActive, useFetch, useRemove } from ".";
 import { ICafePagination, ICafeResponse, IReview } from "~/shared/types";
-import { useOverlay } from "~/shared/contexts/Overlay";
+import { useOverlay } from "~/providers/Overlay";
 import { useLocation } from "@remix-run/react";
 
 export function useKeyword() {

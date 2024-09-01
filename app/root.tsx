@@ -8,9 +8,9 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 
-import MapProvider from "./shared/contexts/Map";
-import OverlayProvider from "./shared/contexts/Overlay";
-import AddressProvider from "./shared/contexts/Address";
+import MapProvider from "./providers/Map";
+import OverlayProvider from "./providers/Overlay";
+import AddressProvider from "./providers/Address";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";

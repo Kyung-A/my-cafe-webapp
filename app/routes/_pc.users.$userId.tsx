@@ -7,7 +7,7 @@ import {
   useOutletContext,
 } from "@remix-run/react";
 
-import { Panel } from "~/components";
+import { Panel } from "~/shared/ui";
 import { getReviewList } from "~/.server/review";
 import { IRegister } from "~/shared/types";
 

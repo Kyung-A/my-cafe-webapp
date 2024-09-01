@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useMap } from "~/shared/contexts/Map";
+import { useMap } from "~/providers/Map";
 import { useGeoLocation } from "./useGeoLocation";
 
 export function useTargetView() {

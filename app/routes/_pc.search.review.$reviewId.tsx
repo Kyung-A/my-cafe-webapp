@@ -14,7 +14,7 @@ import {
   getReview,
   removeReviewLike,
 } from "~/.server/review";
-import { Panel } from "~/components";
+import { Panel } from "~/shared/ui";
 import { useMoveTheMap } from "~/hooks";
 import { ActionFunctionArgs } from "@remix-run/node";
 import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
