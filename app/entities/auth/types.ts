@@ -28,3 +28,14 @@ export interface IValidate {
 }
 
 export type IRegisterErrors = Record<string, string>;
+
+export interface ISigninProps {
+  email: string;
+  password: string;
+}
+
+export interface ISigninPromise {
+  id: string;
+  email: string;
+  name: string;
+}

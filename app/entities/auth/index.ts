@@ -1,2 +1,3 @@
 export * as authTypes from "./types";
-export { authSignup } from "./model/authSignup";
+export * from "./model/authSignup";
+export * from "./model/authSignin";

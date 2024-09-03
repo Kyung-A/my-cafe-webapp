@@ -15,12 +15,10 @@ export default function SignupRoute() {
   const { handleFileUpload, fileRef } = useImageUpload();
 
   return (
-    <>
-      <SignupForm
-        handleFileUpload={handleFileUpload}
-        fileRef={fileRef}
-        data={data}
-      />
-    </>
+    <SignupForm
+      handleFileUpload={handleFileUpload}
+      fileRef={fileRef}
+      data={data}
+    />
   );
 }
