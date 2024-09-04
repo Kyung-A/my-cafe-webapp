@@ -12,24 +12,17 @@ import {
 
 import marker from "~/assets/marker.png";
 import { useGeoLocation } from "~/hooks";
-import {
-  ICafePagination,
-  ICafeResponse,
-  IClusterer,
-  IMarker,
-  IMenu,
-} from "../shared/types";
+import { IMenu } from "../shared/types";
+import { IClusterer, IMarker, ISearchData } from "~/entities/search/types";
 
 interface IMap {
   mapEl: RefObject<HTMLDivElement> | null;
   mapData: { [key: string]: any } | undefined;
   GNB: IMenu[];
   setGNB: Dispatch<SetStateAction<IMenu[]>>;
-  cafeData: { current: ICafeResponse[] };
-  markers: IMarker[];
-  setMarkers: Dispatch<SetStateAction<IMarker[]>>;
-  pagination: ICafePagination | undefined;
-  setPagination: Dispatch<SetStateAction<ICafePagination | undefined>>;
+  cafeData: { current: ISearchData[] };
+  markers: IMarker[] | undefined;
+  setMarkers: Dispatch<SetStateAction<IMarker[] | undefined>>;
   clusterer: IClusterer | undefined;
   searchInput: string;
   setSearchInput: Dispatch<SetStateAction<string>>;
@@ -67,8 +60,6 @@ const MapContext = createContext<IMap>({
   cafeData: { current: [] },
   markers: [],
   setMarkers: () => [],
-  pagination: undefined,
-  setPagination: () => null,
   clusterer: undefined,
   searchInput: "",
   setSearchInput: () => "",
@@ -78,13 +69,12 @@ const MapContext = createContext<IMap>({
 
 function MapProvider({ children }: IMapProvider) {
   const mapEl = useRef<HTMLDivElement>(null);
-  const cafeData = useRef<ICafeResponse[]>([]);
+  const cafeData = useRef<ISearchData[]>([]);
   const { curLocation } = useGeoLocation();
 
   const [mapData, setMapData] = useState<{ [key: string]: any } | undefined>();
   const [copyGNB, setCopyGNB] = useState<IMenu[]>(GNB);
-  const [markers, setMarkers] = useState<IMarker[]>([]);
-  const [pagination, setPagination] = useState<ICafePagination>();
+  const [markers, setMarkers] = useState<IMarker[] | undefined>([]);
   const [clusterer, setClusterer] = useState<IClusterer>();
   const [searchInput, setSearchInput] = useState<string>("");
   const [isIdle, setIdle] = useState<boolean>(false);
@@ -132,8 +122,6 @@ function MapProvider({ children }: IMapProvider) {
         cafeData,
         markers,
         setMarkers,
-        pagination,
-        setPagination,
         clusterer,
         searchInput,
         setSearchInput,
