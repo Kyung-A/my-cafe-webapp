@@ -12,7 +12,7 @@ import { getReviewList } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { SearchForm } from "~/shared/ui";
 import { Header, BottomSheet } from "~/shared/ui/mobile";
-import { useClickActive, useFetch, useKeyword, useRemove } from "~/hooks";
+import { useRemove } from "~/hooks";
 import { useAddress } from "~/providers/Address";
 
 import { useMap } from "~/providers/Map";
@@ -38,7 +38,7 @@ export default function MobileMainLayoutRoute() {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const [fullSheet, setFullSheet] = useState<boolean>(false);
 
-  const { handleMenu } = useClickActive();
+  // const { handleMenu } = useClickActive();
   const {
     mapEl,
     GNB,
@@ -51,9 +51,9 @@ export default function MobileMainLayoutRoute() {
   } = useMap();
   const { removeData, removeMarker, removewOverlay } = useRemove();
   const { overlayArr, listOverlayArr } = useOverlay();
-  const { fetchCafeData, refetchCafeData } = useFetch();
+  // const { fetchCafeData, refetchCafeData } = useFetch();
   const { address } = useAddress();
-  const { handleEnter, handleSearch, keyword } = useKeyword();
+  // const { handleEnter, handleSearch, keyword } = useKeyword();
 
   const oldReview = useRef<any>(null);
 
@@ -63,7 +63,7 @@ export default function MobileMainLayoutRoute() {
       const isActive = GNB.some((v) => v.id === type && v.active === true);
       if (location.pathname !== "/m/search") navigator("/m/search");
       if (isActive) return;
-      handleMenu(type, userReview as IReview[]);
+      // handleMenu(type, userReview as IReview[]);
     },
     [userReview, mapData, GNB, location]
   );
@@ -82,12 +82,12 @@ export default function MobileMainLayoutRoute() {
     clusterer?.clear();
     setIdle(false);
 
-    if (isActiveMenu.id === "search") {
-      handleSearch(searchInput, userReview as IReview[]);
-    } else {
-      setSearchInput("");
-      fetchCafeData(isActiveMenu.id, userReview as IReview[]);
-    }
+    // if (isActiveMenu.id === "search") {
+    //   handleSearch(searchInput, userReview as IReview[]);
+    // } else {
+    //   setSearchInput("");
+    //   fetchCafeData(isActiveMenu.id, userReview as IReview[]);
+    // }
     searchLocation.current = address;
   }, [
     address,
@@ -135,10 +135,14 @@ export default function MobileMainLayoutRoute() {
     }
 
     if (changeReview) {
-      refetchCafeData(changeReview);
+      // refetchCafeData(changeReview);
       oldReview.current = userReview;
     }
-  }, [refetchCafeData, userReview]);
+  }, [
+    // refetchCafeData,
+
+    userReview,
+  ]);
 
   return (
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
@@ -153,7 +157,7 @@ export default function MobileMainLayoutRoute() {
           context={{
             address: searchLocation.current,
             isActiveMenu,
-            keyword,
+            // keyword,
             setFullSheet,
             userReview,
           }}
@@ -165,9 +169,9 @@ export default function MobileMainLayoutRoute() {
             <SearchForm
               searchInput={searchInput}
               setSearchInput={setSearchInput}
-              handleEnter={handleEnter}
-              onSubmit={handleSearch}
-              isActiveMenu={isActiveMenu}
+              // handleEnter={handleEnter}
+              // onSubmit={handleSearch}
+              // isActiveMenu={isActiveMenu}
               userReview={userReview as IReview[]}
             />
           </div>
@@ -194,7 +198,7 @@ export default function MobileMainLayoutRoute() {
                 context={{
                   address: searchLocation.current,
                   isActiveMenu,
-                  keyword,
+                  // keyword,
                   setFullSheet,
                 }}
               />

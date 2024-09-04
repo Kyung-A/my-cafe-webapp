@@ -45,18 +45,12 @@ export default function MobileCafeSearchRoute() {
   const [, setCoordinate] = useState<ICoord | null>();
   const [curCafe, setCurCafe] = useState<any>();
 
-  const { cafeData, pagination } = useMap();
+  const { cafeData } = useMap();
 
   const handleBackReset = useCallback(() => {
     setCurCafe(null);
     setFullSheet(false);
   }, []);
-
-  useEffect(() => {
-    if (pagination?.hasNextPage) {
-      pagination?.gotoPage(pagination.current + 1);
-    }
-  }, [pagination]);
 
   useEffect(() => {
     if (fetcher.data) {
@@ -277,7 +271,7 @@ export default function MobileCafeSearchRoute() {
             </h3>
           </div>
           <div className="overflow-y-auto px-6 pb-52">
-            {!pagination?.hasNextPage && cafeData.current.length > 0 && (
+            {cafeData.current.length > 0 && (
               <div className="mt-4 flex flex-col gap-6">
                 {cafeData.current.map((v: ICafeResponse) => {
                   const directions = location.pathname.includes("directions");
