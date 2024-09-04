@@ -38,9 +38,9 @@ export interface IDataPagination {
 }
 
 export interface ICoord {
-  prevUrl: string;
-  review: string;
-  reviewId: string;
+  prevUrl?: string;
+  review?: string;
+  reviewId?: string;
   x: string;
   y: string;
   name: string;

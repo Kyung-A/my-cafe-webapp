@@ -1,13 +1,15 @@
+import { useEffect, useMemo, useState } from "react";
 import {
-  Form,
   Link,
   json,
   useLoaderData,
   useLocation,
   useNavigate,
+  useOutletContext,
   useParams,
 } from "@remix-run/react";
-import Slider from "react-slick";
+import { ActionFunctionArgs } from "@remix-run/node";
+import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
 
 import {
   createReviewLike,
@@ -15,9 +17,14 @@ import {
   removeReviewLike,
 } from "~/.server/review";
 import { Panel } from "~/shared/ui";
-import { useMoveTheMap } from "~/hooks";
-import { ActionFunctionArgs } from "@remix-run/node";
-import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
+import { getSingleMarker } from "~/entities/search/model/getSingleMarker";
+import { useMap } from "~/providers/Map";
+import { IMarker } from "~/entities/search/types";
+import { removeSingleMarker } from "~/entities/search";
+import { ImageSlider } from "~/shared/ui/ImageSlider";
+import { ReviewContent } from "~/widgets/review/ReviewContent.ui";
+import { IProfile } from "~/entities/user/types";
+import { LikeForm } from "~/features/review/like";
 
 interface IParams {
   params: {
@@ -50,164 +57,106 @@ export default function ReviewDetailRoute() {
   const { reviewId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useOutletContext<{ user: IProfile }>();
+  const { mapData } = useMap();
 
-  const { marker, setMarker } = useMoveTheMap(data);
+  const [marker, setMarker] = useState<IMarker | null>(null);
 
-  const sliderInit = {
-    dots: false,
-    Infinity: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
+  const hasPrevUrl = useMemo(
+    () => location.state?.prevUrl && location.state.prevUrl.includes("/users"),
+    [location.state.prevUrl]
+  );
+
+  useEffect(() => {
+    if (data && hasPrevUrl) {
+      const marker = getSingleMarker(mapData, {
+        x: data.x,
+        y: data.y,
+        name: data.name,
+      });
+      marker.setMap(mapData);
+    }
+  }, [data, mapData, hasPrevUrl]);
 
   return (
-    <Panel
-      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/users") ? "0px" : "320px"}`}
-    >
+    <Panel left={`${hasPrevUrl ? "0px" : "320px"}`}>
       <div className="relative h-full w-full">
         <div
-          className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/users") ? "gap-2" : "justify-between "}`}
+          className={`bg-primary flex w-full items-center px-4 py-3 ${hasPrevUrl ? "gap-2" : "justify-between "}`}
         >
-          {location.state?.prevUrl &&
-            location.state?.prevUrl.includes("/users") && (
-              <button
-                onClick={() => {
-                  navigate(-1);
-                  marker?.setMap(null);
-                  setMarker(null);
-                }}
-                className="w-6"
-              >
-                <ArrowLongLeftIcon />
-              </button>
-            )}
-          {location.state?.prevUrl &&
-          location.state?.prevUrl.includes("/users") ? (
-            <Link
-              to={`/search/${data?.cafeId}`}
-              state={{
-                x: data?.x,
-                y: data?.y,
-                review: data?.description,
-                reviewId: data?.id,
-                ...(location.state?.prevUrl && {
-                  prevUrl: location.state?.prevUrl,
-                }),
-              }}
+          {hasPrevUrl && (
+            <button
               onClick={() => {
-                marker?.setMap(null);
-                setMarker(null);
+                navigate(-1);
+                removeSingleMarker(marker, setMarker);
               }}
-              className="break-keep text-xl font-semibold leading-6"
+              className="w-6"
             >
-              {data?.name}
-            </Link>
-          ) : (
-            <h1 className="break-keep text-xl font-semibold leading-6">
-              {data?.name}
-            </h1>
+              <ArrowLongLeftIcon />
+            </button>
           )}
-          {location.state?.prevUrl &&
-            !location.state?.prevUrl.includes("/users") && (
-              <Link
-                to="/search/reviewForm"
-                state={{
-                  cafeId: data?.cafeId,
-                  reviewId: reviewId,
-                  name: data?.name,
-                }}
-                className="bg-interaction shrink-0 rounded-full px-4 py-1 text-sm font-semibold "
-              >
-                수정
-              </Link>
-            )}
+          <Link
+            to={`/search/${data?.cafeId}`}
+            state={{
+              x: data?.x,
+              y: data?.y,
+              review: data?.description,
+              reviewId: data?.id,
+              ...(location.state?.prevUrl && {
+                prevUrl: location.state?.prevUrl,
+              }),
+            }}
+            onClick={() => {
+              removeSingleMarker(marker, setMarker);
+            }}
+            className="break-keep text-xl font-semibold leading-6"
+          >
+            {data?.name}
+          </Link>
+          {user.id === data?.authorId && (
+            <Link
+              to="/search/reviewForm"
+              state={{
+                cafeId: data?.cafeId,
+                reviewId: reviewId,
+                name: data?.name,
+              }}
+              className="bg-interaction ml-auto shrink-0 rounded-full px-4 py-1 text-sm font-semibold"
+            >
+              수정
+            </Link>
+          )}
         </div>
         <div className="h-full w-full overflow-y-auto">
           {data?.reviewImages && (
-            <div className="slider-container max-h-[208px] overflow-hidden">
-              <Slider {...sliderInit}>
-                {data?.reviewImages?.split(",").map((src) => (
-                  <div key={src} className="h-full w-full">
-                    <input
-                      type="image"
-                      src={src}
-                      className="top-1/4 aspect-square w-full -translate-y-1/4 object-cover"
-                      alt="이미지"
-                    />
-                  </div>
-                ))}
-              </Slider>
-            </div>
+            <ImageSlider data={data?.reviewImages?.split(",")} />
           )}
-          <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
+          <div className="flex flex-col gap-10 px-4 pb-20 pt-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>
               <p className="mt-2 rounded bg-neutral-100 px-3 py-2">
                 {data?.description}
               </p>
             </div>
-            <div>
-              <p className="text-lg font-semibold">👍 장점</p>
-              <ul className="list-inside list-disc px-3 py-2">
-                {data?.good.split(",").map((v, i) => <li key={i}>{v}</li>)}
-              </ul>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">👎 단점</p>
-              <ul className="list-inside list-disc px-3 py-2">
-                {data?.notGood.split(",").map((v, i) => <li key={i}>{v}</li>)}
-              </ul>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">💛 추천메뉴</p>
-              <p className="px-3 py-2">{data?.recommend}</p>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">🏷️ 태그</p>
-              <p className="px-3 py-2">{data?.tags}</p>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">⭐ 별점</p>
-              <p className="px-3 py-2">{data?.starRating} / 5</p>
-            </div>
+            <ReviewContent title="👍 장점" data={data?.good.split(",")} />
+            <ReviewContent title="👎 단점" data={data?.notGood.split(",")} />
+            <ReviewContent title="💛 추천메뉴" data={data?.recommend} />
+            <ReviewContent title="⭐ 별점" data={String(data?.starRating)} />
           </div>
         </div>
-        {location.state?.prevUrl &&
-          location.state?.prevUrl.includes("/users") && (
-            <Form method="post" navigate={false}>
-              <input
-                name="isLiked"
-                type="text"
-                value={String(
-                  data?.likedBy.some((v) => v.id === location.state?.myId)
-                )}
-                hidden
-                readOnly
-              />
-              <input
-                name="reviewId"
-                type="text"
-                value={data?.id}
-                hidden
-                readOnly
-              />
-              <input
-                name="userId"
-                type="text"
-                value={location.state?.myId}
-                hidden
-                readOnly
-              />
-              <button
-                type="submit"
-                className={`absolute bottom-6 right-4 flex h-12 w-12 flex-col items-center justify-center rounded-full shadow-md ${data?.likedBy.some((v) => v.id === location.state?.myId) ? "text-red-500" : ""}`}
-              >
-                <span className="text-xl">❤</span>
-                <span className="-mt-1 text-xs">{data?.likedBy.length}</span>
-              </button>
-            </Form>
-          )}
+        {hasPrevUrl && data && location.state && (
+          <LikeForm
+            data={{
+              isLiked: String(
+                data?.likedBy.some((v) => v.id === location.state.myId)
+              ),
+              reviewId: data.id,
+              userId: location.state.myId,
+              count: data.likedBy.length,
+              likedBy: data.likedBy,
+            }}
+          />
+        )}
       </div>
     </Panel>
   );

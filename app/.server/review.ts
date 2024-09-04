@@ -44,7 +44,11 @@ export async function getReview(id: string) {
     const result = await db.review.findUnique({
       where: { id },
       include: {
-        likedBy: true,
+        likedBy: {
+          select: {
+            id: true,
+          },
+        },
       },
     });
     return result;
