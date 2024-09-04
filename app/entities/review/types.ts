@@ -1,5 +1,11 @@
 import { IRegister } from "../auth/types";
 
+export interface ILikedProps {
+  isLiked?: string;
+  reviewId: string;
+  userId: string;
+}
+
 export interface IReview {
   id: string;
   cafeId: string;

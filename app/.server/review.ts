@@ -1,5 +1,6 @@
 import { IReview } from "~/shared/types";
 import { db } from "./db";
+import { ILikedProps } from "~/entities/review/types";
 
 export async function createReview(data: IReview) {
   try {
@@ -58,10 +59,7 @@ export async function getReview(id: string) {
   }
 }
 
-export async function createReviewLike(data: {
-  reviewId: string;
-  userId: string;
-}) {
+export async function createReviewLike(data: ILikedProps) {
   try {
     const result = await db.review.update({
       where: { id: data.reviewId },
@@ -78,10 +76,7 @@ export async function createReviewLike(data: {
   }
 }
 
-export async function removeReviewLike(data: {
-  reviewId: string;
-  userId: string;
-}) {
+export async function removeReviewLike(data: ILikedProps) {
   try {
     const result = await db.review.update({
       where: { id: data.reviewId },

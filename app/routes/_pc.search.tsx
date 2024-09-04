@@ -18,7 +18,6 @@ import { useOverlay } from "~/providers/Overlay";
 import { getUser } from "~/.server/storage";
 import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useAddress } from "~/providers/Address";
-import { reviewApi } from "~/entities/review/api/reviewApi";
 import { allRemove, updateData } from "~/entities/search";
 import {
   CafeListHeader,
@@ -30,6 +29,7 @@ import { Profile, ProfileEditDialog } from "~/features/user";
 import { IProfile } from "~/entities/user/types";
 import { NavList, NoCafe, NoUser } from "~/widgets/search";
 import { usePreservedCallback } from "~/shared/hooks/usePreservedCallback";
+import { reviewApi } from "~/entities/review";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);

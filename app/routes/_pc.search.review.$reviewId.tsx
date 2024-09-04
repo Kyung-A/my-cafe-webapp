@@ -11,11 +11,7 @@ import {
 import { ActionFunctionArgs } from "@remix-run/node";
 import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
 
-import {
-  createReviewLike,
-  getReview,
-  removeReviewLike,
-} from "~/.server/review";
+import { getReview } from "~/.server/review";
 import { Panel } from "~/shared/ui";
 import { getSingleMarker } from "~/entities/search/model/getSingleMarker";
 import { useMap } from "~/providers/Map";
@@ -25,6 +21,7 @@ import { ImageSlider } from "~/shared/ui/ImageSlider";
 import { ReviewContent } from "~/widgets/review/ReviewContent.ui";
 import { IProfile } from "~/entities/user/types";
 import { LikeForm } from "~/features/review/like";
+import { reivewLiked } from "~/entities/review";
 
 interface IParams {
   params: {
@@ -39,16 +36,7 @@ export async function loader({ params }: IParams) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const formData = await request.formData();
-  const isLiked = String(formData.get("isLiked"));
-  const reviewId = String(formData.get("reviewId"));
-  const userId = String(formData.get("userId"));
-
-  if (isLiked === "true") {
-    await removeReviewLike({ reviewId, userId });
-  } else {
-    await createReviewLike({ reviewId, userId });
-  }
+  await reivewLiked(request);
   return null;
 }
 
