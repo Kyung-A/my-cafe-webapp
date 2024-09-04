@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Link,
@@ -5,71 +6,71 @@ import {
   json,
   useLoaderData,
   useLocation,
+  useNavigate,
   useOutletContext,
 } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   Card,
-  Menu,
   ProfileEditDialog,
   SearchForm,
   TargetViewButton,
 } from "~/shared/ui";
-import {
-  useClear,
-  useClickActive,
-  useFetch,
-  useKeyword,
-  useRemove,
-  useTargetView,
-} from "~/hooks";
+import { useTargetView } from "~/hooks";
 import { useMap } from "~/providers/Map";
 import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
-import { getReviewList } from "~/.server/review";
 import { useOverlay } from "~/providers/Overlay";
 import { getUser } from "~/.server/storage";
-import {
-  Bars3Icon,
-  PencilSquareIcon,
-  ArrowPathIcon,
-} from "@heroicons/react/24/outline";
-import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { Bars3Icon } from "@heroicons/react/24/outline";
 import { useAddress } from "~/providers/Address";
+import { reviewApi } from "~/entities/review/api/reviewApi";
+import { allRemove, updateData } from "~/entities/search";
+import {
+  CafeListHeader,
+  fetchData,
+  NavList,
+  NoCafe,
+  NoUser,
+  RefetchButton,
+  SubNav,
+} from "~/features/search";
+import { Profile } from "~/features/user";
+import { IProfile } from "~/entities/user/types";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
   if (!user?.id) return null;
 
-  const result = await getReviewList(user?.id);
+  const result = await reviewApi(user?.id);
   return json(result);
 }
 
 export default function CafeSearchRoute() {
   const location = useLocation();
+  const navigate = useNavigate();
   const userReview = useLoaderData<typeof loader>();
-  const { user } = useOutletContext<{ user: IRegister }>();
+  const { user } = useOutletContext<{ user: IProfile }>();
 
-  const { removeData, removeMarker, removewOverlay } = useRemove();
-  const { fetchCafeData, refetchCafeData } = useFetch();
   const {
     GNB,
     cafeData,
     clusterer,
-    pagination,
     searchInput,
     setSearchInput,
     isIdle,
     setIdle,
+    mapData,
+    setMarkers,
+    setGNB,
+    markers,
   } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
-  const { handleMenu } = useClickActive();
-  const { handleEnter, handleSearch, keyword } = useKeyword();
   const { targetView } = useTargetView();
-  const { handleClear } = useClear();
   const { address } = useAddress();
 
   const oldReview = useRef<any>(null);
+  const keyword = useRef<string | null>(null);
   const searchLocation = useRef<string | null | undefined>(null);
 
   const [coordinate, setCoordinate] = useState<ICoord | null>();
@@ -77,32 +78,125 @@ export default function CafeSearchRoute() {
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
-  const handleRefetch = useCallback(() => {
-    if (!isActiveMenu) return;
-    // remove
-    removeData();
-    removeMarker();
-    removewOverlay(overlayArr);
-    listOverlayArr[0]?.setMap(null);
-    clusterer?.clear();
-    setIdle(false);
-    // fetch
-    if (isActiveMenu.id === "search") {
-      handleSearch(searchInput, userReview as IReview[]);
-    } else {
-      setSearchInput("");
-      fetchCafeData(isActiveMenu.id, userReview as IReview[]);
+  function handleInteraction(
+    event: { type: string; key: string; preventDefault: () => void },
+    text: string
+  ) {
+    if (event.type === "click" || event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      if (cafeData.current && cafeData.current.length > 0) {
+        allRemove(
+          markers,
+          setMarkers,
+          cafeData,
+          overlayArr,
+          listOverlayArr,
+          clusterer
+        );
+      }
+      setGNB(
+        GNB.map((v) =>
+          v.id === "search" ? { ...v, active: true } : { ...v, active: false }
+        )
+      );
+      keyword.current = text;
+      fetchData(
+        "search",
+        userReview,
+        mapData,
+        cafeData,
+        setMarkers,
+        clusterer,
+        navigate,
+        text
+      );
     }
-    searchLocation.current = address;
-  }, [
-    address,
-    clusterer,
-    isActiveMenu,
-    listOverlayArr,
-    overlayArr,
-    searchInput,
-    userReview,
-  ]);
+  }
+
+  const handleFetch = useCallback(
+    (type: string) => {
+      allRemove(
+        markers,
+        setMarkers,
+        cafeData,
+        overlayArr,
+        listOverlayArr,
+        clusterer
+      );
+      setGNB(
+        GNB.map((v) =>
+          v.id === type ? { ...v, active: true } : { ...v, active: false }
+        )
+      );
+      fetchData(
+        type,
+        userReview,
+        mapData,
+        cafeData,
+        setMarkers,
+        clusterer,
+        navigate
+      );
+    },
+    [
+      GNB,
+      cafeData,
+      clusterer,
+      listOverlayArr,
+      mapData,
+      markers,
+      overlayArr,
+      userReview,
+    ]
+  );
+
+  const handleRefetch = useCallback(
+    async (event: {
+      type: string;
+      key: string;
+      preventDefault: () => void;
+    }) => {
+      if (!isActiveMenu) return;
+      allRemove(
+        markers,
+        setMarkers,
+        cafeData,
+        overlayArr,
+        listOverlayArr,
+        clusterer
+      );
+      setIdle(false);
+
+      if (isActiveMenu?.id === "search") {
+        handleInteraction(event, searchInput);
+      } else {
+        setSearchInput("");
+        fetchData(
+          isActiveMenu?.id,
+          userReview,
+          mapData,
+          cafeData,
+          setMarkers,
+          clusterer,
+          navigate
+        );
+      }
+      searchLocation.current = address;
+    },
+    [
+      isActiveMenu,
+      markers,
+      cafeData,
+      overlayArr,
+      listOverlayArr,
+      clusterer,
+      address,
+      searchInput,
+      userReview,
+      mapData,
+      navigate,
+    ]
+  );
 
   useEffect(() => {
     if (!isActiveMenu) {
@@ -141,10 +235,10 @@ export default function CafeSearchRoute() {
     }
 
     if (changeReview) {
-      refetchCafeData(changeReview);
+      updateData(cafeData, changeReview);
       oldReview.current = userReview;
     }
-  }, [refetchCafeData, userReview]);
+  }, [userReview]);
 
   useEffect(() => {
     if (!location.pathname.includes("directions")) {
@@ -152,18 +246,27 @@ export default function CafeSearchRoute() {
     }
   }, [location.pathname]);
 
-  useEffect(() => {
-    if (pagination?.hasNextPage) {
-      pagination?.gotoPage(pagination.current + 1);
-    }
-  }, [pagination]);
-
   return (
     <>
       <div>
         <div className="bg-primary w-full px-4 py-3">
           <div className="mb-2 flex items-center gap-2 text-white">
-            <button onClick={handleClear}>
+            <button
+              onClick={() => {
+                navigate("/search");
+                allRemove(
+                  markers,
+                  setMarkers,
+                  cafeData,
+                  overlayArr,
+                  listOverlayArr,
+                  clusterer
+                );
+                setGNB(GNB.map((v) => ({ ...v, active: false })));
+                setSearchInput("");
+                setIdle(false);
+              }}
+            >
               <Bars3Icon className="w-5" />
             </button>
             <h1>myCafe</h1>
@@ -171,141 +274,42 @@ export default function CafeSearchRoute() {
           <SearchForm
             searchInput={searchInput}
             setSearchInput={setSearchInput}
-            handleEnter={handleEnter}
-            onSubmit={handleSearch}
-            isActiveMenu={isActiveMenu}
+            handleInteraction={handleInteraction}
             userReview={userReview as IReview[]}
           />
         </div>
-        {/* 프로필 */}
-        {!isActiveMenu && user && (
-          <div className="mb-2 px-4 pt-6">
-            <h2 className="text-lg font-semibold">
-              👋 안녕하세요 {user.name}님!
-            </h2>
-            <div className="relative mt-2 flex w-full items-center">
-              <button onClick={() => setOpened(true)}>
-                <div className="bg-trueGray-100 absolute bottom-0 left-12 h-5 w-5 rounded-full p-[3px]">
-                  <PencilSquareIcon />
-                </div>
-                <div className="h-16 w-16 overflow-hidden rounded-full">
-                  {user.profile ? (
-                    <img
-                      src={user.profile}
-                      alt="프로필 이미지"
-                      className="h-full w-full object-cover"
-                    />
-                  ) : (
-                    <UserCircleIcon className="w-full fill-neutral-300" />
-                  )}
-                </div>
-              </button>
-              <div className="flex-1">
-                <p className="break-keep pl-3 text-sm">{user.email}</p>
-                <table className="mt-1 w-full text-left text-xs">
-                  <tbody>
-                    <tr>
-                      <th className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
-                        리뷰수
-                      </th>
-                      <th className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
-                        팔로워
-                      </th>
-                      <th className="text-trueGray-500 w-1/3 px-3 font-normal">
-                        팔로잉
-                      </th>
-                    </tr>
-                    <tr>
-                      <td className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
-                        {user._count?.review}
-                      </td>
-                      <td className="text-trueGray-500 w-1/3 border-r px-3 font-normal">
-                        {user._count?.followers}
-                      </td>
-                      <td className="text-trueGray-500 w-1/3 px-3 font-normal">
-                        {user._count?.following}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+        {!isActiveMenu && user && <Profile user={user} setOpened={setOpened} />}
         {/* 탐색 */}
         <div>
           {!isActiveMenu ? (
-            <div className="px-4 pt-6">
-              <h2 className="text-lg font-semibold">☕ {address} 주변 탐색</h2>
-              <ul className="mt-3 flex flex-col gap-2">
-                <li>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      handleClear();
-                      handleMenu("default", userReview as IReview[]);
-                    }}
-                    className="border-primary w-full rounded border px-4 py-2 text-left"
-                  >
-                    카페 보기
-                  </button>
-                </li>
-                <li>
-                  <Link
-                    to="/users?filter=ranking"
-                    state={{ filter: "ranking" }}
-                    className="block w-full"
-                  >
-                    <Menu name="베스트 리뷰어" />
-                  </Link>
-                  {user && (
-                    <Link
-                      to="/users?filter=follow"
-                      state={{ filter: "follow" }}
-                      className="mt-2 block w-full"
-                    >
-                      <Menu name="나의 팔로잉 목록" />
-                    </Link>
-                  )}
-                </li>
-              </ul>
-            </div>
+            <NavList
+              address={address}
+              user={!user ? false : true}
+              handleFetch={() => handleFetch("default")}
+            />
           ) : (
             <>
               <div className="px-4 pb-2 pt-6">
+                <CafeListHeader
+                  isActiveMenu={isActiveMenu}
+                  searchLocation={searchLocation.current}
+                  keyword={keyword.current}
+                />
                 {isActiveMenu.id !== "search" && (
-                  <h2 className="text-md mt-1 font-semibold leading-6">
-                    <>
-                      {searchLocation.current} 주변 <br />
-                    </>
-                  </h2>
+                  <SubNav
+                    isActiveMenu={isActiveMenu?.id}
+                    onClick={() => {
+                      if (isActiveMenu.id === "visited") {
+                        handleFetch("default");
+                      } else {
+                        handleFetch("visited");
+                      }
+                    }}
+                  />
                 )}
-                <h3 className="text-interaction text-xl font-semibold">
-                  {isActiveMenu.id === "search"
-                    ? `${keyword} ${isActiveMenu.name}`
-                    : isActiveMenu.name}
-                </h3>
-                <div>
-                  {isActiveMenu.id !== "search" && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        handleClear();
-                        if (isActiveMenu.id === "visited") {
-                          handleMenu("default", userReview as IReview[]);
-                        } else {
-                          handleMenu("visited", userReview as IReview[]);
-                        }
-                      }}
-                      className={`border-primary rounded-full border px-2 py-[2px] text-xs ${isActiveMenu.id === "visited" ? "bg-primary font-semibold text-white" : "text-zinc-400"}`}
-                    >
-                      방문한 카페
-                    </button>
-                  )}
-                </div>
               </div>
               <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
-                {!pagination?.hasNextPage && cafeData.current.length > 0 && (
+                {cafeData.current.length > 0 && (
                   <div className="mt-2 flex flex-col gap-6">
                     {cafeData.current.map((v: ICafeResponse) => {
                       const directions =
@@ -342,42 +346,16 @@ export default function CafeSearchRoute() {
                     })}
                   </div>
                 )}
-                {user === null && isActiveMenu.id === "visited" ? (
-                  <div className="flex h-full w-full flex-col items-center pt-36">
-                    <p className="text-center">로그인이 필요한 서비스입니다.</p>
-                    <Link
-                      to="/signin"
-                      className="bg-interaction mx-auto mt-3 inline-block rounded-full px-8 py-2 text-center text-sm font-semibold text-white"
-                    >
-                      로그인 하기
-                    </Link>
-                  </div>
-                ) : (
-                  (!pagination || !pagination?.hasNextPage) &&
-                  cafeData.current.length === 0 && (
-                    <div className="h-full w-full pt-36">
-                      <p className="text-center">카페를 찾지 못 했습니다.</p>
-                    </div>
-                  )
-                )}
+                {user === null && isActiveMenu.id === "visited" && <NoUser />}
+                {cafeData.current.length === 0 && <NoCafe />}
               </div>
             </>
           )}
         </div>
-        <Outlet context={{ userReview, coordinate }} />
+        <Outlet context={{ userReview, coordinate, user }} />
       </div>
       {isActiveMenu && location.pathname === "/search" && isIdle && (
-        <button
-          onClick={handleRefetch}
-          className="bg-primary fixed bottom-6 left-1/2 z-50 ml-14 rounded-full px-5 py-2"
-        >
-          <div className="flex items-center gap-2">
-            <div className="w-5">
-              <ArrowPathIcon className="text-white" />
-            </div>
-            <span className="font-bold text-white">현 지도에서 검색</span>
-          </div>
-        </button>
+        <RefetchButton handleRefetch={handleRefetch} />
       )}
       <TargetViewButton onClick={targetView} />
       {user && (
