@@ -6,7 +6,7 @@ import {
   ErrorMsg,
   MsgWithAction,
   SubmitButton,
-} from "~/widgets/auth/ui";
+} from "~/widgets/auth";
 import { UploadProfile } from "./UploadProfile.ui";
 
 interface ISignupForm {

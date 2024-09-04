@@ -11,12 +11,7 @@ import {
 } from "@remix-run/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import {
-  Card,
-  ProfileEditDialog,
-  SearchForm,
-  TargetViewButton,
-} from "~/shared/ui";
+import { Card, SearchForm, TargetViewButton } from "~/shared/ui";
 import { useTargetView } from "~/hooks";
 import { useMap } from "~/providers/Map";
 import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
@@ -29,14 +24,12 @@ import { allRemove, updateData } from "~/entities/search";
 import {
   CafeListHeader,
   fetchData,
-  NavList,
-  NoCafe,
-  NoUser,
   RefetchButton,
   SubNav,
 } from "~/features/search";
-import { Profile } from "~/features/user";
+import { Profile, ProfileEditDialog } from "~/features/user";
 import { IProfile } from "~/entities/user/types";
+import { NavList, NoCafe, NoUser } from "~/widgets/search";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);

@@ -1,6 +1,6 @@
 import { Form } from "@remix-run/react";
 import { Input } from "~/shared/ui";
-import { AuthLayout, ErrorMsg, MsgWithAction } from "~/widgets/auth/ui";
+import { AuthLayout, ErrorMsg, MsgWithAction } from "~/widgets/auth";
 
 interface ISigninForm {
   data: { errors: string } | undefined;
