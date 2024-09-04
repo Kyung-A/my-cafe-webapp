@@ -68,7 +68,7 @@ export function ProfileEditDialog({ user, isOpen, setOpened }: IDialog) {
           </div>
           <div className="mt-8 flex items-center justify-center gap-2">
             <Form
-              action="profileUpdate"
+              action="/profileUpdate"
               method="post"
               encType="multipart/form-data"
               onSubmit={(e) => {
