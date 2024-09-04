@@ -25,11 +25,9 @@ export function Card({ data, user }: ICard) {
             )}
           </div>
         </div>
-        <div className="mt-2 flex items-center gap-3">
-          <div className="w-2/3">
-            <p className="break-keep text-sm">{data.address_name}</p>
-            <p className="text-sm">{data.phone}</p>
-          </div>
+        <div className="mt-2">
+          <p className="break-keep text-sm">{data.address_name}</p>
+          <p className="text-sm">{data.phone}</p>
         </div>
         {data.review && (
           <div className="mt-4 box-border rounded bg-neutral-100 px-2 py-1">
