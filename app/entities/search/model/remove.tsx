@@ -9,6 +9,14 @@ export function removeMarker(
   setMarkers([]);
 }
 
+export function removeSingleMarker(
+  marker: IMarker | null,
+  setMarker: (value: React.SetStateAction<IMarker | null>) => void
+) {
+  marker?.setMap(null);
+  setMarker(null);
+}
+
 export function removeCafeData(cafeData: { current: ISearchData[] }) {
   cafeData.current = [];
 }

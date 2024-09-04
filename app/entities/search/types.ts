@@ -37,6 +37,15 @@ export interface IDataPagination {
   totalCount: number;
 }
 
+export interface ICoord {
+  prevUrl: string;
+  review: string;
+  reviewId: string;
+  x: string;
+  y: string;
+  name: string;
+}
+
 export type IMarker = Record<string, any>;
 export type IMapData = Record<string, any>;
 export type IClusterer = Record<string, any>;

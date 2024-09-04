@@ -11,15 +11,17 @@ import {
 
 import { getCafeDetail } from "~/.server/search";
 import { Panel } from "~/shared/ui";
-import { useMoveTheMap } from "~/hooks";
 import {
-  ClockIcon,
   ArrowLongRightIcon,
-  ClipboardIcon,
-  MapPinIcon,
   ArrowLongLeftIcon,
 } from "@heroicons/react/24/outline";
 import { IRegister } from "~/entities/auth/types";
+import { useEffect, useMemo, useState } from "react";
+import { getSingleMarker } from "~/entities/search/model/getSingleMarker";
+import { useMap } from "~/providers/Map";
+import { IMarker } from "~/entities/search/types";
+import { removeSingleMarker } from "~/entities/search";
+import { CafeInfo, DirectionsLink } from "~/widgets/cafe";
 
 interface IParams {
   params: {
@@ -37,31 +39,40 @@ export default function CafeDetailRoute() {
   const data = useLoaderData<typeof loader>();
   const { user } = useOutletContext<{ user: IRegister }>();
   const { cafeId } = useParams<string>();
+  const { mapData } = useMap();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { marker, setMarker } = useMoveTheMap(location.state);
+  const [marker, setMarker] = useState<IMarker | null>(null);
+
+  const hasPrevUrl = useMemo(
+    () => location.state?.prevUrl && location.state?.prevUrl.includes("/users"),
+    [location.state?.prevUrl]
+  );
+
+  useEffect(() => {
+    if (hasPrevUrl) {
+      const marker = getSingleMarker(mapData, location.state);
+      marker.setMap(mapData);
+    }
+  }, [hasPrevUrl, location.state, mapData]);
 
   return (
-    <Panel
-      left={`${location.state?.prevUrl && location.state.prevUrl.includes("/users") ? "0px" : "320px"}`}
-    >
+    <Panel left={`${hasPrevUrl ? "0px" : "320px"}`}>
       <div
-        className={`bg-primary flex w-full items-center px-4 py-3 ${location.state?.prevUrl && location.state?.prevUrl.includes("/users") ? "gap-2" : "justify-between "}`}
+        className={`bg-primary flex w-full items-center px-4 py-3 ${hasPrevUrl ? "gap-2" : "justify-between "}`}
       >
-        {location.state?.prevUrl &&
-          location.state?.prevUrl.includes("/users") && (
-            <button
-              onClick={() => {
-                navigate(-1);
-                marker?.setMap(null);
-                setMarker(null);
-              }}
-              className="w-6"
-            >
-              <ArrowLongLeftIcon />
-            </button>
-          )}
+        {hasPrevUrl && (
+          <button
+            onClick={() => {
+              navigate(-1);
+              removeSingleMarker(marker, setMarker);
+            }}
+            className="w-6"
+          >
+            <ArrowLongLeftIcon />
+          </button>
+        )}
         <h1 className="break-keep text-xl font-semibold leading-6">
           {data.basicInfo.placenamefull}
         </h1>
@@ -75,114 +86,27 @@ export default function CafeDetailRoute() {
       </div>
       <div className="h-full w-full overflow-y-auto">
         <div className="px-4 pb-60 pt-6">
-          <div className="mb-2 flex items-center gap-3 text-sm text-neutral-400">
-            <p>리뷰수 {data.basicInfo.feedback.blogrvwcnt}</p>
-            <p>|</p>
-            <p>
-              별점{" "}
-              {(
-                data.basicInfo.feedback.scoresum /
-                data.basicInfo.feedback.scorecnt
-              ).toFixed(1)}{" "}
-              / 5
-            </p>
-          </div>
-          <Link
-            to="/search/directions"
+          <DirectionsLink
+            onClick={() => removeSingleMarker(marker, setMarker)}
             state={{
               x: location.state.x,
               y: location.state.y,
               name: data.basicInfo.placenamefull,
               position: "start",
             }}
-            onClick={() => {
-              marker?.setMap(null);
-              setMarker(null);
-            }}
-            className="border-interaction text-interaction inline-block rounded-full border px-4 py-[2px] text-sm font-semibold"
-          >
-            출발
-          </Link>
-          <Link
-            to="/search/directions"
+            text="출발"
+          />
+          <DirectionsLink
+            onClick={() => removeSingleMarker(marker, setMarker)}
             state={{
               x: location.state.x,
               y: location.state.y,
               name: data.basicInfo.placenamefull,
               position: "end",
             }}
-            onClick={() => {
-              marker?.setMap(null);
-              setMarker(null);
-            }}
-            className="bg-interaction border-interaction ml-1 inline-block rounded-full border px-4 py-[2px] text-sm font-semibold text-white"
-          >
-            도착
-          </Link>
-          <ul className="mt-2 space-y-2">
-            <li className="flex items-start gap-3">
-              <div className="flex min-w-20 items-center gap-1">
-                <ClockIcon className="w-5" />
-                <p className="font-semibold">영업시간</p>
-              </div>
-              <div>
-                <p>
-                  {data.basicInfo?.openHour?.realtime.open === "N"
-                    ? "영업마감"
-                    : "영업중"}
-                </p>
-                {data.basicInfo?.openHour?.periodList[0].timeList.map(
-                  (v: any, i: number) => (
-                    <p key={i}>
-                      {v.timeSE} {v.dayOfWeek}
-                    </p>
-                  )
-                )}
-              </div>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="flex min-w-20 items-center gap-1">
-                <MapPinIcon className="w-5" />
-                <p className="font-semibold">위치</p>
-              </div>
-              <p className="break-keep">
-                {data.basicInfo.address.region.fullname}{" "}
-                {data.basicInfo.address.addrbunho}{" "}
-                {data.basicInfo.address.addrdetail}
-              </p>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="flex min-w-20 items-center gap-1">
-                <ClipboardIcon className="w-5" />
-                <p className="font-semibold">메뉴</p>
-              </div>
-              <details className="w-full cursor-pointer outline-none">
-                <summary>메뉴 상세보기</summary>
-                <ul>
-                  {data.menuInfo?.menuList.map((v: any, i: number) => (
-                    <li
-                      key={i}
-                      className="border-b-[1px] border-neutral-200 py-3 last:border-b-0"
-                    >
-                      {v.img && (
-                        <div className="h-20 w-2/3 overflow-hidden rounded bg-neutral-100">
-                          <img
-                            src={v.img}
-                            alt="food img"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                      )}
-                      <div className="mt-2 space-y-1">
-                        <p className=" font-semibold">{v.menu}</p>
-                        <p className="text-sm">{v.price}원</p>
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              </details>
-            </li>
-          </ul>
+            text="도착"
+          />
+          <CafeInfo data={data} />
           <hr className="my-6 text-neutral-100" />
           <div className="w-full">
             <p className="text-lg font-semibold">☕ 나의 후기</p>
