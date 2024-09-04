@@ -5,7 +5,7 @@ import { IReview } from "~/shared/types";
 interface ISearch {
   searchInput: string;
   setSearchInput: React.Dispatch<React.SetStateAction<string>>;
-  handleInteraction: (e: any, text: string) => void;
+  handleInteraction: (e: any, type: string, text: string) => void;
   userReview: IReview[];
 }
 
@@ -19,13 +19,13 @@ export function SearchForm({
       <input
         type="search"
         onChange={(e) => setSearchInput(e.target.value)}
-        onKeyDown={(e) => handleInteraction(e, searchInput)}
+        onKeyDown={(e) => handleInteraction(e, "search", searchInput)}
         placeholder="찾으시는 카페가 있으신가요?"
         className="box-border w-[90%] border-none p-2 text-base outline-none placeholder:text-base placeholder:text-zinc-400"
       />
       <button
         type="button"
-        onClick={(e) => handleInteraction(e, searchInput)}
+        onClick={(e) => handleInteraction(e, "search", searchInput)}
         className="p-2"
       >
         <MagnifyingGlassIcon className="w-5 text-gray-400" />

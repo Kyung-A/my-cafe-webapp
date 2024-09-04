@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Link,
@@ -9,7 +8,7 @@ import {
   useNavigate,
   useOutletContext,
 } from "@remix-run/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Card, SearchForm, TargetViewButton } from "~/shared/ui";
 import { useTargetView } from "~/hooks";
@@ -30,6 +29,7 @@ import {
 import { Profile, ProfileEditDialog } from "~/features/user";
 import { IProfile } from "~/entities/user/types";
 import { NavList, NoCafe, NoUser } from "~/widgets/search";
+import { usePreservedCallback } from "~/shared/hooks/usePreservedCallback";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -71,84 +71,52 @@ export default function CafeSearchRoute() {
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
 
-  function handleInteraction(
-    event: { type: string; key: string; preventDefault: () => void },
-    text: string
-  ) {
-    if (event.type === "click" || event.key === "Enter" || event.key === " ") {
-      event.preventDefault();
-      if (cafeData.current && cafeData.current.length > 0) {
-        allRemove(
-          markers,
-          setMarkers,
-          cafeData,
-          overlayArr,
-          listOverlayArr,
-          clusterer
-        );
+  const handleInteraction = usePreservedCallback(
+    (
+      event: { type: string; key: string; preventDefault: () => void },
+      type: string,
+      text: string
+    ) => {
+      if (
+        event.type === "click" ||
+        event.key === "Enter" ||
+        event.key === " "
+      ) {
+        event.preventDefault();
+        keyword.current = text;
+        handleFetch(type, text);
       }
-      setGNB(
-        GNB.map((v) =>
-          v.id === "search" ? { ...v, active: true } : { ...v, active: false }
-        )
-      );
-      keyword.current = text;
-      fetchData(
-        "search",
-        userReview,
-        mapData,
-        cafeData,
-        setMarkers,
-        clusterer,
-        navigate,
-        text
-      );
     }
-  }
-
-  const handleFetch = useCallback(
-    (type: string) => {
-      allRemove(
-        markers,
-        setMarkers,
-        cafeData,
-        overlayArr,
-        listOverlayArr,
-        clusterer
-      );
-      setGNB(
-        GNB.map((v) =>
-          v.id === type ? { ...v, active: true } : { ...v, active: false }
-        )
-      );
-      fetchData(
-        type,
-        userReview,
-        mapData,
-        cafeData,
-        setMarkers,
-        clusterer,
-        navigate
-      );
-    },
-    [
-      GNB,
-      cafeData,
-      clusterer,
-      listOverlayArr,
-      mapData,
-      markers,
-      overlayArr,
-      userReview,
-    ]
   );
 
-  const handleRefetch = useCallback(
-    async (event: {
-      type: string;
-      key: string;
-      preventDefault: () => void;
-    }) => {
+  const handleFetch = usePreservedCallback((type: string, keyword?: string) => {
+    allRemove(
+      markers,
+      setMarkers,
+      cafeData,
+      overlayArr,
+      listOverlayArr,
+      clusterer
+    );
+    setGNB(
+      GNB.map((v) =>
+        v.id === type ? { ...v, active: true } : { ...v, active: false }
+      )
+    );
+    fetchData(
+      type,
+      userReview,
+      mapData,
+      cafeData,
+      setMarkers,
+      clusterer,
+      navigate,
+      keyword
+    );
+  });
+
+  const handleRefetch = usePreservedCallback(
+    (event: { type: string; key: string; preventDefault: () => void }) => {
       if (!isActiveMenu) return;
       allRemove(
         markers,
@@ -161,7 +129,7 @@ export default function CafeSearchRoute() {
       setIdle(false);
 
       if (isActiveMenu?.id === "search") {
-        handleInteraction(event, searchInput);
+        handleInteraction(event, "search", searchInput);
       } else {
         setSearchInput("");
         fetchData(
@@ -175,20 +143,7 @@ export default function CafeSearchRoute() {
         );
       }
       searchLocation.current = address;
-    },
-    [
-      isActiveMenu,
-      markers,
-      cafeData,
-      overlayArr,
-      listOverlayArr,
-      clusterer,
-      address,
-      searchInput,
-      userReview,
-      mapData,
-      navigate,
-    ]
+    }
   );
 
   useEffect(() => {
@@ -272,7 +227,6 @@ export default function CafeSearchRoute() {
           />
         </div>
         {!isActiveMenu && user && <Profile user={user} setOpened={setOpened} />}
-        {/* 탐색 */}
         <div>
           {!isActiveMenu ? (
             <NavList
