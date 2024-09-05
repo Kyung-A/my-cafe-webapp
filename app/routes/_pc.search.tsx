@@ -12,7 +12,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Card, SearchForm, TargetViewButton } from "~/shared/ui";
 import { useMap } from "~/providers/Map";
-import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
+import { ICafeResponse, IRegister, IReview } from "~/shared/types";
 import { useOverlay } from "~/providers/Overlay";
 import { getUser } from "~/.server/storage";
 import { Bars3Icon } from "@heroicons/react/24/outline";
@@ -65,15 +65,9 @@ export default function CafeSearchRoute() {
   const oldReview = useRef<any>(null);
   const keyword = useRef<string | null>(null);
   const searchLocation = useRef<string | null | undefined>(null);
-
-  const [coordinate, setCoordinate] = useState<ICoord | null>();
   const [isOpen, setOpened] = useState<boolean>(false);
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
-  const hasDirections = useMemo(
-    () => location.pathname.includes("directions"),
-    [location.pathname]
-  );
 
   const handleTargetView = usePreservedCallback(() => {
     const { kakao } = window;
@@ -200,12 +194,6 @@ export default function CafeSearchRoute() {
     }
   }, [userReview]);
 
-  useEffect(() => {
-    if (!hasDirections) {
-      setCoordinate(null);
-    }
-  }, [hasDirections]);
-
   return (
     <>
       <div>
@@ -270,39 +258,20 @@ export default function CafeSearchRoute() {
               <div className="h-screen w-full overflow-y-auto px-4 pb-[220px]">
                 {cafeData.current.length > 0 && (
                   <div className="mt-2 flex flex-col gap-6">
-                    {cafeData.current.map((v: ICafeResponse) => {
-                      const directions =
-                        location.pathname.includes("directions");
-
-                      return directions ? (
-                        <div
-                          key={v.id}
-                          onClick={() =>
-                            setCoordinate({
-                              name: v.place_name,
-                              x: v.x,
-                              y: v.y,
-                            })
-                          }
-                          aria-hidden="true"
-                        >
-                          <Card data={v} user={user} />
-                        </div>
-                      ) : (
-                        <Link
-                          to={v.x && v.y && v.id}
-                          key={v.id}
-                          state={{
-                            x: v.x,
-                            y: v.y,
-                            review: v.review,
-                            reviewId: v.reviewId,
-                          }}
-                        >
-                          <Card data={v} user={user} />
-                        </Link>
-                      );
-                    })}
+                    {cafeData.current.map((v: ICafeResponse) => (
+                      <Link
+                        to={v.x && v.y && v.id}
+                        key={v.id}
+                        state={{
+                          x: v.x,
+                          y: v.y,
+                          review: v.review,
+                          reviewId: v.reviewId,
+                        }}
+                      >
+                        <Card data={v} user={user} />
+                      </Link>
+                    ))}
                   </div>
                 )}
                 {user === null && isActiveMenu.id === "visited" && <NoUser />}
@@ -311,7 +280,7 @@ export default function CafeSearchRoute() {
             </>
           )}
         </div>
-        <Outlet context={{ userReview, coordinate, user }} />
+        <Outlet context={{ userReview, user }} />
       </div>
       {isActiveMenu && location.pathname === "/search" && isIdle && (
         <RefetchButton handleRefetch={handleRefetch} />

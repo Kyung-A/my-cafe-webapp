@@ -12,7 +12,8 @@ export function Panel({
       className="absolute top-0 z-10 h-full w-80 shadow-[4px_-1px_9px_0px_#52525230] transition-all"
       style={{
         left: open
-          ? location.pathname === "/search"
+          ? location.pathname === "/search" ||
+            location.pathname === "/directions"
             ? "-320px"
             : "-640px"
           : left,

@@ -14,7 +14,7 @@ interface IDirectionsLink {
 export function DirectionsLink({ text, state, onClick }: IDirectionsLink) {
   return (
     <Link
-      to="/search/directions"
+      to="/directions"
       state={state}
       onClick={onClick}
       className="border-interaction text-interaction mr-2 inline-block rounded-full border px-4 py-[2px] text-sm font-semibold"
