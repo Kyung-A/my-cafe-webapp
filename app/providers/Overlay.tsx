@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, useContext, useEffect, useState } from "react";
 
-import { useCustomOverlay, useRemove } from "~/hooks";
+import { useCustomOverlay } from "~/hooks";
 import { IMarker } from "../shared/types";
 import { useMap } from "./Map";
+import { removewOverlay } from "~/entities/search";
 
 interface IOverlay {
   overlayArr: IMarker[];
@@ -21,7 +22,6 @@ const OverlayContext = createContext<IOverlay>({
 
 const OverlayProvider = ({ children }: IOverlayProvider) => {
   const { mapData, clusterer, cafeData } = useMap();
-  const { removewOverlay } = useRemove();
   const { fetchMarkerOverlay, fetchClusterOverlay } = useCustomOverlay();
 
   const [overlayArr, setOverlayArr] = useState<IMarker[]>([]);

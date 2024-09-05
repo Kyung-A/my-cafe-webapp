@@ -43,7 +43,7 @@ export interface ICoord {
   reviewId?: string;
   x: string;
   y: string;
-  name: string;
+  name?: string;
 }
 
 export type IMarker = Record<string, any>;

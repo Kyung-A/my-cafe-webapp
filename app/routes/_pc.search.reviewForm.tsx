@@ -11,7 +11,7 @@ import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
 
 import { getReview } from "~/.server/review";
-import { ActionInput, Input, Panel } from "~/shared/ui";
+import { ActionInput, Input, Panel, Textarea } from "~/shared/ui";
 import { IFieldInput, IReview } from "~/shared/types";
 import { useImageUpload } from "~/hooks";
 import { imageMaxSize } from "~/shared/lib/imageMaxSize";
@@ -152,13 +152,14 @@ export default function CafeReviewCreateRoute() {
           <div className="flex flex-col gap-8 px-4 pb-20 pt-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>
-              <textarea
-                name="description"
-                defaultValue={fetcher.data?.description ?? ""}
-                required
-                placeholder="후기를 자유롭게 작성해주세요."
-                className="mt-2 h-44 w-full resize-none rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
-              ></textarea>
+              <div className="mt-2 h-44">
+                <Textarea
+                  name="description"
+                  defaultValue={fetcher.data?.description ?? ""}
+                  required
+                  placeholder="후기를 자유롭게 작성해주세요."
+                />
+              </div>
             </div>
             <div>
               <p className="text-lg font-semibold">🏷️ 태그</p>

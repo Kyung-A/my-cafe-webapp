@@ -21,11 +21,18 @@ export function removeCafeData(cafeData: { current: ISearchData[] }) {
   cafeData.current = [];
 }
 
-export function removewOverlay(overlay: IMarker[], listOverlayArr: IMarker[]) {
-  overlay.forEach((v) => {
-    v.setMap(null);
-  });
-  listOverlayArr[0]?.setMap(null);
+export function removewOverlay(
+  overlay?: IMarker[] | undefined,
+  listOverlayArr?: IMarker[] | undefined
+) {
+  if (overlay) {
+    overlay.forEach((v) => {
+      v.setMap(null);
+    });
+  }
+  if (listOverlayArr) {
+    listOverlayArr[0]?.setMap(null);
+  }
 }
 
 export function removeClusterer(clusterer: IClusterer | undefined) {
@@ -36,8 +43,8 @@ export function allRemove(
   markers: IMarker[] | undefined,
   setMarkers: Dispatch<SetStateAction<IMarker[] | undefined>>,
   cafeData: { current: ISearchData[] },
-  overlay: IMarker[],
-  listOverlayArr: IMarker[],
+  overlay: IMarker[] | undefined,
+  listOverlayArr: IMarker[] | undefined,
   clusterer: IClusterer | undefined
 ) {
   removeMarker(markers, setMarkers);

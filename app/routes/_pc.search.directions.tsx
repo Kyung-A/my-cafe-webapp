@@ -9,30 +9,30 @@ import {
   useOutletContext,
   useSubmit,
 } from "@remix-run/react";
-import { useCallback, useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 import { getDirection } from "~/.server/search";
 import { Panel } from "~/shared/ui";
-import { useRemove } from "~/hooks";
 import { useMap } from "~/providers/Map";
-import { IPolyline } from "~/shared/types";
 import { converTime } from "~/shared/lib/converTime";
 import { converDistance } from "~/shared/lib/converDistance";
 import { useOverlay } from "~/providers/Overlay";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  createPolyline,
+  handleRemoveAll,
+  handleRemovePolyline,
+} from "~/entities/directions";
+import { getSingleMarker } from "~/entities/search/model/getSingleMarker";
+import {
+  removeClusterer,
+  removeMarker,
+  removewOverlay,
+} from "~/entities/search";
 
 interface IDirectionInput {
   value: string;
   name: string;
-}
-
-interface IRoads {
-  distance: number;
-  duration: number;
-  name: string;
-  traffic_speed: number;
-  traffic_state: number;
-  vertexes: number[];
 }
 
 export async function action({ request }: ActionFunctionArgs) {
@@ -51,37 +51,17 @@ export default function DirectionsRoute() {
   const directions = useActionData<typeof action>();
   const { coordinate } = useOutletContext<any>();
 
-  const { mapData, markers, clusterer } = useMap();
+  const { mapData, markers, setMarkers, clusterer } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
-  const { removeMarker, removewOverlay } = useRemove();
 
   const [startInput, setStartInput] = useState<IDirectionInput>();
   const [endInput, setEndInput] = useState<IDirectionInput>();
   const [focusInput, setFocusInput] = useState<string>();
-  const [startMarker, setStartMarker] = useState<any>();
-  const [endMarker, setEndMarker] = useState<any>();
-  const [polylines, setPolylines] = useState<{ [key: string]: any }[]>([]);
-
-  const handleRemovePolyline = useCallback(() => {
-    polylines.forEach((v) => v.setMap(null));
-  }, [polylines]);
-
-  const handleRemoveAll = () => {
-    if (startMarker || endMarker) {
-      endMarker?.setMap(null);
-      startMarker?.setMap(null);
-    }
-    handleRemovePolyline();
-  };
-
-  useLayoutEffect(() => {
-    if (markers.length > 0) {
-      removeMarker();
-      removewOverlay(overlayArr);
-      listOverlayArr[0]?.setMap(null);
-      clusterer?.clear();
-    }
-  }, [markers, overlayArr, listOverlayArr]);
+  const [startMarker, setStartMarker] = useState<Record<string, any>>();
+  const [endMarker, setEndMarker] = useState<Record<string, any>>();
+  const [polylines, setPolylines] = useState<Record<string, any>[] | undefined>(
+    []
+  );
 
   useEffect(() => {
     const { kakao } = window;
@@ -112,7 +92,7 @@ export default function DirectionsRoute() {
   useEffect(() => {
     const { kakao } = window;
     if (!kakao) return;
-    handleRemovePolyline();
+    handleRemovePolyline(polylines);
 
     if (startMarker) {
       startMarker.setMap(mapData);
@@ -128,32 +108,32 @@ export default function DirectionsRoute() {
 
     if (coordinate) {
       if (focusInput === "start") {
+        if (startMarker) {
+          startMarker.setMap(null);
+        }
+        const marker = getSingleMarker(mapData, {
+          y: coordinate.y,
+          x: coordinate.x,
+        });
+
         setStartInput({
           value: `${coordinate.x},${coordinate.y}`,
           name: coordinate.name,
         });
-
-        if (startMarker) {
-          startMarker.setMap(null);
-        }
-
-        const marker = new kakao.maps.Marker({
-          position: new kakao.maps.LatLng(coordinate.y, coordinate.x),
-        });
         setStartMarker(marker);
       } else {
+        if (endMarker) {
+          endMarker.setMap(null);
+        }
+        const marker = getSingleMarker(mapData, {
+          y: coordinate.y,
+          x: coordinate.x,
+        });
+
         setEndInput({
           value: `${coordinate.x},${coordinate.y}`,
           name: coordinate.name,
         });
-
-        if (endMarker) {
-          endMarker.setMap(null);
-        }
-        const marker = new kakao.maps.Marker({
-          position: new kakao.maps.LatLng(coordinate.y, coordinate.x),
-        });
-
         setEndMarker(marker);
       }
       setFocusInput("");
@@ -161,41 +141,23 @@ export default function DirectionsRoute() {
   }, [coordinate]);
 
   useEffect(() => {
-    const { kakao } = window;
-    if (!kakao) return;
-
-    const linePath: IPolyline[] = [];
-    if (directions) {
-      const polylineArr: { [key: string]: any }[] = [];
-
-      directions.routes[0].sections[0].roads.forEach((road: IRoads) => {
-        road.vertexes.forEach((vertex: number, idx: number) => {
-          if (idx % 2 === 0) {
-            linePath.push(
-              new kakao.maps.LatLng(road.vertexes[idx + 1], road.vertexes[idx])
-            );
-          }
-        });
-        const polyline = new kakao.maps.Polyline({
-          map: mapData,
-          path: linePath,
-          strokeWeight: 5,
-          strokeColor: "rgb(54 22 137)",
-          strokeOpacity: 0.5,
-          strokeStyle: "solid",
-        });
-        polylineArr.push(polyline);
-        polyline.setMap(mapData);
-      });
-      setPolylines(polylineArr);
-    }
+    const polyline = createPolyline(directions, mapData);
+    setPolylines(polyline);
   }, [directions, mapData]);
+
+  useEffect(() => {
+    if (markers && markers?.length > 0) {
+      removeMarker(markers, setMarkers);
+      removewOverlay(overlayArr, listOverlayArr);
+      removeClusterer(clusterer);
+    }
+  }, [markers, overlayArr, listOverlayArr]);
 
   return (
     <Panel left="320px">
       <button
         onClick={() => {
-          handleRemoveAll();
+          handleRemoveAll(startMarker, endMarker, polylines);
           naviagte("/search");
         }}
         className="bg-primary absolute left-80 top-0 flex h-12 w-12 flex-col items-center justify-center"
@@ -205,7 +167,7 @@ export default function DirectionsRoute() {
       <Form
         method="post"
         onSubmit={(event) => {
-          handleRemovePolyline();
+          handleRemovePolyline(polylines);
           submit(event.currentTarget);
         }}
       >

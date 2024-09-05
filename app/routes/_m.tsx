@@ -12,7 +12,6 @@ import { getReviewList } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { SearchForm } from "~/shared/ui";
 import { Header, BottomSheet } from "~/shared/ui/mobile";
-import { useRemove } from "~/hooks";
 import { useAddress } from "~/providers/Address";
 
 import { useMap } from "~/providers/Map";
@@ -49,7 +48,7 @@ export default function MobileMainLayoutRoute() {
     searchInput,
     setSearchInput,
   } = useMap();
-  const { removeData, removeMarker, removewOverlay } = useRemove();
+  // const { removeData, removeMarker, removewOverlay } = useRemove();
   const { overlayArr, listOverlayArr } = useOverlay();
   // const { fetchCafeData, refetchCafeData } = useFetch();
   const { address } = useAddress();
@@ -75,9 +74,9 @@ export default function MobileMainLayoutRoute() {
   const handleRefetch = useCallback(() => {
     if (!isActiveMenu) return;
 
-    removeData();
-    removeMarker();
-    removewOverlay(overlayArr);
+    // removeData();
+    // removeMarker();
+    // removewOverlay(overlayArr);
     listOverlayArr[0]?.setMap(null);
     clusterer?.clear();
     setIdle(false);

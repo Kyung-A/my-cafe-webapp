@@ -70,6 +70,10 @@ export default function CafeSearchRoute() {
   const [isOpen, setOpened] = useState<boolean>(false);
 
   const isActiveMenu = useMemo(() => GNB.find((v) => v.active), [GNB]);
+  const hasDirections = useMemo(
+    () => location.pathname.includes("directions"),
+    [location.pathname]
+  );
 
   const handleInteraction = usePreservedCallback(
     (
@@ -189,10 +193,10 @@ export default function CafeSearchRoute() {
   }, [userReview]);
 
   useEffect(() => {
-    if (!location.pathname.includes("directions")) {
+    if (!hasDirections) {
       setCoordinate(null);
     }
-  }, [location.pathname]);
+  }, [hasDirections]);
 
   return (
     <>
