@@ -126,9 +126,7 @@ export default function ReviewDetailRoute() {
                 {data?.description}
               </p>
             </div>
-            <ReviewContent title="👍 장점" data={data?.good.split(",")} />
-            <ReviewContent title="👎 단점" data={data?.notGood.split(",")} />
-            <ReviewContent title="💛 추천메뉴" data={data?.recommend} />
+            <ReviewContent title="🏷️ 태그" data={data?.tags?.split(",")} />
             <ReviewContent title="⭐ 별점" data={String(data?.starRating)} />
           </div>
         </div>

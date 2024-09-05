@@ -1,18 +1,23 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ActionFunctionArgs, json, redirect } from "@remix-run/node";
-import { Form, useFetcher, useLocation } from "@remix-run/react";
+import { ActionFunctionArgs, json } from "@remix-run/node";
+import {
+  Form,
+  useFetcher,
+  useLocation,
+  useNavigate,
+  useOutletContext,
+} from "@remix-run/react";
+import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useState } from "react";
-import Slider from "react-slick";
 
-import { getReview, createReview, updateReview } from "~/.server/review";
-import { getUser } from "~/.server/storage";
-import { Panel } from "~/shared/ui";
+import { getReview } from "~/.server/review";
+import { ActionInput, Input, Panel } from "~/shared/ui";
 import { IFieldInput, IReview } from "~/shared/types";
 import { useImageUpload } from "~/hooks";
-import { uploadPromise } from "~/shared/lib/uploadPromise";
-import { formDataPromise } from "~/shared/lib/formData";
 import { imageMaxSize } from "~/shared/lib/imageMaxSize";
-import { PhotoIcon, MinusIcon } from "@heroicons/react/24/outline";
+import { IProfile } from "~/entities/user/types";
+import { postReview } from "~/entities/review/model/postReview";
+import { ImageSlider } from "~/shared/ui/ImageSlider";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);
@@ -25,127 +30,56 @@ export async function loader({ request }: { request: Request }) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-  const user = await getUser(request);
-  if (!user) return redirect("/signin");
-
-  const formData = await formDataPromise(request);
-
-  const data: any = {};
-  const goodArr: FormDataEntryValue[] = [];
-  const notGoodArr: FormDataEntryValue[] = [];
-  const imageUrls = [];
-
-  const reviewImages = formData.getAll("reviewImages");
-  const reviewId = String(formData.get("reviewId"));
-
-  [...formData.entries()].forEach(([key, value]) => {
-    if (key === "reviewId") return;
-    if (key === "reviewImages") return;
-
-    if (key === "good") {
-      goodArr.push(value);
-      data[key] = goodArr.join(",");
-    } else if (key === "notGood") {
-      notGoodArr.push(value);
-      data[key] = notGoodArr.join(",");
-    } else if (key === "starRating") {
-      data[key] = Number(value);
-    } else {
-      data[key] = value;
-    }
-  });
-
-  data["authorId"] = user.id;
-  data["visited"] = true;
-
-  if (reviewImages[0] && (reviewImages as any)[0].size !== 0) {
-    for (const img of reviewImages) {
-      const imageUrl = await uploadPromise(img);
-      imageUrls.push(imageUrl);
-    }
-    data["reviewImages"] = imageUrls.length > 0 ? imageUrls.join(",") : "";
-  }
-
-  if (reviewId) {
-    data["id"] = reviewId;
-
-    const id = await updateReview(data as IReview);
-    return redirect(`/search/review/${id}`);
-  } else {
-    const id = await createReview(data as IReview);
-    return redirect(`/search/review/${id}`);
-  }
+  return await postReview(request);
 }
 
 export default function CafeReviewCreateRoute() {
   const location = useLocation();
+  const navigate = useNavigate();
   const fetcher = useFetcher<IReview>();
   const { handleFileUpload, fileRef } = useImageUpload();
+  const { user } = useOutletContext<{ user: IProfile }>();
 
-  const [goodInput, setGoodInput] = useState<IFieldInput[]>([
-    { id: 0, text: "" },
-  ]);
-  const [notGoodInput, setNotGoodInput] = useState<IFieldInput[]>([
+  const [tagInputs, setTagInputs] = useState<IFieldInput[]>([
     { id: 0, text: "" },
   ]);
   const [preview, setPreview] = useState<string[]>();
 
-  const sliderInit = {
-    dots: false,
-    Infinity: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-  };
-
-  const addInput = useCallback(
-    (name: string) => {
-      if (name === "good") {
-        const num = goodInput.length !== 0 ? goodInput.at(-1)?.id : 0;
-        setGoodInput([...goodInput, { id: num! + 1, text: "" }]);
-      }
-      if (name === "notGood") {
-        const num = notGoodInput.length !== 0 ? notGoodInput.at(-1)?.id : 0;
-        setNotGoodInput([...notGoodInput, { id: num! + 1, text: "" }]);
-      }
-    },
-    [goodInput, notGoodInput]
-  );
+  const addInput = useCallback(() => {
+    const num = tagInputs.length !== 0 ? tagInputs.at(-1)?.id : 0;
+    setTagInputs([...tagInputs, { id: num! + 1, text: "" }]);
+  }, [tagInputs]);
 
   const deleteInput = useCallback(
-    (name: string, id: number) => {
-      if (name === "good") {
-        const remove = goodInput.filter((v) => v.id !== id);
-        setGoodInput(remove);
-      }
-      if (name === "notGood") {
-        const remove = notGoodInput.filter((v) => v.id !== id);
-        setNotGoodInput(remove);
-      }
+    (id: number) => {
+      const remove = tagInputs.filter((v) => v.id !== id);
+      setTagInputs(remove);
     },
-    [goodInput, notGoodInput]
+    [tagInputs]
   );
 
   useEffect(() => {
-    if (location.state.reviewId) {
+    if (location.state?.reviewId) {
       fetcher.load(`/search/reviewForm?reviewId=${location.state.reviewId}`);
     }
   }, [location.state]);
 
   useEffect(() => {
     if (fetcher.data) {
-      const { good, notGood } = fetcher.data;
-
-      const goodArr = good.split(",").map((v, i) => ({ id: i, text: v }));
-      const notGoodArr = notGood.split(",").map((v, i) => ({ id: i, text: v }));
-      setGoodInput(goodArr);
-      setNotGoodInput(notGoodArr);
+      const { tags } = fetcher.data;
+      setTagInputs(tags.split(",").map((v, i) => ({ id: i, text: v })));
 
       if (fetcher.data.reviewImages) {
         setPreview(fetcher.data.reviewImages.split(","));
       }
     }
   }, [fetcher.data]);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/signin");
+    }
+  }, [user]);
 
   return (
     <Panel left="320px">
@@ -171,24 +105,13 @@ export default function CafeReviewCreateRoute() {
           </h2>
           {preview && preview[0] !== "" ? (
             <div className="mt-4">
-              <div className="slider-container max-h-[208px] overflow-hidden">
-                <Slider {...sliderInit}>
-                  {preview.map((src) => (
-                    <div key={src} className="h-full w-full">
-                      <input
-                        type="image"
-                        src={src}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleFileUpload();
-                        }}
-                        className="top-1/4 aspect-square w-full -translate-y-1/4 object-cover"
-                        alt="이미지"
-                      />
-                    </div>
-                  ))}
-                </Slider>
-              </div>
+              <ImageSlider
+                data={preview}
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleFileUpload();
+                }}
+              />
             </div>
           ) : (
             <button
@@ -226,149 +149,80 @@ export default function CafeReviewCreateRoute() {
             multiple
             hidden
           />
-          <div className="flex flex-col gap-12 px-4 pb-20 pt-6">
+          <div className="flex flex-col gap-8 px-4 pb-20 pt-6">
             <div>
               <p className="text-lg font-semibold">☕ 후기</p>
-              {location.state && (
-                <>
-                  <input
-                    name="cafeId"
-                    value={location.state.cafeId}
-                    readOnly
-                    hidden
-                  />
-                  <input name="x" value={location.state.x} readOnly hidden />
-                  <input name="y" value={location.state.y} readOnly hidden />
-                  <input
-                    name="name"
-                    value={location.state.name}
-                    readOnly
-                    hidden
-                  />
-                  <input
-                    name="reviewId"
-                    value={location.state.reviewId}
-                    readOnly
-                    hidden
-                  />
-                </>
-              )}
               <textarea
                 name="description"
                 defaultValue={fetcher.data?.description ?? ""}
                 required
                 placeholder="후기를 자유롭게 작성해주세요."
-                className="mt-2 h-24 w-full resize-none rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
+                className="mt-2 h-44 w-full resize-none rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
               ></textarea>
             </div>
             <div>
-              <p className="text-lg font-semibold">👍 장점</p>
-              <div className="mt-2 space-y-2">
-                {goodInput.map((v) => (
-                  <div
-                    key={v.id}
-                    className="flex items-center justify-between overflow-hidden rounded border border-neutral-300"
-                  >
-                    <input
-                      name="good"
-                      type="text"
-                      defaultValue={v.text}
-                      required
-                      className="w-[90%] px-3 py-2 outline-none placeholder:text-neutral-300"
-                      placeholder="장점을 입력해주세요."
-                    />
-                    <button
-                      onClick={() => deleteInput("good", v.id)}
-                      type="button"
-                      className="pr-2 text-neutral-400"
-                    >
-                      <MinusIcon />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => addInput("good")}
-                  type="button"
-                  className="bg-interaction mt-4 rounded-full px-4 py-1 text-xs font-semibold text-white"
-                >
-                  추가
-                </button>
-              </div>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">👎 단점</p>
-              <div className="mt-2 space-y-2">
-                {notGoodInput.map((v) => (
-                  <div
-                    key={v.id}
-                    className="flex items-center justify-between overflow-hidden rounded border border-neutral-300"
-                  >
-                    <input
-                      name="notGood"
-                      type="text"
-                      defaultValue={v.text}
-                      required
-                      className="w-[90%] px-3 py-2 outline-none placeholder:text-neutral-300"
-                      placeholder="단점을 입력해주세요."
-                    />
-                    <button
-                      onClick={() => deleteInput("notGood", v.id)}
-                      type="button"
-                      className="pr-2 text-neutral-400"
-                    >
-                      <MinusIcon />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={() => addInput("notGood")}
-                  type="button"
-                  className="bg-interaction mt-4 rounded-full px-4 py-1 text-xs font-semibold text-white"
-                >
-                  추가
-                </button>
-              </div>
-            </div>
-            <div>
-              <p className="text-lg font-semibold">💛 추천메뉴</p>
-              <input
-                name="recommend"
-                type="text"
-                defaultValue={fetcher.data?.recommend ?? ""}
-                required
-                className="mt-2 w-full rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
-                placeholder="추천메뉴를 입력해주세요."
-              />
-            </div>
-            <div>
               <p className="text-lg font-semibold">🏷️ 태그</p>
-              <input
-                name="tags"
-                defaultValue={fetcher.data?.tags ?? ""}
-                type="text"
-                className="mt-2 w-full rounded border border-neutral-300 px-3 py-2 outline-none placeholder:text-neutral-300"
-                placeholder="태그를 입력해주세요."
-              />
+              <div className="mt-2 space-y-2">
+                {tagInputs.map((v) => (
+                  <ActionInput
+                    name="tags"
+                    type="text"
+                    defaultValue={v.text}
+                    required
+                    placeholder="태그를 입력해주세요."
+                    key={v.id}
+                    onClickButton={() => deleteInput(v.id)}
+                    icon={<MinusIcon />}
+                  />
+                ))}
+                <button
+                  onClick={addInput}
+                  type="button"
+                  className="bg-interaction mt-4 rounded-full px-4 py-1 text-xs font-semibold text-white"
+                >
+                  추가
+                </button>
+              </div>
             </div>
             <div>
               <p className="text-lg font-semibold">⭐ 별점</p>
               <div className="mt-2 flex items-center gap-2">
-                <input
+                <Input
                   name="starRating"
                   required
                   type="number"
                   max={5}
                   min={0}
-                  defaultValue={fetcher.data?.starRating}
+                  defaultValue={fetcher.data?.starRating ?? 0}
                   step={1}
-                  className="w-20 rounded border border-neutral-300 px-3 py-1 outline-none placeholder:text-neutral-300"
-                  placeholder="별점"
+                  style={{ width: "60px" }}
                 />
                 <p className="text-lg">/ 5</p>
               </div>
             </div>
           </div>
         </div>
+        <input name="authorId" type="text" hidden value={user.id} />
+        <input name="visited" type="checkbox" hidden checked />
+        {location.state && (
+          <>
+            <input
+              name="cafeId"
+              value={location.state.cafeId}
+              readOnly
+              hidden
+            />
+            <input name="x" value={location.state.x} readOnly hidden />
+            <input name="y" value={location.state.y} readOnly hidden />
+            <input name="name" value={location.state.name} readOnly hidden />
+            <input
+              name="reviewId"
+              value={location.state.reviewId}
+              readOnly
+              hidden
+            />
+          </>
+        )}
       </Form>
     </Panel>
   );

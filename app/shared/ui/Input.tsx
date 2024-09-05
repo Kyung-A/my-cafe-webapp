@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { forwardRef } from "react";
 
 interface IActionInput extends React.InputHTMLAttributes<HTMLInputElement> {
   icon: React.ReactNode;
-  onClickButton: () => void;
+  onClickButton: (...props: any) => void;
 }
 
 interface IFileInput extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -32,7 +33,7 @@ export function ActionInput({
       <button
         onClick={onClickButton}
         type="button"
-        className="pr-2 text-neutral-400"
+        className="w-8 pr-2 text-neutral-400"
       >
         {icon}
       </button>

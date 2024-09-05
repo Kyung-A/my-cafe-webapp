@@ -106,7 +106,7 @@ export interface IReview {
   x: string;
   y: string;
   likedBy?: IRegister;
-  reviewImages: string;
+  reviewImages?: string;
 }
 
 export interface IDirection {

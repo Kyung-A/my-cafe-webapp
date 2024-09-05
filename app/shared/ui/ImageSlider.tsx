@@ -1,10 +1,12 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Slider from "react-slick";
 
 interface IImageSlider {
   data: string[];
+  onClick?: (e: any) => void;
 }
 
-export function ImageSlider({ data }: IImageSlider) {
+export function ImageSlider({ data, onClick }: IImageSlider) {
   const sliderInit = {
     dots: false,
     Infinity: true,
@@ -18,8 +20,10 @@ export function ImageSlider({ data }: IImageSlider) {
       <Slider {...sliderInit}>
         {data.map((src) => (
           <div key={src} className="h-full w-full">
-            <img
+            <input
               src={src}
+              type="image"
+              onClick={onClick}
               className="top-1/4 aspect-square w-full -translate-y-1/4 object-cover"
               alt="이미지"
             />

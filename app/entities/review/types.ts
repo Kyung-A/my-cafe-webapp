@@ -1,5 +1,3 @@
-import { IRegister } from "../auth/types";
-
 export interface ILikedProps {
   isLiked?: string;
   reviewId: string;
@@ -7,6 +5,7 @@ export interface ILikedProps {
 }
 
 export interface IReview {
+  reviewId?: string;
   id: string;
   cafeId: string;
   authorId: string;
@@ -20,6 +19,6 @@ export interface IReview {
   recommend: string;
   x: string;
   y: string;
-  likedBy?: IRegister;
+  likedBy?: Record<string, string>;
   reviewImages: string | null;
 }
