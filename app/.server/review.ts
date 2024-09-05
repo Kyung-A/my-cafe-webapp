@@ -1,6 +1,5 @@
-import { IReview } from "~/shared/types";
 import { db } from "./db";
-import { ILikedProps } from "~/entities/review/types";
+import { ILikedProps, IReview } from "~/entities/review/types";
 
 export async function createReview(data: IReview) {
   try {
