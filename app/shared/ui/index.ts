@@ -4,3 +4,4 @@ export * from "./Panel";
 export * from "./Menu";
 export * from "./TargetViewButton";
 export * from "./Input";
+export * from "./Textarea";
