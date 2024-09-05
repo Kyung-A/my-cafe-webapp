@@ -9,8 +9,8 @@ import {
   useState,
 } from "react";
 import { IGeocoder } from "../shared/types";
-import { useGeoLocation } from "~/hooks";
 import { useMap } from "./Map";
+import { useGeoLocation } from "~/shared/hooks/useGeoLocation";
 
 interface IAddress {
   address: string;

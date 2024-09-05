@@ -11,7 +11,6 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { Card, SearchForm, TargetViewButton } from "~/shared/ui";
-import { useTargetView } from "~/hooks";
 import { useMap } from "~/providers/Map";
 import { ICafeResponse, ICoord, IRegister, IReview } from "~/shared/types";
 import { useOverlay } from "~/providers/Overlay";
@@ -30,6 +29,7 @@ import { IProfile } from "~/entities/user/types";
 import { NavList, NoCafe, NoUser } from "~/widgets/search";
 import { usePreservedCallback } from "~/shared/hooks/usePreservedCallback";
 import { reviewApi } from "~/entities/review";
+import { useGeoLocation } from "~/shared/hooks/useGeoLocation";
 
 export async function loader({ request }: { request: Request }) {
   const user: IRegister | null = await getUser(request);
@@ -59,8 +59,8 @@ export default function CafeSearchRoute() {
     markers,
   } = useMap();
   const { overlayArr, listOverlayArr } = useOverlay();
-  const { targetView } = useTargetView();
   const { address } = useAddress();
+  const { curLocation } = useGeoLocation();
 
   const oldReview = useRef<any>(null);
   const keyword = useRef<string | null>(null);
@@ -74,6 +74,14 @@ export default function CafeSearchRoute() {
     () => location.pathname.includes("directions"),
     [location.pathname]
   );
+
+  const handleTargetView = usePreservedCallback(() => {
+    const { kakao } = window;
+    if (!kakao || !curLocation || !mapData) return;
+
+    const { latitude, longitude } = curLocation;
+    mapData.panTo(new kakao.maps.LatLng(latitude, longitude));
+  });
 
   const handleInteraction = usePreservedCallback(
     (
@@ -308,7 +316,7 @@ export default function CafeSearchRoute() {
       {isActiveMenu && location.pathname === "/search" && isIdle && (
         <RefetchButton handleRefetch={handleRefetch} />
       )}
-      <TargetViewButton onClick={targetView} />
+      <TargetViewButton onClick={handleTargetView} />
       {user && (
         <ProfileEditDialog user={user} isOpen={isOpen} setOpened={setOpened} />
       )}

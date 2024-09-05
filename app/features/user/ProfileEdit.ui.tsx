@@ -2,9 +2,9 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { Form, useSubmit } from "@remix-run/react";
 import { useEffect, useRef, useState } from "react";
 
-import { useImageUpload } from "~/hooks";
 import { IRegister } from "~/shared/types";
 import { imageMaxSize } from "~/shared/lib/imageMaxSize";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 
 interface IDialog {
   user: IRegister;

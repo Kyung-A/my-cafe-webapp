@@ -49,3 +49,4 @@ export interface ICoord {
 export type IMarker = Record<string, any>;
 export type IMapData = Record<string, any>;
 export type IClusterer = Record<string, any>;
+export type IClusters = _.List<any>;

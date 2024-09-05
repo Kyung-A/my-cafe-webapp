@@ -7,7 +7,6 @@ import Slider from "react-slick";
 import { getReview, createReview, updateReview } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { IFieldInput, IReview } from "~/shared/types";
-import { useImageUpload } from "~/hooks";
 import { uploadPromise } from "~/shared/lib/uploadPromise";
 import { formDataPromise } from "~/shared/lib/formData";
 import { imageMaxSize } from "~/shared/lib/imageMaxSize";
@@ -16,6 +15,7 @@ import {
   MinusIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);

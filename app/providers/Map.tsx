@@ -11,9 +11,9 @@ import {
 } from "react";
 
 import marker from "~/assets/marker.png";
-import { useGeoLocation } from "~/hooks";
 import { IMenu } from "../shared/types";
 import { IClusterer, IMarker, ISearchData } from "~/entities/search/types";
+import { useGeoLocation } from "~/shared/hooks/useGeoLocation";
 
 interface IMap {
   mapEl: RefObject<HTMLDivElement> | null;

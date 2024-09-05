@@ -13,11 +13,11 @@ import { useCallback, useEffect, useState } from "react";
 import { getReview } from "~/.server/review";
 import { ActionInput, Input, Panel, Textarea } from "~/shared/ui";
 import { IFieldInput, IReview } from "~/shared/types";
-import { useImageUpload } from "~/hooks";
 import { imageMaxSize } from "~/shared/lib/imageMaxSize";
 import { IProfile } from "~/entities/user/types";
 import { postReview } from "~/entities/review/model/postReview";
 import { ImageSlider } from "~/shared/ui/ImageSlider";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 
 export async function loader({ request }: { request: Request }) {
   const url = new URL(request.url);

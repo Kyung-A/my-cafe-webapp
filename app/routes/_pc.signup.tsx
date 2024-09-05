@@ -3,7 +3,7 @@ import { useActionData } from "@remix-run/react";
 
 import { authSignup } from "~/entities/auth";
 import { SignupForm } from "~/features/auth";
-import { useImageUpload } from "~/hooks";
+import { useImageUpload } from "~/shared/hooks/useImageUpload";
 
 export async function action({ request }: ActionFunctionArgs) {
   const result = await authSignup(request);
