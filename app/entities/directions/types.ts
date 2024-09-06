@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface IPolyline {
   La: number;
   Ma: number;
@@ -11,3 +12,5 @@ export interface IRoads {
   traffic_state: number;
   vertexes: number[];
 }
+
+export type IDirections = Record<string, any>;

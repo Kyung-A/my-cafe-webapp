@@ -1,6 +1,10 @@
 import { ICoord, IMapData } from "../types";
 
-export function getSingleMarker(mapData: IMapData | undefined, coord: ICoord) {
+export function getSingleMarker(
+  mapData: IMapData | undefined,
+  coord: ICoord,
+  isMove: boolean = true
+) {
   const { kakao } = window;
   if (!kakao || !mapData) return;
 
@@ -11,6 +15,8 @@ export function getSingleMarker(mapData: IMapData | undefined, coord: ICoord) {
     zIndex: 30,
   });
 
-  mapData.setCenter(position);
+  if (isMove) {
+    mapData.setCenter(position);
+  }
   return marker;
 }

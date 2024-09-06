@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ActionFunctionArgs } from "@remix-run/node";
 import {
-  Form,
   json,
   useActionData,
   useLocation,
@@ -9,15 +8,15 @@ import {
   useSubmit,
 } from "@remix-run/react";
 import { useCallback, useEffect, useState } from "react";
+import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
 
 import { getDirection } from "~/.server/search";
 import { Panel } from "~/shared/ui";
 import { useMap } from "~/providers/Map";
-import { converTime } from "~/shared/lib/converTime";
-import { converDistance } from "~/shared/lib/converDistance";
 import { useOverlay } from "~/providers/Overlay";
 import {
   createPolyline,
+  getKeywordSearchData,
   handleRemoveAll,
   handleRemovePolyline,
 } from "~/entities/directions";
@@ -27,8 +26,8 @@ import {
   removeMarker,
   removewOverlay,
 } from "~/entities/search";
-import { ArrowLongLeftIcon } from "@heroicons/react/24/outline";
 import { ISearchData } from "~/entities/search/types";
+import { DirectionsForm, DirectionsInfo } from "~/features/directions";
 
 interface IDirectionInput {
   value: string;
@@ -61,69 +60,78 @@ export default function DirectionsRoute() {
   const [polylines, setPolylines] = useState<Record<string, any>[] | undefined>(
     []
   );
-  const [filteredItems, setFilteredItems] = useState<ISearchData[]>([]);
+  const [data, setData] = useState<ISearchData[]>([]);
   const [inputValue, setInputValue] = useState<{ [key: string]: string }>();
 
   const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
       setInputValue(focusInput === "start" ? { start: value } : { end: value });
-
-      const { kakao } = window;
-      if (!kakao || !mapData) return;
-
-      const ps = new kakao.maps.services.Places(mapData);
-      ps.keywordSearch(
-        value,
-        (data: ISearchData[], status: string) => {
-          if (status !== kakao.maps.services.Status.OK) return;
-          setFilteredItems(data);
-        },
-        { useMapBounds: true, useMapCenter: true, radius: 1000 }
-      );
+      const { data } = await getKeywordSearchData(mapData, value);
+      setData(data);
     },
     [mapData, focusInput]
   );
 
-  const onClickList = useCallback(
-    (item: ISearchData) => {
-      if (focusInput === "start") {
-        if (startMarker) startMarker.setMap(null);
+  const removeCurMarker = useCallback(
+    (focus: string) => {
+      if (focus === "start") startMarker?.setMap(null);
+      if (focus === "end") endMarker?.setMap(null);
+    },
+    [endMarker, startMarker]
+  );
 
-        const marker = getSingleMarker(mapData, {
-          y: item.y,
-          x: item.x,
-        });
+  const updateMarker = useCallback(
+    (x: string, y: string, dispatch: React.SetStateAction<any>) => {
+      const marker = getSingleMarker(mapData, {
+        y: y,
+        x: x,
+      });
+
+      dispatch(marker);
+    },
+    [mapData]
+  );
+
+  const onClickList = useCallback(
+    (item: ISearchData, focus: string | undefined) => {
+      if (focus === "start") {
+        removeCurMarker("start");
+        updateMarker(item.x, item.y, setStartMarker);
+
         setStartInput({
           value: `${item.x},${item.y}`,
           name: item.place_name,
         });
-        setStartMarker(marker);
         setInputValue({ start: item.place_name });
       } else {
-        if (endMarker) endMarker.setMap(null);
+        removeCurMarker("end");
+        updateMarker(item.x, item.y, setEndMarker);
 
-        const marker = getSingleMarker(mapData, {
-          y: item.y,
-          x: item.x,
-        });
         setEndInput({
           value: `${item.x},${item.y}`,
           name: item.place_name,
         });
-        setEndMarker(marker);
         setInputValue({ end: item.place_name });
       }
       setFocusInput("");
-      setFilteredItems([]);
+      setData([]);
     },
-    [endMarker, focusInput, mapData, startMarker]
+    [removeCurMarker, updateMarker]
   );
 
-  const handleBack = useCallback(() => {
+  const handleSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      handleRemovePolyline(polylines);
+      submit(event.currentTarget);
+    },
+    [polylines, submit]
+  );
+
+  const handleBack = () => {
     handleRemoveAll(startMarker, endMarker, polylines);
     naviagte("/search");
-  }, [endMarker, naviagte, polylines, startMarker]);
+  };
 
   useEffect(() => {
     const { kakao } = window;
@@ -132,9 +140,11 @@ export default function DirectionsRoute() {
     if (location.state) {
       const { x, y, name, position } = location.state;
 
-      const marker = new kakao.maps.Marker({
-        position: new kakao.maps.LatLng(y, x),
-      });
+      const marker = getSingleMarker(
+        mapData,
+        { y: y, x: x, name: name },
+        false
+      );
 
       if (position === "start") {
         setStartInput({
@@ -152,7 +162,7 @@ export default function DirectionsRoute() {
         setInputValue({ end: name });
       }
     }
-  }, [location]);
+  }, [location.state, mapData]);
 
   useEffect(() => {
     const { kakao } = window;
@@ -212,16 +222,16 @@ export default function DirectionsRoute() {
               className={`w-full cursor-pointer rounded-b p-2 text-left outline-none ${focusInput === "end" ? "focusBorder" : ""}`}
             />
           </div>
-          {filteredItems.length > 0 && (
-            <ul className="absolute top-[90px] box-border h-40 w-full overflow-y-auto rounded-lg bg-white px-4 shadow-md">
-              {filteredItems.map((item) => (
+          {data.length > 0 && (
+            <ul className="absolute top-[92px] box-border h-40 w-full overflow-y-auto rounded-lg bg-white px-4 shadow-[0px_0px_10px_-2px_#4343432e]">
+              {data.map((item) => (
                 <li
                   key={item.id}
                   className="w-full border-b py-2 last:border-b-0"
                 >
                   <button
                     type="button"
-                    onClick={() => onClickList(item)}
+                    onClick={() => onClickList(item, focusInput)}
                     className="block w-full text-left"
                   >
                     {item.place_name}
@@ -231,51 +241,13 @@ export default function DirectionsRoute() {
             </ul>
           )}
         </div>
-        <Form
-          method="post"
-          onSubmit={(event) => {
-            handleRemovePolyline(polylines);
-            submit(event.currentTarget);
-          }}
-        >
-          <input
-            name="origin"
-            value={startInput?.value || ""}
-            hidden
-            readOnly
-          />
-          <input
-            name="destination"
-            value={endInput?.value || ""}
-            hidden
-            readOnly
-          />
-          <button
-            type="submit"
-            className="bg-interaction mt-2 rounded-full px-5 py-1 text-white"
-          >
-            길찾기
-          </button>
-        </Form>
-        {directions && (
-          <div className="mt-6 border-t border-neutral-200">
-            <h2 className="text-interaction mt-6 text-sm">최적경로</h2>
-            <h3 className="mt-1 text-xl font-semibold">
-              {converTime(directions.routes[0].summary.duration)}
-              <span className="ml-2 text-sm font-light text-neutral-400">
-                {converDistance(directions.routes[0].summary.distance)}km
-              </span>
-            </h3>
-            <p className="mt-1 text-sm">
-              <span className="mr-2">택시비</span>
-              {directions.routes[0].summary.fare.taxi.toLocaleString("ko-KR")}원
-            </p>
-            <p className="text-sm">
-              <span className="mr-2">통행요금</span>
-              {directions.routes[0].summary.fare.toll.toLocaleString("ko-KR")}원
-            </p>
-          </div>
-        )}
+        <DirectionsForm
+          onSubmit={handleSubmit}
+          startValue={startInput?.value || ""}
+          endValue={endInput?.value || ""}
+        />
+        <hr className="mt-6 border-t border-neutral-200" />
+        {directions && <DirectionsInfo data={directions} />}
       </div>
     </Panel>
   );
