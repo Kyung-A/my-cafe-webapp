@@ -11,12 +11,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getReviewList } from "~/.server/review";
 import { getUser } from "~/.server/storage";
 import { SearchForm } from "~/shared/ui";
-import { Header, BottomSheet } from "~/shared/ui/mobile";
 import { useAddress } from "~/providers/Address";
 
 import { useMap } from "~/providers/Map";
 import { useOverlay } from "~/providers/Overlay";
 import { IRegister, IReview } from "~/shared/types";
+import { BottomSheet } from "~/shared/ui/BottomSheet";
+import { MobileHeader } from "~/shared/ui/MobileHeader";
 
 export const meta: MetaFunction = () => {
   return [{ title: "myCafe" }];
@@ -206,7 +207,7 @@ export default function MobileMainLayoutRoute() {
         </>
       )}
 
-      <Header handleHeader={handleHeader} isActiveMenu={isActiveMenu} />
+      <MobileHeader handleHeader={handleHeader} isActiveMenu={isActiveMenu} />
     </div>
   );
 }

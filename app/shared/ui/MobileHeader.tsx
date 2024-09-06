@@ -8,7 +8,7 @@ interface IHeader {
   isActiveMenu: { id: string; name: string; active: boolean } | undefined;
 }
 
-export function Header({ handleHeader, isActiveMenu }: IHeader) {
+export function MobileHeader({ handleHeader, isActiveMenu }: IHeader) {
   const location = useLocation();
 
   return (
