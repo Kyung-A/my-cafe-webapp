@@ -1,10 +1,13 @@
+import { memo } from "react";
 import targetView from "~/assets/target.svg";
 
 interface ITargetView {
   onClick: () => void;
 }
 
-export function TargetViewButton({ onClick }: ITargetView) {
+export const TargetViewButton = memo(function TargetViewButton({
+  onClick,
+}: ITargetView) {
   return (
     <button
       onClick={onClick}
@@ -13,4 +16,4 @@ export function TargetViewButton({ onClick }: ITargetView) {
       <img src={targetView} alt="현재 내위치" className="block w-6" />
     </button>
   );
-}
+});

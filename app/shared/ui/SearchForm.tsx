@@ -1,15 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { IReview } from "~/shared/types";
+import { memo } from "react";
 
 interface ISearch {
   searchInput: string;
   setSearchInput: React.Dispatch<React.SetStateAction<string>>;
   handleInteraction: (e: any, type: string, text: string) => void;
-  userReview: IReview[];
 }
 
-export function SearchForm({
+export const SearchForm = memo(function SsearchForm({
   searchInput,
   setSearchInput,
   handleInteraction,
@@ -32,4 +31,4 @@ export function SearchForm({
       </button>
     </div>
   );
-}
+});

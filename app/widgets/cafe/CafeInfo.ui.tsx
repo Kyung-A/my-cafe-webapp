@@ -4,10 +4,11 @@ import {
   ClipboardIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline";
+import { memo } from "react";
 
 type ICafeData = Record<string, any>;
 
-export function CafeInfo({ data }: ICafeData) {
+export const CafeInfo = memo(function CafeInfo({ data }: ICafeData) {
   return (
     <>
       <div className="my-2 flex items-center gap-3 text-sm text-neutral-400">
@@ -87,4 +88,4 @@ export function CafeInfo({ data }: ICafeData) {
       </ul>
     </>
   );
-}
+});

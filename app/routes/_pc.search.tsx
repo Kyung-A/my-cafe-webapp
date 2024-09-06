@@ -77,6 +77,17 @@ export default function CafeSearchRoute() {
     mapData.panTo(new kakao.maps.LatLng(latitude, longitude));
   });
 
+  const allRemoveData = usePreservedCallback(() => {
+    allRemove(
+      markers,
+      setMarkers,
+      cafeData,
+      overlayArr,
+      listOverlayArr,
+      clusterer
+    );
+  });
+
   const handleInteraction = usePreservedCallback(
     (
       event: { type: string; key: string; preventDefault: () => void },
@@ -96,14 +107,7 @@ export default function CafeSearchRoute() {
   );
 
   const handleFetch = usePreservedCallback((type: string, keyword?: string) => {
-    allRemove(
-      markers,
-      setMarkers,
-      cafeData,
-      overlayArr,
-      listOverlayArr,
-      clusterer
-    );
+    allRemoveData();
     setGNB(
       GNB.map((v) =>
         v.id === type ? { ...v, active: true } : { ...v, active: false }
@@ -124,14 +128,7 @@ export default function CafeSearchRoute() {
   const handleRefetch = usePreservedCallback(
     (event: { type: string; key: string; preventDefault: () => void }) => {
       if (!isActiveMenu) return;
-      allRemove(
-        markers,
-        setMarkers,
-        cafeData,
-        overlayArr,
-        listOverlayArr,
-        clusterer
-      );
+      allRemoveData();
       setIdle(false);
 
       if (isActiveMenu?.id === "search") {
@@ -202,14 +199,7 @@ export default function CafeSearchRoute() {
             <button
               onClick={() => {
                 navigate("/search");
-                allRemove(
-                  markers,
-                  setMarkers,
-                  cafeData,
-                  overlayArr,
-                  listOverlayArr,
-                  clusterer
-                );
+                allRemoveData();
                 setGNB(GNB.map((v) => ({ ...v, active: false })));
                 setSearchInput("");
                 setIdle(false);
@@ -223,7 +213,6 @@ export default function CafeSearchRoute() {
             searchInput={searchInput}
             setSearchInput={setSearchInput}
             handleInteraction={handleInteraction}
-            userReview={userReview as IReview[]}
           />
         </div>
         {!isActiveMenu && user && <Profile user={user} setOpened={setOpened} />}

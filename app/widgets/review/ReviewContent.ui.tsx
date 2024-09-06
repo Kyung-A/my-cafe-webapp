@@ -1,9 +1,14 @@
+import { memo } from "react";
+
 interface IReviewContent {
   title: string;
   data: string[] | string | undefined;
 }
 
-export function ReviewContent({ title, data }: IReviewContent) {
+export const ReviewContent = memo(function ReviewContent({
+  title,
+  data,
+}: IReviewContent) {
   return (
     <div>
       <p className="text-lg font-semibold">{title}</p>
@@ -16,4 +21,4 @@ export function ReviewContent({ title, data }: IReviewContent) {
       )}
     </div>
   );
-}
+});

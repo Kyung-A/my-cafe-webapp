@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 interface ICafeListHeader {
   isActiveMenu: {
     id: string;
@@ -7,7 +9,7 @@ interface ICafeListHeader {
   keyword: string | null;
 }
 
-export function CafeListHeader({
+export const CafeListHeader = memo(function CafeListHeader({
   isActiveMenu,
   searchLocation,
   keyword,
@@ -26,4 +28,4 @@ export function CafeListHeader({
       </h3>
     </>
   );
-}
+});

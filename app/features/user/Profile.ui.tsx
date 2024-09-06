@@ -1,5 +1,6 @@
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { memo } from "react";
 import { IProfile } from "~/entities/user/types";
 
 interface IProfileProps {
@@ -7,7 +8,10 @@ interface IProfileProps {
   setOpened: (value: React.SetStateAction<boolean>) => void;
 }
 
-export function Profile({ user, setOpened }: IProfileProps) {
+export const Profile = memo(function Profile({
+  user,
+  setOpened,
+}: IProfileProps) {
   return (
     <div className="mb-2 px-4 pt-6">
       <h2 className="text-lg font-semibold">👋 안녕하세요 {user?.name}님!</h2>
@@ -60,4 +64,4 @@ export function Profile({ user, setOpened }: IProfileProps) {
       </div>
     </div>
   );
-}
+});

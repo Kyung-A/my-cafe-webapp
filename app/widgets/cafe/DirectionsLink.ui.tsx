@@ -1,4 +1,5 @@
 import { Link } from "@remix-run/react";
+import { memo } from "react";
 
 interface IDirectionsLink {
   text: string;
@@ -11,7 +12,11 @@ interface IDirectionsLink {
   onClick: () => void;
 }
 
-export function DirectionsLink({ text, state, onClick }: IDirectionsLink) {
+export const DirectionsLink = memo(function DirectionsLink({
+  text,
+  state,
+  onClick,
+}: IDirectionsLink) {
   return (
     <Link
       to="/directions"
@@ -22,4 +27,4 @@ export function DirectionsLink({ text, state, onClick }: IDirectionsLink) {
       {text}
     </Link>
   );
-}
+});
