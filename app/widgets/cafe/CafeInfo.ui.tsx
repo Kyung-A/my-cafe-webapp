@@ -12,12 +12,13 @@ export const CafeInfo = memo(function CafeInfo({ data }: ICafeData) {
   return (
     <>
       <div className="my-2 flex items-center gap-3 text-sm text-neutral-400">
-        <p>리뷰수 {data.basicInfo.feedback.blogrvwcnt}</p>
+        <p>리뷰수 {data?.basicInfo.feedback.blogrvwcnt}</p>
         <p>|</p>
         <p>
           별점{" "}
           {(
-            data.basicInfo.feedback.scoresum / data.basicInfo.feedback.scorecnt
+            data?.basicInfo.feedback.scoresum /
+            data?.basicInfo.feedback.scorecnt
           ).toFixed(1)}{" "}
           / 5
         </p>
@@ -49,9 +50,9 @@ export const CafeInfo = memo(function CafeInfo({ data }: ICafeData) {
             <p className="font-semibold">위치</p>
           </div>
           <p className="break-keep">
-            {data.basicInfo.address.region.fullname}{" "}
-            {data.basicInfo.address.addrbunho}{" "}
-            {data.basicInfo.address.addrdetail}
+            {data?.basicInfo.address.region.fullname}{" "}
+            {data?.basicInfo.address.addrbunho}{" "}
+            {data?.basicInfo.address.addrdetail}
           </p>
         </li>
         <li className="flex items-start gap-3">

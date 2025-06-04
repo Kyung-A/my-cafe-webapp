@@ -74,12 +74,12 @@ export default function CafeDetailRoute() {
           </button>
         )}
         <h1 className="break-keep text-xl font-semibold leading-6">
-          {data.basicInfo.placenamefull}
+          {data?.basicInfo.placenamefull}
         </h1>
       </div>
       <div className="h-40 w-full overflow-hidden bg-neutral-100">
         <img
-          src={data.basicInfo.mainphotourl}
+          src={data?.basicInfo.mainphotourl}
           alt="cafe img"
           className="h-full w-full object-cover"
         />
@@ -91,7 +91,7 @@ export default function CafeDetailRoute() {
             state={{
               x: location.state.x,
               y: location.state.y,
-              name: data.basicInfo.placenamefull,
+              name: data?.basicInfo.placenamefull,
               position: "start",
             }}
             text="출발"
@@ -101,7 +101,7 @@ export default function CafeDetailRoute() {
             state={{
               x: location.state.x,
               y: location.state.y,
-              name: data.basicInfo.placenamefull,
+              name: data?.basicInfo.placenamefull,
               position: "end",
             }}
             text="도착"
@@ -129,7 +129,7 @@ export default function CafeDetailRoute() {
                   to={!user ? "/signin" : "/search/reviewForm"}
                   state={{
                     cafeId: cafeId,
-                    name: data.basicInfo.placenamefull,
+                    name: data?.basicInfo.placenamefull,
                     x: location.state.x,
                     y: location.state.y,
                   }}
